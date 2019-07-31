@@ -11,7 +11,7 @@ Async stream API experiment that may be introduced as a language feature in the 
 repository = "https://github.com/taiki-e/futures-async-stream"
 documentation = "https://docs.rs/futures-async-stream/"
 readme = "README.md"
-keywords = ["async", "future", "futures", "stream", "macros", "attribute"]
+keywords = ["async", "future", "futures", "stream", "macros"]
 categories = ["asynchronous"]
 
 [workspace]
