@@ -6,7 +6,7 @@ authors = ["Taiki Endo <te316e89@gmail.com>"]
 edition = "2018"
 license = "Apache-2.0/MIT"
 description = """
-Definition of the `#[async_stream]` macro for the `futures-rs` crate as well as a few other assorted macros.
+Definition of the `#[async_stream]` macro for the `futures-async-stream` crate as well as a few other assorted macros.
 """
 repository = "https://github.com/taiki-e/futures-async-stream"
 documentation = "https://docs.rs/futures-async-stream-macro/"
