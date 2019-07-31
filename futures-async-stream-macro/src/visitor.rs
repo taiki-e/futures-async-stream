@@ -90,8 +90,8 @@ impl Visitor {
             Closure => {
                 return expr_compile_error(&error!(
                     expr,
-                    "#[for_await] cannot be allowed outside of \
-                     async closures, blocks, functions, async_stream blocks, and functions.",
+                    "for await may not be allowed outside of \
+                     async blocks, functions, closures, async stream blocks, and functions",
                 ))
             }
         };

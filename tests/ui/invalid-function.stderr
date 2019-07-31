@@ -1,0 +1,28 @@
+error: only foreign functions are allowed to be C-variadic
+ --> $DIR/invalid-fn-kind.rs:9:13
+  |
+9 | fn variadic(...) {} //~ ERROR async stream may not be variadic
+  |             ^^^
+
+error: async stream may not be const
+ --> $DIR/invalid-fn-kind.rs:6:1
+  |
+6 | const fn constness() {} //~ ERROR async stream may not be const
+  | ^^^^^
+
+error: async stream must be declared as async
+
+error: async stream must be declared as async
+  --> $DIR/invalid-fn-kind.rs:12:1
+   |
+12 | fn asyncness() {} //~ ERROR async stream must be declared as async
+   | ^^
+
+error: async stream must return the unit type
+  --> $DIR/invalid-fn-kind.rs:15:22
+   |
+15 | async fn output() -> i32 {} //~ ERROR async stream must return the unit type
+   |                      ^^^
+
+error: aborting due to 5 previous errors
+

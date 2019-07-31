@@ -18,9 +18,9 @@ use crate::{
 
 pub(super) fn async_stream(args: TokenStream, input: TokenStream) -> Result<TokenStream> {
     let args: Arg = syn::parse2(args)?;
-    let function: ItemFn = syn::parse2(input)?;
+    let item: ItemFn = syn::parse2(input)?;
 
-    expand_async_stream_fn(function, &args.0)
+    expand_async_stream_fn(item, &args.0)
 }
 
 struct Arg(Type);
@@ -37,26 +37,28 @@ impl Parse for Arg {
     }
 }
 
-fn expand_async_stream_fn(function: ItemFn, item_ty: &Type) -> Result<TokenStream> {
-    if function.asyncness.is_none() {
-        return Err(error!(
-            function.decl.fn_token,
-            "async_stream can only be applied to async functions"
-        ));
+fn expand_async_stream_fn(item: ItemFn, item_ty: &Type) -> Result<TokenStream> {
+    if let Some(constness) = item.constness {
+        return Err(error!(constness, "async stream may not be const"));
     }
-    if let Some(variadic) = function.decl.variadic {
-        return Err(error!(variadic, "variadic functions cannot be async"));
+    if let Some(variadic) = item.decl.variadic {
+        return Err(error!(variadic, "async stream may not be variadic"));
     }
 
-    let ItemFn { ident, vis, constness, unsafety, abi, block, decl, attrs, .. } = function;
-    let FnDecl { inputs, output, mut generics, fn_token, .. } = *decl;
-    let where_clause = &generics.where_clause;
-    if let ReturnType::Type(_, ty) = output {
-        match &*ty {
+    if item.asyncness.is_none() {
+        return Err(error!(item.decl.fn_token, "async stream must be declared as async"));
+    }
+
+    if let ReturnType::Type(_, ty) = &item.decl.output {
+        match &**ty {
             Type::Tuple(TypeTuple { elems, .. }) if elems.is_empty() => {}
-            _ => return Err(error!(ty, "async stream functions must return the unit type")),
+            _ => return Err(error!(ty, "async stream must return the unit type")),
         }
     }
+
+    let ItemFn { ident, vis, unsafety, abi, block, decl, attrs, .. } = item;
+    let FnDecl { inputs, mut generics, fn_token, .. } = *decl;
+    let where_clause = &generics.where_clause;
 
     // Desugar `async fn`
     // from:
@@ -161,7 +163,7 @@ fn expand_async_stream_fn(function: ItemFn, item_ty: &Type) -> Result<TokenStrea
     let return_ty = respan(return_ty, output_span);
     Ok(quote! {
         #(#attrs)*
-        #vis #unsafety #abi #constness
+        #vis #unsafety #abi
         #fn_token #ident #generics (#(#inputs_no_patterns),*)
             -> #return_ty
             #where_clause
