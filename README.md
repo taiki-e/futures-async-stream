@@ -1,13 +1,13 @@
 # futures-async-stream
 
-<!-- [![Build Status][azure-badge]][azure-url] -->
+[![Build Status][azure-badge]][azure-url]
 [![Crates.io][crates-version-badge]][crates-url]
 [![Docs.rs][docs-badge]][docs-url]
 [![License][crates-license-badge]][crates-url]
 ![Minimum supported Rust version][rustc-badge]
 
-<!-- [azure-badge]: -->
-<!-- [azure-url]: -->
+[azure-badge]: https://dev.azure.com/taiki-e/taiki-e/_apis/build/status/taiki-e.futures-async-stream?branchName=master
+[azure-url]: https://dev.azure.com/taiki-e/taiki-e/_build/latest?definitionId=4&branchName=master
 [crates-version-badge]: https://img.shields.io/crates/v/futures-async-stream.svg
 [crates-license-badge]: https://img.shields.io/crates/l/futures-async-stream.svg
 [crates-badge]: https://img.shields.io/crates/v/futures-async-stream.svg
@@ -30,7 +30,7 @@ futures-async-stream = "0.1.0-alpha.1"
 futures-preview = "0.3.0-alpha.17"
 ```
 
-The current futures-async-stream requires Rust nightly 2019-05-09 or later.
+The current futures-async-stream requires Rust nightly 2019-07-02 or later.
 
 ## \#\[for_await\]
 
