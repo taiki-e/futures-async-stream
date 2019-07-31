@@ -1,0 +1,8 @@
+error: async_stream can only be applied to async functions
+ --> $DIR/not-async.rs:6:1
+  |
+6 | fn _stream1() {} //~ ERROR async_stream can only be applied to async functions
+  | ^^
+
+error: aborting due to previous error
+

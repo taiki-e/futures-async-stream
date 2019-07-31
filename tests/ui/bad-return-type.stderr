@@ -1,0 +1,8 @@
+error: async stream functions must return the unit type
+ --> $DIR/bad-return-type.rs:6:19
+  |
+6 | async fn foo() -> i32 {} //~ ERROR async stream functions must return the unit type
+  |                   ^^^
+
+error: aborting due to previous error
+
