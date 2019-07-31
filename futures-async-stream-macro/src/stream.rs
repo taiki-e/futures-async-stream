@@ -17,10 +17,7 @@ use crate::{
 // async_stream
 
 pub(super) fn async_stream(args: TokenStream, input: TokenStream) -> Result<TokenStream> {
-    let args: Arg = syn::parse2(args)?;
-    let item: ItemFn = syn::parse2(input)?;
-
-    expand_async_stream_fn(item, &args.0)
+    parse_async_stream_fn(args, input)
 }
 
 struct Arg(Type);
@@ -37,7 +34,10 @@ impl Parse for Arg {
     }
 }
 
-fn expand_async_stream_fn(item: ItemFn, item_ty: &Type) -> Result<TokenStream> {
+fn parse_async_stream_fn(args: TokenStream, input: TokenStream) -> Result<TokenStream> {
+    let args: Arg = syn::parse2(args)?;
+    let item: ItemFn = syn::parse2(input)?;
+
     if let Some(constness) = item.constness {
         return Err(error!(constness, "async stream may not be const"));
     }
@@ -56,6 +56,10 @@ fn expand_async_stream_fn(item: ItemFn, item_ty: &Type) -> Result<TokenStream> {
         }
     }
 
+    Ok(expand_async_stream_fn(item, &args.0))
+}
+
+fn expand_async_stream_fn(item: ItemFn, item_ty: &Type) -> TokenStream {
     let ItemFn { ident, vis, unsafety, abi, block, decl, attrs, .. } = item;
     let FnDecl { inputs, mut generics, fn_token, .. } = *decl;
     let where_clause = &generics.where_clause;
@@ -83,29 +87,29 @@ fn expand_async_stream_fn(item: ItemFn, item_ty: &Type) -> Result<TokenStream> {
     let mut patterns = Vec::new();
     let mut temp_bindings = Vec::new();
     for (i, input) in inputs.into_iter().enumerate() {
-        if let FnArg::Captured(ArgCaptured { pat: Pat::Ident(pat), .. }) = &input {
-            // `self: Box<Self>` will get captured naturally
-            if pat.ident == "self" {
+        match input {
+            FnArg::Captured(ArgCaptured { pat: Pat::Ident(ref pat), .. })
+                if pat.ident == "self" =>
+            {
+                // `self: Box<Self>` will get captured naturally
                 inputs_no_patterns.push(input);
-                continue;
             }
-        }
-
-        if let FnArg::Captured(ArgCaptured {
-            pat: pat @ Pat::Ident(PatIdent { by_ref: Some(_), .. }),
-            ty,
-            colon_token,
-        }) = input
-        {
-            // `ref a: B` (or some similar pattern)
-            patterns.push(pat);
-            let ident = Ident::new(&format!("__arg_{}", i), Span::call_site());
-            temp_bindings.push(ident.clone());
-            let pat = PatIdent { by_ref: None, mutability: None, ident, subpat: None }.into();
-            inputs_no_patterns.push(ArgCaptured { pat, ty, colon_token }.into());
-        } else {
-            // Other arguments get captured naturally
-            inputs_no_patterns.push(input);
+            FnArg::Captured(ArgCaptured {
+                pat: pat @ Pat::Ident(PatIdent { by_ref: Some(_), .. }),
+                ty,
+                colon_token,
+            }) => {
+                // `ref a: B` (or some similar pattern)
+                patterns.push(pat);
+                let ident = Ident::new(&format!("__arg_{}", i), Span::call_site());
+                temp_bindings.push(ident.clone());
+                let pat = PatIdent { by_ref: None, mutability: None, ident, subpat: None }.into();
+                inputs_no_patterns.push(ArgCaptured { pat, ty, colon_token }.into());
+            }
+            _ => {
+                // Other arguments get captured naturally
+                inputs_no_patterns.push(input);
+            }
         }
     }
 
@@ -161,14 +165,14 @@ fn expand_async_stream_fn(item: ItemFn, item_ty: &Type) -> Result<TokenStream> {
         #impl_token ::futures_async_stream::stream::Stream<Item = #item_ty> + #(#lifetimes +)*
     };
     let return_ty = respan(return_ty, output_span);
-    Ok(quote! {
+    quote! {
         #(#attrs)*
         #vis #unsafety #abi
         #fn_token #ident #generics (#(#inputs_no_patterns),*)
             -> #return_ty
             #where_clause
         #body
-    })
+    }
 }
 
 // =================================================================================================
