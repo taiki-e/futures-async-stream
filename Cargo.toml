@@ -27,4 +27,5 @@ pin-project = { version = "0.3.4", default-features = false }
 [dev-dependencies]
 compiletest = { version = "0.3.21", package = "compiletest_rs", features = ["stable", "tmp"] }
 futures-preview = "0.3.0-alpha.17"
+pin-utils = "0.1.0-alpha.4"
 romio = "0.3.0-alpha.8"
