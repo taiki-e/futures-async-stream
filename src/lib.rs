@@ -11,7 +11,7 @@
 //!
 //! ```rust
 //! #![feature(async_await, stmt_expr_attributes, proc_macro_hygiene)]
-//! use futures::prelude::*;
+//! use futures::stream::Stream;
 //! use futures_async_stream::for_await;
 //!
 //! async fn collect(stream: impl Stream<Item = i32>) -> Vec<i32> {
@@ -26,6 +26,25 @@
 //!
 //! `value` has the `Item` type of the stream passed in. Note that async for loops can only be used inside of `async` functions, closures, blocks, `#[async_stream]` functions and `async_stream_block!` macros.
 //!
+//! *If you want to write the equivalent code without this API, you can write this by combining `while let` loop, `.await`, `pin_mut` macro, and `StreamExt::next()` method:*
+//!
+//! ```rust
+//! #![feature(async_await)]
+//! use futures::{
+//!     pin_mut,
+//!     stream::{Stream, StreamExt},
+//! };
+//!
+//! async fn collect(stream: impl Stream<Item = i32>) -> Vec<i32> {
+//!     let mut vec = Vec::new();
+//!     pin_mut!(stream);
+//!     while let Some(value) = stream.next().await {
+//!         vec.push(value);
+//!     }
+//!     vec
+//! }
+//! ```
+//!
 //! ### \#\[async_stream\]
 //!
 //! Creates streams via generators.
@@ -34,7 +53,7 @@
 //!
 //! ```rust
 //! #![feature(async_await, generators)]
-//! use futures::prelude::*;
+//! use futures::stream::Stream;
 //! use futures_async_stream::async_stream;
 //!
 //! // Returns a stream of i32
@@ -48,6 +67,50 @@
 //! ```
 //!
 //! `#[async_stream]` must have an item type specified via `item = some::Path` and the values output from the stream must be yielded via the `yield` expression.
+//!
+//!
+//! *If you want to write the equivalent code without this API, you can write this by manually implementing the combinator:*
+//!
+//! ```rust
+//! #![feature(async_await)]
+//! use futures::{
+//!     stream::Stream,
+//!     ready,
+//!     task::{Context, Poll},
+//! };
+//! use pin_utils::unsafe_pinned;
+//! use std::pin::Pin;
+//!
+//! fn foo<S>(stream: S) -> impl Stream<Item = i32>
+//! where
+//!     S: Stream<Item = String>,
+//! {
+//!     Foo { stream }
+//! }
+//!
+//! struct Foo<S> {
+//!     stream: S,
+//! }
+//!
+//! impl<S> Foo<S> {
+//!     unsafe_pinned!(stream: S);
+//! }
+//!
+//! impl<S> Stream for Foo<S>
+//! where
+//!     S: Stream<Item = String>,
+//! {
+//!     type Item = i32;
+//!
+//!     fn poll_next(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
+//!         if let Some(x) = ready!(self.stream().poll_next(cx)) {
+//!             Poll::Ready(Some(x.parse().unwrap()))
+//!         } else {
+//!             Poll::Ready(None)
+//!         }
+//!     }
+//! }
+//! ```
 //!
 //! [futures-await]: https://github.com/alexcrichton/futures-await
 
