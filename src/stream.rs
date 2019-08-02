@@ -27,10 +27,7 @@ where
 /// A wrapper around generators used to implement `Stream` for `async`/`await` code.
 #[unsafe_project(Unpin)]
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
-struct GenStream<U, T>
-where
-    T: Generator<Yield = Poll<U>, Return = ()>,
-{
+struct GenStream<U, T> {
     #[pin]
     gen: T,
     _phantom: PhantomData<U>,
