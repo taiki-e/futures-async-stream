@@ -1,6 +1,7 @@
-use quote::{quote, ToTokens};
+use quote::{quote, quote_spanned, ToTokens};
 use syn::{
     fold::{self, Fold},
+    spanned::Spanned,
     Expr, ExprCall, ExprField, ExprForLoop, ExprMacro, ExprYield, Item, Member,
 };
 
@@ -136,7 +137,7 @@ impl Visitor {
         }
     }
 
-    /// Expands `<expr>.await` in `async_stream` scope.
+    /// Expands `<base>.await` in `async_stream` scope.
     ///
     /// It needs to adjust the type yielded by the macro because generators used internally by
     /// async fn yield `()` type, but generators used internally by `async_stream` yield
@@ -150,10 +151,10 @@ impl Visitor {
             Member::Named(x) if x == "await" => {}
             _ => return Expr::Field(expr),
         }
-        let expr = expr.base;
+        let ExprField { base, member, .. } = expr;
 
-        syn::parse2(quote! {{
-            let mut __pinned = #expr;
+        syn::parse2(quote_spanned! { member.span() => {
+            let mut __pinned = #base;
             loop {
                 if let ::futures_async_stream::core_reexport::task::Poll::Ready(x) =
                     ::futures_async_stream::stream::poll_with_tls_context(unsafe {
@@ -166,10 +167,7 @@ impl Visitor {
                 yield ::futures_async_stream::core_reexport::task::Poll::Pending
             }
         }})
-        // As macro input (<expr>) is untrusted, use `syn::parse2` + `expr_compile_error`
-        // instead of `syn::parse_quote!` to generate better error messages (`syn::parse_quote!`
-        // panics if fail to parse).
-        .unwrap_or_else(|e| expr_compile_error(&e))
+        .unwrap()
     }
 }
 
