@@ -1,5 +1,6 @@
 use proc_macro2::{Span, TokenStream, TokenTree};
 use quote::ToTokens;
+use syn::parse::{Parse, ParseStream, Result};
 
 pub(crate) fn first_last<T: ToTokens>(tokens: &T) -> (Span, Span) {
     let mut spans = TokenStream::new();
@@ -23,6 +24,16 @@ pub(crate) fn respan(input: TokenStream, (first_span, last_span): (Span, Span)) 
 
 pub(crate) fn expr_compile_error(e: &syn::Error) -> syn::Expr {
     syn::parse2(e.to_compile_error()).unwrap()
+}
+
+// See https://github.com/dtolnay/syn/commit/82a3aed7ecfd07fc2f7f322b01d2413ffea6c5e7
+/// An empty syntax tree node that consumes no tokens when parsed.
+pub(crate) struct Nothing;
+
+impl Parse for Nothing {
+    fn parse(_input: ParseStream<'_>) -> Result<Self> {
+        Ok(Nothing)
+    }
 }
 
 macro_rules! error {

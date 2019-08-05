@@ -11,5 +11,5 @@ jobs:
 
     - script: |
         cargo clean
-        RUSTFLAGS='--cfg ui_tests' cargo test -p futures-async-stream --all-features --test compile-test
+        RUSTFLAGS='--cfg compile_test' cargo test -p futures-async-stream --all-features --test compile-test
       displayName: cargo test (compile-test)

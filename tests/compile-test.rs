@@ -1,4 +1,4 @@
-#![cfg(ui_tests)]
+#![cfg(compile_test)]
 #![warn(rust_2018_idioms)]
 
 use std::{env, path::PathBuf};

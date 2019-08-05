@@ -5,7 +5,7 @@ use futures_async_stream::async_stream;
 
 #[async_stream(item = i32)]
 async fn foo() {
-    #[for_await(bar)] //~ ERROR attribute must be of the form `#[for_await]`
+    #[for_await(bar)] //~ ERROR unexpected token
     for i in stream::iter(vec![1, 2]) {
         yield i;
     }

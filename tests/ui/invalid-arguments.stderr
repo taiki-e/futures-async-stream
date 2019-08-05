@@ -1,17 +1,17 @@
-error: attribute must be of the form `#[for_await]`
- --> $DIR/bad-input.rs:8:5
+error: unexpected token
+ --> $DIR/invalid-arguments.rs:8:16
   |
-8 |     #[for_await(bar)] //~ ERROR attribute must be of the form `#[for_await]`
-  |     ^^^^^^^^^^^^^^^^^
+8 |     #[for_await(bar)] //~ ERROR unexpected token
+  |                ^^^^^
 
 error: expected `item`
-  --> $DIR/bad-input.rs:14:16
+  --> $DIR/invalid-arguments.rs:14:16
    |
 14 | #[async_stream(baz, item = i32)] //~ ERROR expected `item`
    |                ^^^
 
 error: unexpected token
-  --> $DIR/bad-input.rs:22:26
+  --> $DIR/invalid-arguments.rs:22:26
    |
 22 | #[async_stream(item = i32, baz)] //~ ERROR unexpected token
    |                          ^

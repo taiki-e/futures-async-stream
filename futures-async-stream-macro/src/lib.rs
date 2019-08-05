@@ -9,7 +9,6 @@
 extern crate proc_macro;
 
 use proc_macro::{Delimiter, Group, TokenStream, TokenTree};
-use proc_macro2::TokenStream as TokenStream2;
 use quote::ToTokens;
 use syn::{fold::Fold, Expr, ExprForLoop};
 
@@ -20,17 +19,15 @@ mod elision;
 mod stream;
 mod visitor;
 
+use crate::utils::Nothing;
+
 /// Processes streams using a for loop.
 #[proc_macro_attribute]
 pub fn for_await(args: TokenStream, input: TokenStream) -> TokenStream {
     // TODO: Concurrent versions are not supported yet.
-    if !args.is_empty() {
-        return error!(TokenStream2::from(args), "attribute must be of the form `#[for_await]`")
-            .to_compile_error()
-            .into();
-    }
-
+    let _: Nothing = syn::parse_macro_input!(args);
     let mut expr: ExprForLoop = syn::parse_macro_input!(input);
+
     expr.attrs.push(syn::parse_quote!(#[for_await]));
     visitor::Visitor::default().fold_expr(Expr::ForLoop(expr)).into_token_stream().into()
 }

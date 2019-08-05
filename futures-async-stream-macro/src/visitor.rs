@@ -5,7 +5,10 @@ use syn::{
     Expr, ExprCall, ExprField, ExprForLoop, ExprMacro, ExprYield, Item, Member,
 };
 
-use crate::{async_stream_block, utils::expr_compile_error};
+use crate::{
+    async_stream_block,
+    utils::{expr_compile_error, Nothing},
+};
 
 pub(crate) use Scope::{Closure, Future, Stream};
 
@@ -51,11 +54,9 @@ impl Visitor {
         if !(expr.attrs.len() == 1 && expr.attrs[0].path.is_ident("for_await")) {
             return Expr::ForLoop(expr);
         }
-        if !expr.attrs[0].tts.is_empty() {
-            return expr_compile_error(&error!(
-                expr.attrs.pop(),
-                "attribute must be of the form `#[for_await]`"
-            ));
+        let attr = expr.attrs.pop().unwrap();
+        if let Err(e) = syn::parse2::<Nothing>(attr.tts) {
+            return expr_compile_error(&e);
         }
 
         // It needs to adjust the type yielded by the macro because generators used internally by
