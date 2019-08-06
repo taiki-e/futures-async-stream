@@ -10,7 +10,7 @@ extern crate proc_macro;
 
 use proc_macro::{Delimiter, Group, TokenStream, TokenTree};
 use quote::ToTokens;
-use syn::{fold::Fold, Expr, ExprForLoop};
+use syn::{Expr, ExprForLoop};
 
 #[macro_use]
 mod utils;
@@ -29,7 +29,9 @@ pub fn for_await(args: TokenStream, input: TokenStream) -> TokenStream {
     let mut expr: ExprForLoop = syn::parse_macro_input!(input);
 
     expr.attrs.push(syn::parse_quote!(#[for_await]));
-    visitor::Visitor::default().fold_expr(Expr::ForLoop(expr)).into_token_stream().into()
+    let mut expr = Expr::ForLoop(expr);
+    visitor::Visitor::default().visit_for_loop(&mut expr);
+    expr.into_token_stream().into()
 }
 
 /// Creates streams via generators.
