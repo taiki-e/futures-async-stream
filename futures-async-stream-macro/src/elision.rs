@@ -1,15 +1,17 @@
 use proc_macro2::Span;
 use syn::{
-    fold::Fold, punctuated::Punctuated, token::Comma, ArgSelfRef, FnArg, GenericParam, Lifetime,
-    LifetimeDef, TypeReference,
+    punctuated::Punctuated,
+    token::Comma,
+    visit_mut::{self, VisitMut},
+    ArgSelfRef, FnArg, GenericArgument, GenericParam, Lifetime, LifetimeDef, TypeReference,
 };
 
 pub(super) fn unelide_lifetimes(
     generics: &mut Punctuated<GenericParam, Comma>,
-    args: Vec<FnArg>,
-) -> Vec<FnArg> {
-    let mut folder = UnelideLifetimes::new(generics);
-    args.into_iter().map(|arg| folder.fold_fn_arg(arg)).collect()
+    args: &mut Vec<FnArg>,
+) {
+    let mut visitor = UnelideLifetimes::new(generics);
+    args.iter_mut().for_each(|arg| visitor.visit_fn_arg_mut(arg));
 }
 
 struct UnelideLifetimes<'a> {
@@ -26,8 +28,7 @@ impl<'a> UnelideLifetimes<'a> {
         Self { generics, lifetime_index, lifetime_name, count: 0 }
     }
 
-    // Constitute a new lifetime
-    fn new_lifetime(&mut self) -> Lifetime {
+    fn next_lifetime(&mut self) -> Lifetime {
         let lifetime_name = format!("{}{}", self.lifetime_name, self.count);
         let lifetime = Lifetime::new(&lifetime_name, Span::call_site());
 
@@ -38,38 +39,35 @@ impl<'a> UnelideLifetimes<'a> {
         lifetime
     }
 
-    // Take an Option<Lifetime> and guarantee its an unelided lifetime
-    fn expand_lifetime(&mut self, lifetime: Option<Lifetime>) -> Lifetime {
+    fn visit_opt_lifetime(&mut self, lifetime: &mut Option<Lifetime>) {
         match lifetime {
-            Some(l) => self.fold_lifetime(l),
-            None => self.new_lifetime(),
+            None => *lifetime = Some(self.next_lifetime()),
+            Some(lifetime) => self.visit_lifetime(lifetime),
+        }
+    }
+
+    fn visit_lifetime(&mut self, lifetime: &mut Lifetime) {
+        if lifetime.ident == "_" {
+            *lifetime = self.next_lifetime();
         }
     }
 }
 
-impl Fold for UnelideLifetimes<'_> {
-    // Handling self arguments
-    fn fold_arg_self_ref(&mut self, arg: ArgSelfRef) -> ArgSelfRef {
-        let ArgSelfRef { and_token, lifetime, mutability, self_token } = arg;
-        let lifetime = Some(self.expand_lifetime(lifetime));
-        ArgSelfRef { and_token, lifetime, mutability, self_token }
+impl VisitMut for UnelideLifetimes<'_> {
+    fn visit_arg_self_ref_mut(&mut self, arg: &mut ArgSelfRef) {
+        self.visit_opt_lifetime(&mut arg.lifetime);
     }
 
-    // If the lifetime is `'_`, replace it with a new unelided lifetime
-    fn fold_lifetime(&mut self, lifetime: Lifetime) -> Lifetime {
-        if lifetime.ident == "_" {
-            self.new_lifetime()
-        } else {
-            lifetime
+    fn visit_type_reference_mut(&mut self, ty: &mut TypeReference) {
+        self.visit_opt_lifetime(&mut ty.lifetime);
+        visit_mut::visit_type_reference_mut(self, ty);
+    }
+
+    fn visit_generic_argument_mut(&mut self, gen: &mut GenericArgument) {
+        if let GenericArgument::Lifetime(lifetime) = gen {
+            self.visit_lifetime(lifetime);
         }
-    }
-
-    // If the reference's lifetime is elided, replace it with a new unelided lifetime
-    fn fold_type_reference(&mut self, ty_ref: TypeReference) -> TypeReference {
-        let TypeReference { and_token, lifetime, mutability, elem } = ty_ref;
-        let lifetime = Some(self.expand_lifetime(lifetime));
-        let elem = Box::new(self.fold_type(*elem));
-        TypeReference { and_token, lifetime, mutability, elem }
+        visit_mut::visit_generic_argument_mut(self, gen);
     }
 }
 

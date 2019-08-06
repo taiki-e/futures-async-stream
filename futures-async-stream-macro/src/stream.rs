@@ -1,10 +1,11 @@
 use proc_macro2::{Span, TokenStream};
 use quote::{quote, ToTokens};
 use syn::{
-    fold::Fold,
     parse::{Parse, ParseStream},
-    token, ArgCaptured, Expr, FnArg, FnDecl, Ident, ItemFn, Pat, PatIdent, Result, ReturnType,
-    Token, Type, TypeTuple,
+    token,
+    visit_mut::VisitMut,
+    ArgCaptured, Expr, FnArg, FnDecl, Ident, ItemFn, Pat, PatIdent, Result, ReturnType, Token,
+    Type, TypeTuple,
 };
 
 use crate::{
@@ -60,14 +61,15 @@ fn parse_async_stream_fn(args: TokenStream, input: TokenStream) -> Result<TokenS
 }
 
 fn expand_async_stream_fn(item: ItemFn, item_ty: &Type) -> TokenStream {
-    let ItemFn { ident, vis, unsafety, abi, block, decl, attrs, .. } = item;
+    let ItemFn { ident, vis, unsafety, abi, mut block, decl, attrs, .. } = item;
     let FnDecl { inputs, mut generics, fn_token, .. } = *decl;
     let where_clause = &generics.where_clause;
 
     // Desugar `async fn`
     // from:
     //
-    //      async fn foo(ref a: u32) -> u32 {
+    //      #[async_stream(item = u32)]
+    //      async fn foo(ref a: u32) {
     //          // ...
     //      }
     //
@@ -113,8 +115,8 @@ fn expand_async_stream_fn(item: ItemFn, item_ty: &Type) -> TokenStream {
         }
     }
 
-    // Expand `#[for_await]` and `.await`.
-    let block = Visitor::new(Stream).fold_block(*block);
+    // Visit `#[for_await]` and `.await`.
+    Visitor::new(Stream).visit_block_mut(&mut *block);
 
     let block_inner = quote! {
         #( let #patterns = #temp_bindings; )*
@@ -156,7 +158,7 @@ fn expand_async_stream_fn(item: ItemFn, item_ty: &Type) -> TokenStream {
         body_inner.to_tokens(tokens);
     });
 
-    let inputs_no_patterns = elision::unelide_lifetimes(&mut generics.params, inputs_no_patterns);
+    elision::unelide_lifetimes(&mut generics.params, &mut inputs_no_patterns);
     let lifetimes = generics.lifetimes().map(|l| &l.lifetime);
 
     // Raw `impl` breaks syntax highlighting in some editors.
@@ -182,8 +184,8 @@ pub(super) fn async_stream_block(input: TokenStream) -> Result<TokenStream> {
     syn::parse2(input).map(expand_async_stream_block)
 }
 
-fn expand_async_stream_block(expr: Expr) -> TokenStream {
-    let expr = Visitor::new(Stream).fold_expr(expr);
+fn expand_async_stream_block(mut expr: Expr) -> TokenStream {
+    Visitor::new(Stream).visit_expr_mut(&mut expr);
 
     let gen_body = quote! {{
         let (): () = #expr;

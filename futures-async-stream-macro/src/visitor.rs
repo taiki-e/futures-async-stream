@@ -1,13 +1,13 @@
-use quote::{quote, quote_spanned, ToTokens};
+use quote::{quote, quote_spanned};
 use syn::{
-    fold::{self, Fold},
     spanned::Spanned,
-    Expr, ExprCall, ExprField, ExprForLoop, ExprMacro, ExprYield, Item, Member,
+    visit_mut::{self, VisitMut},
+    Expr, ExprCall, ExprField, ExprForLoop, ExprYield, Item, Member,
 };
 
 use crate::{
     async_stream_block,
-    utils::{expr_compile_error, Nothing},
+    utils::{expr_compile_error, replace_boxed_expr, replace_expr, Nothing},
 };
 
 pub(crate) use Scope::{Closure, Future, Stream};
@@ -48,133 +48,143 @@ impl Visitor {
         Self { scope }
     }
 
-    /// Expands `#[for_await] for <pat> in <expr> { .. }`.
-    fn expand_for_loop(&self, mut expr: ExprForLoop) -> Expr {
-        // TODO: Should we allow other attributes?
-        if !(expr.attrs.len() == 1 && expr.attrs[0].path.is_ident("for_await")) {
-            return Expr::ForLoop(expr);
-        }
-        let attr = expr.attrs.pop().unwrap();
-        if let Err(e) = syn::parse2::<Nothing>(attr.tts) {
-            return expr_compile_error(&e);
-        }
-
-        // It needs to adjust the type yielded by the macro because generators used internally by
-        // async fn yield `()` type, but generators used internally by `async_stream` yield
-        // `Poll<U>` type.
-        let match_next = match self.scope {
-            Future => {
-                quote! {
-                    match ::futures_async_stream::stream::next(&mut __pinned).await {
-                        ::futures_async_stream::core_reexport::option::Option::Some(e) => e,
-                        ::futures_async_stream::core_reexport::option::Option::None => break,
-                    }
-                }
+    /// Visits `#[for_await] for <pat> in <expr> { .. }`.
+    pub(crate) fn visit_for_loop(&self, expr: &mut Expr) {
+        if let Expr::ForLoop(ExprForLoop { attrs, label, pat, expr: e, body, .. }) = expr {
+            // TODO: Should we allow other attributes?
+            if !(attrs.len() == 1 && attrs[0].path.is_ident("for_await")) {
+                return;
             }
-            Stream => {
-                quote! {
-                    match ::futures_async_stream::stream::poll_next_with_tls_context(
-                        ::futures_async_stream::core_reexport::pin::Pin::as_mut(&mut __pinned),
-                    ) {
-                        ::futures_async_stream::core_reexport::task::Poll::Ready(
-                            ::futures_async_stream::core_reexport::option::Option::Some(e),
-                        ) => e,
-                        ::futures_async_stream::core_reexport::task::Poll::Ready(
-                            ::futures_async_stream::core_reexport::option::Option::None,
-                        ) => break,
-                        ::futures_async_stream::core_reexport::task::Poll::Pending => {
-                            yield ::futures_async_stream::core_reexport::task::Poll::Pending;
-                            continue
+            let attr = attrs.pop().unwrap();
+            if let Err(e) = syn::parse2::<Nothing>(attr.tts) {
+                *expr = expr_compile_error(&e);
+                return;
+            }
+
+            // It needs to adjust the type yielded by the macro because generators used internally by
+            // async fn yield `()` type, but generators used internally by `async_stream` yield
+            // `Poll<U>` type.
+            let match_next = match self.scope {
+                Future => {
+                    quote! {
+                        match ::futures_async_stream::stream::next(&mut __pinned).await {
+                            ::futures_async_stream::core_reexport::option::Option::Some(e) => e,
+                            ::futures_async_stream::core_reexport::option::Option::None => break,
                         }
                     }
                 }
-            }
-            Closure => {
-                return expr_compile_error(&error!(
-                    expr,
-                    "for await may not be allowed outside of \
-                     async blocks, functions, closures, async stream blocks, and functions",
-                ))
-            }
-        };
-
-        let ExprForLoop { label, pat, expr, body, .. } = &expr;
-        syn::parse_quote! {{
-            let mut __pinned = #expr;
-            let mut __pinned = unsafe {
-                ::futures_async_stream::core_reexport::pin::Pin::new_unchecked(&mut __pinned)
+                Stream => {
+                    quote! {
+                        match ::futures_async_stream::stream::poll_next_with_tls_context(
+                            ::futures_async_stream::core_reexport::pin::Pin::as_mut(&mut __pinned),
+                        ) {
+                            ::futures_async_stream::core_reexport::task::Poll::Ready(
+                                ::futures_async_stream::core_reexport::option::Option::Some(e),
+                            ) => e,
+                            ::futures_async_stream::core_reexport::task::Poll::Ready(
+                                ::futures_async_stream::core_reexport::option::Option::None,
+                            ) => break,
+                            ::futures_async_stream::core_reexport::task::Poll::Pending => {
+                                yield ::futures_async_stream::core_reexport::task::Poll::Pending;
+                                continue
+                            }
+                        }
+                    }
+                }
+                Closure => {
+                    *expr = expr_compile_error(&error!(
+                        expr.clone(),
+                        "for await may not be allowed outside of \
+                         async blocks, functions, closures, async stream blocks, and functions",
+                    ));
+                    return;
+                }
             };
-            #label
-            loop {
-                let #pat = #match_next;
-                #body
-            }
-        }}
+
+            *expr = syn::parse_quote! {{
+                let mut __pinned = #e;
+                let mut __pinned = unsafe {
+                    ::futures_async_stream::core_reexport::pin::Pin::new_unchecked(&mut __pinned)
+                };
+                #label
+                loop {
+                    let #pat = #match_next;
+                    #body
+                }
+            }}
+        }
     }
 
-    /// Expands `yield <expr>` in `async_stream` scope.
-    fn expand_yield(&self, expr: ExprYield) -> ExprYield {
+    /// Visits `yield <expr>` in `async_stream` scope.
+    fn visit_yield(&self, expr: &mut ExprYield) {
         if self.scope != Stream {
-            return expr;
+            return;
         }
 
         // Desugar `yield <expr>` into `yield Poll::Ready(<expr>)`.
-        let ExprYield { attrs, yield_token, expr } = expr;
-        let expr = expr.map_or_else(|| quote!(()), ToTokens::into_token_stream);
-        let expr = syn::parse_quote! {
-            ::futures_async_stream::core_reexport::task::Poll::Ready(#expr)
-        };
-        ExprYield { attrs, yield_token, expr: Some(Box::new(expr)) }
+        replace_boxed_expr(&mut expr.expr, |expr| {
+            syn::parse_quote! {
+                ::futures_async_stream::core_reexport::task::Poll::Ready(#expr)
+            }
+        });
     }
 
-    /// Expands `async_stream_block!` macro.
-    fn expand_macro(&mut self, mut expr: ExprMacro) -> Expr {
-        if expr.mac.path.is_ident("async_stream_block") {
-            let mut e: ExprCall = syn::parse(async_stream_block(expr.mac.tts.into())).unwrap();
-            e.attrs.append(&mut expr.attrs);
-            Expr::Call(e)
-        } else {
-            Expr::Macro(expr)
-        }
+    /// Visits `async_stream_block!` macro.
+    fn visit_macro(&mut self, expr: &mut Expr) {
+        replace_expr(expr, |expr| {
+            if let Expr::Macro(mut expr) = expr {
+                if expr.mac.path.is_ident("async_stream_block") {
+                    let mut e: ExprCall =
+                        syn::parse(async_stream_block(expr.mac.tts.into())).unwrap();
+                    e.attrs.append(&mut expr.attrs);
+                    Expr::Call(e)
+                } else {
+                    Expr::Macro(expr)
+                }
+            } else {
+                expr
+            }
+        })
     }
 
-    /// Expands `<base>.await` in `async_stream` scope.
+    /// Visits `<base>.await` in `async_stream` scope.
     ///
     /// It needs to adjust the type yielded by the macro because generators used internally by
     /// async fn yield `()` type, but generators used internally by `async_stream` yield
     /// `Poll<U>` type.
-    fn expand_await(&mut self, expr: ExprField) -> Expr {
+    fn visit_await(&mut self, expr: &mut Expr) {
         if self.scope != Stream {
-            return Expr::Field(expr);
+            return;
         }
 
-        match &expr.member {
-            Member::Named(x) if x == "await" => {}
-            _ => return Expr::Field(expr),
-        }
-        let ExprField { base, member, .. } = expr;
-
-        syn::parse2(quote_spanned! { member.span() => {
-            let mut __pinned = #base;
-            loop {
-                if let ::futures_async_stream::core_reexport::task::Poll::Ready(x) =
-                    ::futures_async_stream::stream::poll_with_tls_context(unsafe {
-                        ::futures_async_stream::core_reexport::pin::Pin::new_unchecked(&mut __pinned)
-                    })
-                {
-                    break x;
-                }
-
-                yield ::futures_async_stream::core_reexport::task::Poll::Pending
+        if let Expr::Field(ExprField { base, member, .. }) = expr {
+            match &member {
+                Member::Named(x) if x == "await" => {}
+                _ => return,
             }
-        }})
-        .unwrap()
+
+            *expr = syn::parse2(quote_spanned! { member.span() => {
+                let mut __pinned = #base;
+                loop {
+                    if let ::futures_async_stream::core_reexport::task::Poll::Ready(x) =
+                        ::futures_async_stream::stream::poll_with_tls_context(unsafe {
+                            ::futures_async_stream::core_reexport::pin::Pin::new_unchecked(&mut __pinned)
+                        })
+                    {
+                        break x;
+                    }
+
+                    yield ::futures_async_stream::core_reexport::task::Poll::Pending
+                }
+            }})
+            .unwrap();
+        }
     }
 }
 
-impl Fold for Visitor {
-    fn fold_expr(&mut self, expr: Expr) -> Expr {
-        // Backup current scope and adjust the scope. This must be done before folding expr.
+impl VisitMut for Visitor {
+    fn visit_expr_mut(&mut self, expr: &mut Expr) {
+        // Backup current scope and adjust the scope. This must be done before visiting expr.
         let tmp = self.scope;
         match &expr {
             Expr::Async(_) => self.scope = Future,
@@ -187,21 +197,19 @@ impl Fold for Visitor {
             _ => {}
         }
 
-        let expr = match fold::fold_expr(self, expr) {
-            Expr::Yield(expr) => Expr::Yield(self.expand_yield(expr)),
-            Expr::Field(expr) => self.expand_await(expr),
-            Expr::ForLoop(expr) => self.expand_for_loop(expr),
-            Expr::Macro(expr) => self.expand_macro(expr),
-            expr => expr,
-        };
+        visit_mut::visit_expr_mut(self, expr);
+        match expr {
+            Expr::Yield(expr) => self.visit_yield(expr),
+            Expr::Field(_) => self.visit_await(expr),
+            Expr::ForLoop(_) => self.visit_for_loop(expr),
+            Expr::Macro(_) => self.visit_macro(expr),
+            _ => {}
+        }
 
         // Restore the backup.
         self.scope = tmp;
-        expr
     }
 
     // Stop at item bounds
-    fn fold_item(&mut self, item: Item) -> Item {
-        item
-    }
+    fn visit_item_mut(&mut self, _: &mut Item) {}
 }
