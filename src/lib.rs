@@ -203,9 +203,3 @@ pub mod alloc_reexport {
     #[doc(hidden)]
     pub use alloc::boxed;
 }
-
-#[doc(hidden)]
-pub mod futures_reexport {
-    #[doc(hidden)]
-    pub use futures_core::*;
-}
