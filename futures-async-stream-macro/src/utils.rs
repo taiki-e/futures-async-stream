@@ -5,7 +5,7 @@ use quote::ToTokens;
 use syn::{
     parse::{Parse, ParseStream},
     punctuated::Punctuated,
-    Result, *,
+    token, Expr, ExprTuple, ExprVerbatim, Result,
 };
 
 pub(crate) fn first_last<T: ToTokens>(tokens: &T) -> (Span, Span) {

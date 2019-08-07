@@ -4,8 +4,8 @@ use syn::{
     parse::{Parse, ParseStream},
     token,
     visit_mut::VisitMut,
-    ArgCaptured, Expr, FnArg, FnDecl, Ident, ItemFn, Pat, PatIdent, Result, ReturnType, Token,
-    Type, TypeTuple, *,
+    ArgCaptured, Attribute, Block, Expr, FnArg, FnDecl, Ident, ItemFn, MethodSig, Pat, PatIdent,
+    Result, ReturnType, Token, TraitItemMethod, Type, TypeTuple, Visibility,
 };
 
 use crate::{
