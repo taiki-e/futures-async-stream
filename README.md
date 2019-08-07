@@ -55,25 +55,6 @@ async fn collect(stream: impl Stream<Item = i32>) -> Vec<i32> {
 
 `value` has the `Item` type of the stream passed in. Note that async for loops can only be used inside of `async` functions, closures, blocks, `#[async_stream]` functions and `async_stream_block!` macros.
 
-*If you want to write the equivalent code without this API, you can write this by combining `while let` loop, `.await`, `pin_mut` macro, and `StreamExt::next()` method:*
-
-```rust
-#![feature(async_await)]
-use futures::{
-    pin_mut,
-    stream::{Stream, StreamExt},
-};
-
-async fn collect(stream: impl Stream<Item = i32>) -> Vec<i32> {
-    let mut vec = Vec::new();
-    pin_mut!(stream);
-    while let Some(value) = stream.next().await {
-        vec.push(value);
-    }
-    vec
-}
-```
-
 ## \#\[async_stream\]
 
 Creates streams via generators.
@@ -98,7 +79,100 @@ async fn foo(stream: impl Stream<Item = String>) {
 
 `#[async_stream]` must have an item type specified via `item = some::Path` and the values output from the stream must be yielded via the `yield` expression.
 
-*If you want to write the equivalent code without this API, you can write this by manually implementing the combinator:*
+## Using async stream functions in traits
+
+You can use async stream functions in traits by passing `boxed` or `boxed_local` as an argument.
+
+```rust
+#![feature(async_await, generators)]
+use futures_async_stream::async_stream;
+
+trait Foo {
+    #[async_stream(boxed, item = u32)]
+    async fn method(&mut self);
+}
+
+struct Bar(u32);
+
+impl Foo for Bar {
+    #[async_stream(boxed, item = u32)]
+    async fn method(&mut self) {
+        while self.0 < u32::max_value() {
+            self.0 += 1;
+            yield self.0;
+        }
+    }
+}
+```
+
+A async stream function that received a `boxed` argument is converted to a function that returns `Pin<Box<dyn Stream<Item = item> + Send + 'lifetime>>`.
+If you passed `boxed_local` instead of `boxed`, async stream function returns a non-threadsafe stream (`Pin<Box<dyn Stream<Item = item> + 'lifetime>>`).
+
+```rust
+#![feature(async_await, generators)]
+use futures::stream::Stream;
+use futures_async_stream::async_stream;
+use std::pin::Pin;
+
+// The trait itself can be defined without unstable features.
+trait Foo {
+    fn method(&mut self) -> Pin<Box<dyn Stream<Item = u32> + Send + '_>>;
+}
+
+struct Bar(u32);
+
+impl Foo for Bar {
+    #[async_stream(boxed, item = u32)]
+    async fn method(&mut self) {
+        while self.0 < u32::max_value() {
+            self.0 += 1;
+            yield self.0;
+        }
+    }
+}
+```
+
+<!--
+### async_stream_block!
+
+TODO
+-->
+
+<!--
+## List of features that may be added in the future as an extension of this feature:
+
+  * `async_try_stream` (https://github.com/rust-lang-nursery/futures-rs/pull/1548#discussion_r287558350)
+  * `async_sink` (https://github.com/rust-lang-nursery/futures-rs/pull/1548#issuecomment-486205382)
+  * Support `.await` in macro (https://github.com/rust-lang-nursery/futures-rs/pull/1548#discussion_r285341883)
+  * Parallel version of `for_await` (https://github.com/rustasync/runtime/pull/25)
+-->
+
+## How to write the equivalent code without this API?
+
+### \#\[for_await\]
+
+You can write this by combining `while let` loop, `.await`, `pin_mut` macro, and `StreamExt::next()` method:
+
+```rust
+#![feature(async_await)]
+use futures::{
+    pin_mut,
+    stream::{Stream, StreamExt},
+};
+
+async fn collect(stream: impl Stream<Item = i32>) -> Vec<i32> {
+    let mut vec = Vec::new();
+    pin_mut!(stream);
+    while let Some(value) = stream.next().await {
+        vec.push(value);
+    }
+    vec
+}
+```
+
+### \#\[async_stream\]
+
+You can write this by manually implementing the combinator:
 
 ```rust
 #![feature(async_await)]
@@ -141,20 +215,7 @@ where
 }
 ```
 
-<!--
-### async_stream_block!
-
-TODO
--->
-
-<!--
-## List of features that may be added in the future as an extension of this feature:
-
-  * `async_try_stream` (https://github.com/rust-lang-nursery/futures-rs/pull/1548#discussion_r287558350)
-  * `async_sink` (https://github.com/rust-lang-nursery/futures-rs/pull/1548#issuecomment-486205382)
-  * Support `.await` in macro (https://github.com/rust-lang-nursery/futures-rs/pull/1548#discussion_r285341883)
-  * Parallel version of `for_await` (https://github.com/rustasync/runtime/pull/25)
--->
+[futures-await]: https://github.com/alexcrichton/futures-await
 
 ## License
 

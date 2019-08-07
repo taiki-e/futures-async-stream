@@ -1,8 +1,13 @@
 #![warn(rust_2018_idioms)]
 #![feature(async_await, generators, stmt_expr_attributes, proc_macro_hygiene)]
 
-use futures::{executor::block_on, future, stream};
+use futures::{
+    executor::block_on,
+    future,
+    stream::{self, Stream},
+};
 use futures_async_stream::{async_stream, async_stream_block, for_await};
+use std::{pin::Pin, rc::Rc, sync::Arc};
 
 #[async_stream(item = i32)]
 pub async fn nested() {
@@ -55,14 +60,28 @@ mod foo {
     pub struct _Foo(pub i32);
 }
 
-#[async_stream(item = foo::_Foo)]
+#[async_stream(boxed, item = foo::_Foo)]
 pub async fn stream5() {
     yield foo::_Foo(0);
     yield foo::_Foo(1);
 }
 
-#[async_stream(item = i32)]
+#[async_stream(item = i32, boxed)]
 pub async fn stream6() {
+    #[for_await]
+    for foo::_Foo(i) in stream5() {
+        yield i * i;
+    }
+}
+
+#[async_stream(boxed_local, item = foo::_Foo)]
+pub async fn stream7() {
+    yield foo::_Foo(0);
+    yield foo::_Foo(1);
+}
+
+#[async_stream(item = i32, boxed_local)]
+pub async fn stream8() {
     #[for_await]
     for foo::_Foo(i) in stream5() {
         yield i * i;
@@ -88,8 +107,77 @@ impl A {
     }
 
     #[async_stream(item = i32)]
-    pub async fn take_boxed_self(self: Box<Self>) {
+    pub async fn take_ref_self(&self) {
         yield self.0
+    }
+
+    #[async_stream(item = i32)]
+    pub async fn take_ref_mut_self(&mut self) {
+        yield self.0
+    }
+
+    #[async_stream(item = i32)]
+    pub async fn take_box_self(self: Box<Self>) {
+        yield self.0
+    }
+
+    #[async_stream(item = i32)]
+    pub async fn take_rc_self(self: Rc<Self>) {
+        yield self.0
+    }
+
+    #[async_stream(item = i32)]
+    pub async fn take_arc_self(self: Arc<Self>) {
+        yield self.0
+    }
+
+    #[async_stream(item = i32)]
+    pub async fn take_pin_ref_self(self: Pin<&Self>) {
+        yield self.0
+    }
+
+    #[async_stream(item = i32)]
+    pub async fn take_pin_ref_mut_self(self: Pin<&mut Self>) {
+        yield self.0
+    }
+
+    #[async_stream(item = i32)]
+    pub async fn take_pin_box_self(self: Pin<Box<Self>>) {
+        yield self.0
+    }
+}
+
+pub trait Trait {
+    fn stream1() -> Pin<Box<dyn Stream<Item = i32> + Send>>;
+
+    fn stream2(&self) -> Pin<Box<dyn Stream<Item = i32> + Send + '_>>;
+
+    #[async_stream(boxed, item = i32)]
+    async fn stream3();
+
+    #[async_stream(boxed, item = i32)]
+    async fn stream4(&self);
+}
+
+impl Trait for A {
+    #[async_stream(boxed, item = i32)]
+    async fn stream1() {
+        yield 1;
+    }
+
+    #[async_stream(boxed, item = i32)]
+    async fn stream2(&self) {
+        yield 1;
+    }
+
+    #[async_stream(boxed, item = i32)]
+    async fn stream3() {
+        yield 1;
+    }
+
+    #[async_stream(boxed, item = i32)]
+    async fn stream4(&self) {
+        yield 1;
     }
 }
 
