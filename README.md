@@ -26,7 +26,7 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-futures-async-stream = "0.1.0-alpha.1"
+futures-async-stream = "0.1.0-alpha.2"
 futures-preview = "0.3.0-alpha.17"
 ```
 
