@@ -1,3 +1,6 @@
+// compile-fail
+
+#![deny(warnings)]
 #![feature(async_await, generators)]
 
 use futures::stream;

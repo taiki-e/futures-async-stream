@@ -1,3 +1,6 @@
+// compile-fail
+
+#![deny(warnings)]
 #![feature(async_await, generators, proc_macro_hygiene)]
 
 use futures_async_stream::async_stream_block;

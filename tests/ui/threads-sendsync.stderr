@@ -1,0 +1,19 @@
+error[E0277]: `dyn futures_core::stream::Stream<Item = i32>` cannot be sent between threads safely
+  --> $DIR/threads-sendsync.rs:30:5
+   |
+30 |     assert_send(boxed_local()); //~ ERROR `dyn futures_core::stream::Stream<Item = i32>` cannot be sent between threads safely
+   |     ^^^^^^^^^^^ `dyn futures_core::stream::Stream<Item = i32>` cannot be sent between threads safely
+   |
+   = help: the trait `std::marker::Send` is not implemented for `dyn futures_core::stream::Stream<Item = i32>`
+   = note: required because of the requirements on the impl of `std::marker::Send` for `std::ptr::Unique<dyn futures_core::stream::Stream<Item = i32>>`
+   = note: required because it appears within the type `std::boxed::Box<dyn futures_core::stream::Stream<Item = i32>>`
+   = note: required because it appears within the type `std::pin::Pin<std::boxed::Box<dyn futures_core::stream::Stream<Item = i32>>>`
+note: required by `assert_send`
+  --> $DIR/threads-sendsync.rs:8:1
+   |
+8  | fn assert_send<T: Send>(_: T) {}
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+error: aborting due to previous error
+
+For more information about this error, try `rustc --explain E0277`.
