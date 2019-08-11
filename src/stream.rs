@@ -87,9 +87,12 @@ struct Next<'a, S> {
     stream: &'a mut S,
 }
 
-impl<S: Unpin> Unpin for Next<'_, S> {}
+impl<S> Unpin for Next<'_, S> where S: Unpin {}
 
-impl<S: Stream + Unpin> Future for Next<'_, S> {
+impl<S> Future for Next<'_, S>
+where
+    S: Stream + Unpin,
+{
     type Output = Option<S::Item>;
 
     fn poll(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {

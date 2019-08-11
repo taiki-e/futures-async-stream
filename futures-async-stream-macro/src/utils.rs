@@ -8,7 +8,10 @@ use syn::{
     token, Expr, ExprTuple, ExprVerbatim, Result,
 };
 
-pub(crate) fn first_last<T: ToTokens>(tokens: &T) -> (Span, Span) {
+pub(crate) fn first_last<T>(tokens: &T) -> (Span, Span)
+where
+    T: ToTokens,
+{
     let mut spans = TokenStream::new();
     tokens.to_tokens(&mut spans);
     let good_tokens = spans.into_iter().collect::<Vec<_>>();
