@@ -1,18 +1,17 @@
 [package]
 name = "futures-async-stream"
-# NB: When modifying, also modify html_root_url in lib.rs
 version = "0.1.0-alpha.2"
 authors = ["Taiki Endo <te316e89@gmail.com>"]
 edition = "2018"
 license = "Apache-2.0/MIT"
-description = """
-Async stream API experiment that may be introduced as a language feature in the future.
-"""
 repository = "https://github.com/taiki-e/futures-async-stream"
 documentation = "https://docs.rs/futures-async-stream/"
 readme = "README.md"
 keywords = ["async", "future", "futures", "stream", "macros"]
 categories = ["asynchronous"]
+description = """
+Async stream for Rust and the futures crate.
+"""
 
 [workspace]
 members = ["futures-async-stream-macro"]

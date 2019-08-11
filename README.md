@@ -16,7 +16,7 @@
 [docs-url]: https://docs.rs/futures-async-stream/
 [rustc-badge]: https://img.shields.io/badge/rustc-nightly-lightgray.svg
 
-Async stream API experiment that may be introduced as a language feature in the future.
+Async stream for Rust and the futures crate.
 
 This crate provides useful features for streams, using unstable `async_await` and `generators`.
 
