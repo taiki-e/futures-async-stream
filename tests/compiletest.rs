@@ -1,4 +1,4 @@
-#![cfg(compile_test)]
+#![cfg(compiletest)]
 #![warn(rust_2018_idioms)]
 
 use std::{env, path::PathBuf};
@@ -27,6 +27,6 @@ fn run_mode(mode: &'static str) {
 }
 
 #[test]
-fn compile_test() {
+fn compiletest() {
     run_mode("ui");
 }
