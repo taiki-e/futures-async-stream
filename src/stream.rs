@@ -1,4 +1,4 @@
-use pin_project::unsafe_project;
+use pin_project::pin_project;
 use std::{
     future::{self, Future},
     marker::PhantomData,
@@ -25,8 +25,8 @@ where
 }
 
 /// A wrapper around generators used to implement `Stream` for `async`/`await` code.
-#[unsafe_project(Unpin)]
-#[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
+#[pin_project]
+#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
 struct GenStream<U, T> {
     #[pin]
     gen: T,
