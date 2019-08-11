@@ -181,7 +181,7 @@ use futures::{
     ready,
     task::{Context, Poll},
 };
-use pin_utils::unsafe_pinned;
+use pin_project::pin_project;
 use std::pin::Pin;
 
 fn foo<S>(stream: S) -> impl Stream<Item = i32>
@@ -191,12 +191,10 @@ where
     Foo { stream }
 }
 
+#[pin_project]
 struct Foo<S> {
+    #[pin]
     stream: S,
-}
-
-impl<S> Foo<S> {
-    unsafe_pinned!(stream: S);
 }
 
 impl<S> Stream for Foo<S>
@@ -206,7 +204,8 @@ where
     type Item = i32;
 
     fn poll_next(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
-        if let Some(x) = ready!(self.stream().poll_next(cx)) {
+        let this = self.project();
+        if let Some(x) = ready!(this.stream.poll_next(cx)) {
             Poll::Ready(Some(x.parse().unwrap()))
         } else {
             Poll::Ready(None)
