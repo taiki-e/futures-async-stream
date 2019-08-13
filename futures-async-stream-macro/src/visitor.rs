@@ -1,13 +1,14 @@
 use quote::{quote, quote_spanned};
 use syn::{
+    parse::Nothing,
     spanned::Spanned,
     visit_mut::{self, VisitMut},
-    Expr, ExprCall, ExprField, ExprForLoop, ExprYield, Item, Member,
+    Expr, ExprAwait, ExprCall, ExprForLoop, ExprYield, Item,
 };
 
 use crate::{
     async_stream_block,
-    utils::{expr_compile_error, replace_boxed_expr, replace_expr, Nothing},
+    utils::{expr_compile_error, replace_boxed_expr, replace_expr},
 };
 
 pub(crate) use Scope::{Closure, Future, Stream};
@@ -56,7 +57,7 @@ impl Visitor {
                 return;
             }
             let attr = attrs.pop().unwrap();
-            if let Err(e) = syn::parse2::<Nothing>(attr.tts) {
+            if let Err(e) = syn::parse2::<Nothing>(attr.tokens) {
                 *expr = expr_compile_error(&e);
                 return;
             }
@@ -93,7 +94,7 @@ impl Visitor {
                 }
                 Closure => {
                     *expr = expr_compile_error(&error!(
-                        expr.clone(),
+                        &expr,
                         "for await may not be allowed outside of \
                          async blocks, functions, closures, async stream blocks, and functions",
                     ));
@@ -130,12 +131,12 @@ impl Visitor {
     }
 
     /// Visits `async_stream_block!` macro.
-    fn visit_macro(&mut self, expr: &mut Expr) {
+    fn visit_macro(&self, expr: &mut Expr) {
         replace_expr(expr, |expr| {
             if let Expr::Macro(mut expr) = expr {
                 if expr.mac.path.is_ident("async_stream_block") {
                     let mut e: ExprCall =
-                        syn::parse(async_stream_block(expr.mac.tts.into())).unwrap();
+                        syn::parse(async_stream_block(expr.mac.tokens.into())).unwrap();
                     e.attrs.append(&mut expr.attrs);
                     Expr::Call(e)
                 } else {
@@ -152,18 +153,13 @@ impl Visitor {
     /// It needs to adjust the type yielded by the macro because generators used internally by
     /// async fn yield `()` type, but generators used internally by `async_stream` yield
     /// `Poll<U>` type.
-    fn visit_await(&mut self, expr: &mut Expr) {
+    fn visit_await(&self, expr: &mut Expr) {
         if self.scope != Stream {
             return;
         }
 
-        if let Expr::Field(ExprField { base, member, .. }) = expr {
-            match &member {
-                Member::Named(x) if x == "await" => {}
-                _ => return,
-            }
-
-            *expr = syn::parse2(quote_spanned! { member.span() => {
+        if let Expr::Await(ExprAwait { base, await_token, .. }) = expr {
+            *expr = syn::parse2(quote_spanned! { await_token.span() => {
                 let mut __pinned = #base;
                 loop {
                     if let ::futures_async_stream::core_reexport::task::Poll::Ready(x) =
@@ -200,7 +196,7 @@ impl VisitMut for Visitor {
         visit_mut::visit_expr_mut(self, expr);
         match expr {
             Expr::Yield(expr) => self.visit_yield(expr),
-            Expr::Field(_) => self.visit_await(expr),
+            Expr::Await(_) => self.visit_await(expr),
             Expr::ForLoop(_) => self.visit_for_loop(expr),
             Expr::Macro(_) => self.visit_macro(expr),
             _ => {}
@@ -210,6 +206,7 @@ impl VisitMut for Visitor {
         self.scope = tmp;
     }
 
-    // Stop at item bounds
-    fn visit_item_mut(&mut self, _: &mut Item) {}
+    fn visit_item_mut(&mut self, _: &mut Item) {
+        // Do not recurse into nested items.
+    }
 }

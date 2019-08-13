@@ -10,7 +10,7 @@ extern crate proc_macro;
 
 use proc_macro::{Delimiter, Group, TokenStream, TokenTree};
 use quote::ToTokens;
-use syn::{Expr, ExprForLoop};
+use syn::{parse::Nothing, Expr, ExprForLoop};
 
 #[macro_use]
 mod utils;
@@ -18,8 +18,6 @@ mod utils;
 mod elision;
 mod stream;
 mod visitor;
-
-use crate::utils::Nothing;
 
 /// Processes streams using a for loop.
 #[proc_macro_attribute]

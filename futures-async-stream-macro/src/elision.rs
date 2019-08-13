@@ -3,7 +3,7 @@ use syn::{
     punctuated::Punctuated,
     token::Comma,
     visit_mut::{self, VisitMut},
-    ArgSelfRef, FnArg, GenericArgument, GenericParam, Lifetime, LifetimeDef, TypeReference,
+    FnArg, GenericArgument, GenericParam, Lifetime, LifetimeDef, Receiver, TypeReference,
 };
 
 pub(super) fn unelide_lifetimes(
@@ -54,8 +54,10 @@ impl<'a> UnelideLifetimes<'a> {
 }
 
 impl VisitMut for UnelideLifetimes<'_> {
-    fn visit_arg_self_ref_mut(&mut self, arg: &mut ArgSelfRef) {
-        self.visit_opt_lifetime(&mut arg.lifetime);
+    fn visit_receiver_mut(&mut self, receiver: &mut Receiver) {
+        if let Some((_, lifetime)) = &mut receiver.reference {
+            self.visit_opt_lifetime(lifetime);
+        }
     }
 
     fn visit_type_reference_mut(&mut self, ty: &mut TypeReference) {

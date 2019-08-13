@@ -13,7 +13,6 @@ fn run_mode(mode: &'static str) {
          -Z unstable-options \
          --extern futures_async_stream \
          --extern futures \
-         --cfg procmacro2_semver_exempt \
          -L {}",
         me.display()
     ));

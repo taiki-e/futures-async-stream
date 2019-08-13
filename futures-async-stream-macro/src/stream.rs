@@ -1,11 +1,11 @@
-use proc_macro2::{Span, TokenStream};
-use quote::{quote, ToTokens};
+use proc_macro2::TokenStream;
+use quote::{format_ident, quote, ToTokens};
 use syn::{
     parse::{Parse, ParseStream},
     token,
     visit_mut::VisitMut,
-    ArgCaptured, Attribute, Block, Expr, FnArg, FnDecl, Ident, ItemFn, MethodSig, Pat, PatIdent,
-    Result, ReturnType, Token, TraitItemMethod, Type, TypeTuple, Visibility,
+    Attribute, Block, Expr, FnArg, ItemFn, Pat, PatIdent, PatType, Result, ReturnType, Signature,
+    Token, TraitItemMethod, Type, TypeTuple, Visibility,
 };
 
 use crate::{
@@ -107,27 +107,14 @@ impl Parse for Args {
 struct FnSig {
     attrs: Vec<Attribute>,
     vis: Visibility,
-    sig: MethodSig,
+    sig: Signature,
     block: Block,
     semi: Option<Token![;]>,
 }
 
 impl From<ItemFn> for FnSig {
     fn from(item: ItemFn) -> Self {
-        Self {
-            attrs: item.attrs,
-            vis: item.vis,
-            sig: MethodSig {
-                constness: item.constness,
-                asyncness: item.asyncness,
-                unsafety: item.unsafety,
-                abi: item.abi,
-                ident: item.ident,
-                decl: *item.decl,
-            },
-            block: *item.block,
-            semi: None,
-        }
+        Self { attrs: item.attrs, vis: item.vis, sig: item.sig, block: *item.block, semi: None }
     }
 }
 
@@ -164,15 +151,15 @@ fn parse_async_stream_fn(args: TokenStream, input: TokenStream) -> Result<TokenS
     if let Some(constness) = item.sig.constness {
         return Err(error!(constness, "async stream may not be const"));
     }
-    if let Some(variadic) = item.sig.decl.variadic {
+    if let Some(variadic) = item.sig.variadic {
         return Err(error!(variadic, "async stream may not be variadic"));
     }
 
     if item.sig.asyncness.is_none() {
-        return Err(error!(item.sig.decl.fn_token, "async stream must be declared as async"));
+        return Err(error!(item.sig.fn_token, "async stream must be declared as async"));
     }
 
-    if let ReturnType::Type(_, ty) = &item.sig.decl.output {
+    if let ReturnType::Type(_, ty) = &item.sig.output {
         match &**ty {
             Type::Tuple(TypeTuple { elems, .. }) if elems.is_empty() => {}
             _ => return Err(error!(ty, "async stream must return the unit type")),
@@ -184,8 +171,7 @@ fn parse_async_stream_fn(args: TokenStream, input: TokenStream) -> Result<TokenS
 
 fn expand_async_stream_fn(item: FnSig, args: &Args) -> TokenStream {
     let FnSig { attrs, vis, sig, mut block, semi } = item;
-    let MethodSig { unsafety, abi, ident, decl, .. } = sig;
-    let FnDecl { inputs, mut generics, fn_token, .. } = decl;
+    let Signature { unsafety, abi, fn_token, ident, mut generics, inputs, .. } = sig;
     let where_clause = &generics.where_clause;
 
     // Desugar `async fn`
@@ -212,29 +198,33 @@ fn expand_async_stream_fn(item: FnSig, args: &Args) -> TokenStream {
     let mut patterns = Vec::new();
     let mut temp_bindings = Vec::new();
     for (i, input) in inputs.into_iter().enumerate() {
-        match input {
-            FnArg::Captured(ArgCaptured { pat: Pat::Ident(ref pat), .. })
-                if pat.ident == "self" =>
-            {
+        if let FnArg::Typed(PatType { attrs, pat, ty, colon_token }) = input {
+            let captured_naturally = match &*pat {
                 // `self: Box<Self>` will get captured naturally
-                inputs_no_patterns.push(input);
-            }
-            FnArg::Captured(ArgCaptured {
-                pat: pat @ Pat::Ident(PatIdent { by_ref: Some(_), .. }),
-                ty,
-                colon_token,
-            }) => {
+                Pat::Ident(pat) if pat.ident == "self" => true,
+                Pat::Ident(PatIdent { by_ref: Some(_), .. }) => false,
+                // Other arguments get captured naturally
+                _ => true,
+            };
+            if captured_naturally {
+                inputs_no_patterns.push(FnArg::Typed(PatType { attrs, pat, ty, colon_token }));
+                continue;
+            } else {
                 // `ref a: B` (or some similar pattern)
                 patterns.push(pat);
-                let ident = Ident::new(&format!("__arg_{}", i), Span::call_site());
+                let ident = format_ident!("__arg_{}", i);
                 temp_bindings.push(ident.clone());
-                let pat = PatIdent { by_ref: None, mutability: None, ident, subpat: None }.into();
-                inputs_no_patterns.push(ArgCaptured { pat, ty, colon_token }.into());
+                let pat = Box::new(Pat::Ident(PatIdent {
+                    attrs: Vec::new(),
+                    by_ref: None,
+                    mutability: None,
+                    ident,
+                    subpat: None,
+                }));
+                inputs_no_patterns.push(PatType { attrs, pat, ty, colon_token }.into());
             }
-            _ => {
-                // Other arguments get captured naturally
-                inputs_no_patterns.push(input);
-            }
+        } else {
+            inputs_no_patterns.push(input);
         }
     }
 

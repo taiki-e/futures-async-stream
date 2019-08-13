@@ -2,11 +2,7 @@ use std::mem;
 
 use proc_macro2::{Span, TokenStream, TokenTree};
 use quote::ToTokens;
-use syn::{
-    parse::{Parse, ParseStream},
-    punctuated::Punctuated,
-    token, Expr, ExprTuple, ExprVerbatim, Result,
-};
+use syn::{punctuated::Punctuated, token, Expr, ExprTuple};
 
 pub(crate) fn first_last<T>(tokens: &T) -> (Span, Span)
 where
@@ -47,7 +43,7 @@ pub(crate) fn replace_expr<F>(this: &mut Expr, f: F)
 where
     F: FnOnce(Expr) -> Expr,
 {
-    *this = f(mem::replace(this, Expr::Verbatim(ExprVerbatim { tts: TokenStream::new() })));
+    *this = f(mem::replace(this, Expr::Verbatim(TokenStream::new())));
 }
 
 pub(super) fn replace_boxed_expr<F>(expr: &mut Option<Box<Expr>>, f: F)
@@ -60,16 +56,6 @@ where
 
     if let Some(expr) = expr {
         replace_expr(&mut **expr, f);
-    }
-}
-
-// See https://github.com/dtolnay/syn/commit/82a3aed7ecfd07fc2f7f322b01d2413ffea6c5e7
-/// An empty syntax tree node that consumes no tokens when parsed.
-pub(crate) struct Nothing;
-
-impl Parse for Nothing {
-    fn parse(_input: ParseStream<'_>) -> Result<Self> {
-        Ok(Nothing)
     }
 }
 
