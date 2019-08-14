@@ -207,11 +207,11 @@ fn expand_async_body(inputs: Punctuated<FnArg, Comma>) -> (Vec<FnArg>, Vec<Local
     //
     // We notably skip everything related to `self` which typically doesn't have
     // many patterns with it and just gets captured naturally.
-    for (i, input) in inputs.into_iter().enumerate() {
-        if let FnArg::Typed(PatType { attrs, pat, ty, colon_token }) = input {
+    for (i, argument) in inputs.into_iter().enumerate() {
+        if let FnArg::Typed(PatType { attrs, pat, ty, colon_token }) = argument {
             let captured_naturally = match &*pat {
                 // `self: Box<Self>` will get captured naturally
-                Pat::Ident(pat) if pat.ident == "self" => true,
+                Pat::Ident(PatIdent { ident, .. }) if ident == "self" => true,
                 // `ref a: B` (or some similar pattern)
                 Pat::Ident(PatIdent { by_ref: Some(_), .. }) => false,
                 // Other arguments get captured naturally
@@ -220,36 +220,36 @@ fn expand_async_body(inputs: Punctuated<FnArg, Comma>) -> (Vec<FnArg>, Vec<Local
             if captured_naturally {
                 arguments.push(FnArg::Typed(PatType { attrs, pat, ty, colon_token }));
                 continue;
-            } else {
-                let ident = format_ident!("__arg{}", i);
-
-                let local = Local {
-                    attrs: Vec::new(),
-                    let_token: token::Let::default(),
-                    pat: *pat,
-                    init: Some((
-                        token::Eq::default(),
-                        Box::new(Expr::Path(ExprPath {
-                            attrs: Vec::new(),
-                            qself: None,
-                            path: ident.clone().into(),
-                        })),
-                    )),
-                    semi_token: token::Semi::default(),
-                };
-                statements.push(local);
-
-                let pat = Box::new(Pat::Ident(PatIdent {
-                    attrs: Vec::new(),
-                    by_ref: None,
-                    mutability: None,
-                    ident,
-                    subpat: None,
-                }));
-                arguments.push(PatType { attrs, pat, ty, colon_token }.into());
             }
+
+            let ident = format_ident!("__arg{}", i);
+
+            let local = Local {
+                attrs: Vec::new(),
+                let_token: token::Let::default(),
+                pat: *pat,
+                init: Some((
+                    token::Eq::default(),
+                    Box::new(Expr::Path(ExprPath {
+                        attrs: Vec::new(),
+                        qself: None,
+                        path: ident.clone().into(),
+                    })),
+                )),
+                semi_token: token::Semi::default(),
+            };
+            statements.push(local);
+
+            let pat = Box::new(Pat::Ident(PatIdent {
+                attrs: Vec::new(),
+                by_ref: None,
+                mutability: None,
+                ident,
+                subpat: None,
+            }));
+            arguments.push(FnArg::Typed(PatType { attrs, pat, ty, colon_token }));
         } else {
-            arguments.push(input);
+            arguments.push(argument);
         }
     }
 
