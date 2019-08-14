@@ -6,7 +6,7 @@
 use futures_async_stream::async_stream;
 
 #[async_stream(item = ())]
-const fn constness() {} //~ ERROR async stream may not be const
+const fn constness() {} //~ ERROR async stream must be declared as async
 
 #[async_stream(item = ())]
 fn variadic(_: ...) {} //~ ERROR async stream may not be variadic

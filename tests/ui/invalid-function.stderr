@@ -4,11 +4,11 @@ error: only foreign functions are allowed to be C-variadic
 12 | fn variadic(_: ...) {} //~ ERROR async stream may not be variadic
    |                ^^^
 
-error: async stream may not be const
- --> $DIR/invalid-function.rs:9:1
+error: async stream must be declared as async
+ --> $DIR/invalid-function.rs:9:7
   |
-9 | const fn constness() {} //~ ERROR async stream may not be const
-  | ^^^^^
+9 | const fn constness() {} //~ ERROR async stream must be declared as async
+  |       ^^
 
 error: expected `:`
   --> $DIR/invalid-function.rs:11:1

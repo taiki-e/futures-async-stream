@@ -2,10 +2,10 @@ use proc_macro2::TokenStream;
 use quote::{format_ident, quote, ToTokens};
 use syn::{
     parse::{Parse, ParseStream},
-    token,
+    punctuated::Punctuated,
+    token::{self, Comma},
     visit_mut::VisitMut,
-    Attribute, Block, Expr, FnArg, ItemFn, Pat, PatIdent, PatType, Result, ReturnType, Signature,
-    Token, TraitItemMethod, Type, TypeTuple, Visibility,
+    *,
 };
 
 use crate::{
@@ -112,6 +112,20 @@ struct FnSig {
     semi: Option<Token![;]>,
 }
 
+impl FnSig {
+    fn parse(input: TokenStream, boxed: ReturnTypeKind) -> Result<Self> {
+        match boxed {
+            ReturnTypeKind::Default => syn::parse2(input).map(ItemFn::into),
+            ReturnTypeKind::Boxed { .. } => {
+                let input2 = input.clone();
+                syn::parse2(input)
+                    .map(ItemFn::into)
+                    .or_else(|e| syn::parse2(input2).map(TraitItemMethod::into).map_err(|_e| e))
+            }
+        }
+    }
+}
+
 impl From<ItemFn> for FnSig {
     fn from(item: ItemFn) -> Self {
         Self { attrs: item.attrs, vis: item.vis, sig: item.sig, block: *item.block, semi: None }
@@ -135,28 +149,20 @@ impl From<TraitItemMethod> for FnSig {
     }
 }
 
-fn parse_async_stream_fn(args: TokenStream, input: TokenStream) -> Result<TokenStream> {
-    let args: Args = syn::parse2(args)?;
-    let item: FnSig = {
-        let input2 = input.clone();
-        match syn::parse2(input) {
-            Ok(item) => ItemFn::into(item),
-            Err(e) => match syn::parse2(input2) {
-                Ok(item) => TraitItemMethod::into(item),
-                Err(_e) => return Err(e),
-            },
-        }
-    };
-
-    if let Some(constness) = item.sig.constness {
-        return Err(error!(constness, "async stream may not be const"));
-    }
-    if let Some(variadic) = item.sig.variadic {
-        return Err(error!(variadic, "async stream may not be variadic"));
-    }
-
+fn validate_async_stream_fn(item: &FnSig) -> Result<()> {
     if item.sig.asyncness.is_none() {
         return Err(error!(item.sig.fn_token, "async stream must be declared as async"));
+    }
+
+    if let Some(constness) = item.sig.constness {
+        // This line is currently unreachable.
+        // `async const fn` and `const async fn` is rejected by syn.
+        // `const fn` is rejected by the previous statements.
+        return Err(error!(constness, "async stream may not be const"));
+    }
+
+    if let Some(variadic) = &item.sig.variadic {
+        return Err(error!(variadic, "async stream may not be variadic"));
     }
 
     if let ReturnType::Type(_, ty) = &item.sig.output {
@@ -166,13 +172,20 @@ fn parse_async_stream_fn(args: TokenStream, input: TokenStream) -> Result<TokenS
         }
     }
 
+    Ok(())
+}
+
+fn parse_async_stream_fn(args: TokenStream, input: TokenStream) -> Result<TokenStream> {
+    let args: Args = syn::parse2(args)?;
+    let item = FnSig::parse(input, args.boxed)?;
+
+    validate_async_stream_fn(&item)?;
     Ok(expand_async_stream_fn(item, &args))
 }
 
-fn expand_async_stream_fn(item: FnSig, args: &Args) -> TokenStream {
-    let FnSig { attrs, vis, sig, mut block, semi } = item;
-    let Signature { unsafety, abi, fn_token, ident, mut generics, inputs, .. } = sig;
-    let where_clause = &generics.where_clause;
+fn expand_async_body(inputs: Punctuated<FnArg, Comma>) -> (Vec<FnArg>, Vec<Local>) {
+    let mut arguments: Vec<FnArg> = Vec::new();
+    let mut statements: Vec<Local> = Vec::new();
 
     // Desugar `async fn`
     // from:
@@ -184,9 +197,9 @@ fn expand_async_stream_fn(item: FnSig, args: &Args) -> TokenStream {
     //
     // into:
     //
-    //      fn foo(__arg_0: u32) -> impl Stream<Item = u32> {
+    //      fn foo(__arg0: u32) -> impl Stream<Item = u32> {
     //          from_generator(static move || {
-    //              let ref a = __arg_0;
+    //              let ref a = __arg0;
     //
     //              // ...
     //          })
@@ -194,26 +207,38 @@ fn expand_async_stream_fn(item: FnSig, args: &Args) -> TokenStream {
     //
     // We notably skip everything related to `self` which typically doesn't have
     // many patterns with it and just gets captured naturally.
-    let mut inputs_no_patterns = Vec::new();
-    let mut patterns = Vec::new();
-    let mut temp_bindings = Vec::new();
     for (i, input) in inputs.into_iter().enumerate() {
         if let FnArg::Typed(PatType { attrs, pat, ty, colon_token }) = input {
             let captured_naturally = match &*pat {
                 // `self: Box<Self>` will get captured naturally
                 Pat::Ident(pat) if pat.ident == "self" => true,
+                // `ref a: B` (or some similar pattern)
                 Pat::Ident(PatIdent { by_ref: Some(_), .. }) => false,
                 // Other arguments get captured naturally
                 _ => true,
             };
             if captured_naturally {
-                inputs_no_patterns.push(FnArg::Typed(PatType { attrs, pat, ty, colon_token }));
+                arguments.push(FnArg::Typed(PatType { attrs, pat, ty, colon_token }));
                 continue;
             } else {
-                // `ref a: B` (or some similar pattern)
-                patterns.push(pat);
-                let ident = format_ident!("__arg_{}", i);
-                temp_bindings.push(ident.clone());
+                let ident = format_ident!("__arg{}", i);
+
+                let local = Local {
+                    attrs: Vec::new(),
+                    let_token: token::Let::default(),
+                    pat: *pat,
+                    init: Some((
+                        token::Eq::default(),
+                        Box::new(Expr::Path(ExprPath {
+                            attrs: Vec::new(),
+                            qself: None,
+                            path: ident.clone().into(),
+                        })),
+                    )),
+                    semi_token: token::Semi::default(),
+                };
+                statements.push(local);
+
                 let pat = Box::new(Pat::Ident(PatIdent {
                     attrs: Vec::new(),
                     by_ref: None,
@@ -221,18 +246,28 @@ fn expand_async_stream_fn(item: FnSig, args: &Args) -> TokenStream {
                     ident,
                     subpat: None,
                 }));
-                inputs_no_patterns.push(PatType { attrs, pat, ty, colon_token }.into());
+                arguments.push(PatType { attrs, pat, ty, colon_token }.into());
             }
         } else {
-            inputs_no_patterns.push(input);
+            arguments.push(input);
         }
     }
+
+    (arguments, statements)
+}
+
+fn expand_async_stream_fn(item: FnSig, args: &Args) -> TokenStream {
+    let FnSig { attrs, vis, sig, mut block, semi } = item;
+    let Signature { unsafety, abi, fn_token, ident, mut generics, inputs, .. } = sig;
+    let where_clause = &generics.where_clause;
+
+    let (mut arguments, statements) = expand_async_body(inputs);
 
     // Visit `#[for_await]` and `.await`.
     Visitor::new(Stream).visit_block_mut(&mut block);
 
     let block_inner = quote! {
-        #( let #patterns = #temp_bindings; )*
+        #(#statements)*
         #block
     };
     let mut result = TokenStream::new();
@@ -278,7 +313,7 @@ fn expand_async_stream_fn(item: FnSig, args: &Args) -> TokenStream {
         body_inner.to_tokens(tokens);
     });
 
-    elision::unelide_lifetimes(&mut generics.params, &mut inputs_no_patterns);
+    elision::unelide_lifetimes(&mut generics.params, &mut arguments);
     let lifetimes = generics.lifetimes().map(|l| &l.lifetime);
 
     let return_ty = match args.boxed {
@@ -307,7 +342,7 @@ fn expand_async_stream_fn(item: FnSig, args: &Args) -> TokenStream {
     quote! {
         #(#attrs)*
         #vis #unsafety #abi
-        #fn_token #ident #generics (#(#inputs_no_patterns),*)
+        #fn_token #ident #generics (#(#arguments),*)
             -> #return_ty
             #where_clause
         #body
