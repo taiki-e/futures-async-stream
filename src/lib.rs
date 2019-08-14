@@ -49,6 +49,24 @@
 //!
 //! `#[async_stream]` must have an item type specified via `item = some::Path` and the values output from the stream must be yielded via the `yield` expression.
 //!
+//! ## async_stream_block!
+//!
+//! You can create a stream directly as an expression using an `async_stream_block!` macro:
+//!
+//! ```rust
+//! #![feature(async_await, generators, proc_macro_hygiene)]
+//! use futures::stream::Stream;
+//! use futures_async_stream::async_stream_block;
+//!
+//! fn foo() -> impl Stream<Item = i32> {
+//!     async_stream_block! {
+//!         for i in 0..10 {
+//!             yield i;
+//!         }
+//!     }
+//! }
+//! ```
+//!
 //! ## Using async stream functions in traits
 //!
 //! You can use async stream functions in traits by passing `boxed` or `boxed_local` as an argument.
