@@ -1,8 +1,8 @@
 error: only foreign functions are allowed to be C-variadic
-  --> $DIR/invalid-function.rs:12:13
+  --> $DIR/invalid-function.rs:12:16
    |
-12 | fn variadic(...) {} //~ ERROR async stream may not be variadic
-   |             ^^^
+12 | fn variadic(_: ...) {} //~ ERROR async stream may not be variadic
+   |                ^^^
 
 error: async stream may not be const
  --> $DIR/invalid-function.rs:9:1
@@ -10,7 +10,11 @@ error: async stream may not be const
 9 | const fn constness() {} //~ ERROR async stream may not be const
   | ^^^^^
 
-error: async stream must be declared as async
+error: expected `:`
+  --> $DIR/invalid-function.rs:11:1
+   |
+11 | #[async_stream(item = ())]
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 error: async stream must be declared as async
   --> $DIR/invalid-function.rs:15:1
