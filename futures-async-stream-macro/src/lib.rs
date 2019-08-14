@@ -1,7 +1,7 @@
 //! Procedural macro for the `#[async_stream]` attribute.
 
 #![recursion_limit = "256"]
-#![doc(html_root_url = "https://docs.rs/futures-async-stream-macro/0.1.0-alpha.2")]
+#![doc(html_root_url = "https://docs.rs/futures-async-stream-macro/0.1.0-alpha.3")]
 #![doc(test(attr(deny(warnings), allow(dead_code, unused_assignments, unused_variables))))]
 #![warn(rust_2018_idioms, unreachable_pub, single_use_lifetimes)]
 #![warn(clippy::all, clippy::pedantic)]

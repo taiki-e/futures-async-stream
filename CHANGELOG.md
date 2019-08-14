@@ -1,3 +1,9 @@
+# Unreleased
+
+# 0.1.0-alpha.3 - 2019-08-14
+
+* Updated `proc-macro2`, `syn`, and `quote` to 1.0.
+
 # 0.1.0-alpha.2 - 2019-08-07
 
 * [You can now use async stream functions in traits.][12] e.g. You can write the following:
