@@ -271,16 +271,7 @@ fn expand_async_body(inputs: Punctuated<FnArg, Comma>) -> (Vec<FnArg>, Vec<Local
     (arguments, statements)
 }
 
-fn expand_async_stream_fn(item: FnSig, args: &Args) -> TokenStream {
-    let FnSig { attrs, vis, sig, mut block, semi } = item;
-    let Signature { unsafety, abi, fn_token, ident, mut generics, inputs, .. } = sig;
-    let where_clause = &generics.where_clause;
-
-    let (mut arguments, statements) = expand_async_body(inputs);
-
-    // Visit `#[for_await]` and `.await`.
-    Visitor::new(Stream).visit_block_mut(&mut block);
-
+fn make_gen_body(statements: &[Local], block: &Block) -> TokenStream {
     let block_inner = quote! {
         #(#statements)*
         #block
@@ -306,6 +297,21 @@ fn expand_async_stream_fn(item: FnSig, args: &Args) -> TokenStream {
     block.brace_token.surround(&mut gen_body, |tokens| {
         gen_body_inner.to_tokens(tokens);
     });
+
+    gen_body
+}
+
+fn expand_async_stream_fn(item: FnSig, args: &Args) -> TokenStream {
+    let FnSig { attrs, vis, sig, mut block, semi } = item;
+    let Signature { unsafety, abi, fn_token, ident, mut generics, inputs, .. } = sig;
+    let where_clause = &generics.where_clause;
+
+    let (mut arguments, statements) = expand_async_body(inputs);
+
+    // Visit `#[for_await]` and `.await`.
+    Visitor::new(Stream).visit_block_mut(&mut block);
+
+    let gen_body = make_gen_body(&statements, &block);
 
     let item = &args.item;
 
