@@ -5,6 +5,7 @@
 #![doc(test(attr(deny(warnings), allow(dead_code, unused_assignments, unused_variables))))]
 #![warn(rust_2018_idioms, unreachable_pub, single_use_lifetimes)]
 #![warn(clippy::all, clippy::pedantic)]
+#![allow(clippy::use_self)]
 
 extern crate proc_macro;
 

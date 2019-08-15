@@ -38,11 +38,6 @@ impl Parse for Item {
     }
 }
 
-struct Args {
-    item: Type,
-    boxed: ReturnTypeKind,
-}
-
 // TODO: rename to `ReturnType`
 #[derive(Clone, Copy)]
 enum ReturnTypeKind {
@@ -52,15 +47,16 @@ enum ReturnTypeKind {
     Boxed { send: bool },
 }
 
-impl Parse for Args {
-    fn parse(input: ParseStream<'_>) -> Result<Self> {
-        let mut item = None;
-        let mut boxed = ReturnTypeKind::Default;
+impl ReturnTypeKind {
+    pub(super) fn parse_or_else<F>(&mut self, input: ParseStream<'_>, mut f: F) -> Result<()>
+    where
+        F: FnMut(ParseStream<'_>) -> Result<()>,
+    {
         while !input.is_empty() {
             if input.peek(kw::boxed) {
                 let i: kw::boxed = input.parse()?;
-                match boxed {
-                    ReturnTypeKind::Default => boxed = ReturnTypeKind::Boxed { send: true },
+                match self {
+                    ReturnTypeKind::Default => *self = ReturnTypeKind::Boxed { send: true },
                     ReturnTypeKind::Boxed { send: true } => {
                         return Err(error!(i, "duplicate `boxed` argument"))
                     }
@@ -73,8 +69,8 @@ impl Parse for Args {
                 }
             } else if input.peek(kw::boxed_local) {
                 let i: kw::boxed_local = input.parse()?;
-                match boxed {
-                    ReturnTypeKind::Default => boxed = ReturnTypeKind::Boxed { send: false },
+                match self {
+                    ReturnTypeKind::Default => *self = ReturnTypeKind::Boxed { send: false },
                     ReturnTypeKind::Boxed { send: false } => {
                         return Err(error!(i, "duplicate `boxed_local` argument"))
                     }
@@ -86,14 +82,33 @@ impl Parse for Args {
                     }
                 }
             } else {
-                let i: Item = input.parse()?;
-                if item.is_some() {
-                    return Err(error!(i.0, "duplicate `item` argument"));
-                }
-                item = Some(i.0);
+                f(input)?;
             }
             let _: Option<Token![,]> = input.parse()?;
         }
+
+        Ok(())
+    }
+}
+
+struct Args {
+    item: Type,
+    boxed: ReturnTypeKind,
+}
+
+impl Parse for Args {
+    fn parse(input: ParseStream<'_>) -> Result<Self> {
+        let mut item = None;
+        let mut boxed = ReturnTypeKind::Default;
+        boxed.parse_or_else(input, |input| {
+            let i: Item = input.parse()?;
+            if item.is_some() {
+                Err(error!(i.0, "duplicate `item` argument"))
+            } else {
+                item = Some(i.0);
+                Ok(())
+            }
+        })?;
 
         if let Some(item) = item {
             Ok(Self { item, boxed })
