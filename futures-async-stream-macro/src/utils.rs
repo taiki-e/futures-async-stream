@@ -2,7 +2,7 @@ use std::mem;
 
 use proc_macro2::{Span, TokenStream, TokenTree};
 use quote::ToTokens;
-use syn::{punctuated::Punctuated, token, Expr, ExprTuple};
+use syn::{punctuated::Punctuated, token, Block, Expr, ExprTuple, Stmt};
 
 pub(crate) fn first_last<T>(tokens: &T) -> (Span, Span)
 where
@@ -25,6 +25,10 @@ pub(crate) fn respan(input: TokenStream, (first_span, last_span): (Span, Span)) 
         token.set_span(last_span);
     }
     new_tokens.into_iter().collect()
+}
+
+pub(crate) fn block(stmts: Vec<Stmt>) -> Block {
+    Block { brace_token: token::Brace::default(), stmts }
 }
 
 pub(crate) fn expr_compile_error(e: &syn::Error) -> syn::Expr {

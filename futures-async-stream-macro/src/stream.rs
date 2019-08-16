@@ -10,7 +10,7 @@ use syn::{
 
 use crate::{
     elision,
-    utils::{first_last, respan},
+    utils::{block, first_last, respan},
     visitor::{Stream, Visitor},
 };
 
@@ -271,7 +271,7 @@ fn expand_async_body(inputs: Punctuated<FnArg, Comma>) -> (Vec<FnArg>, Vec<Local
     (arguments, statements)
 }
 
-fn make_gen_body(statements: &[Local], block: &Block) -> TokenStream {
+fn make_gen_body(statements: &[Local], block: &Block, gen_function: &TokenStream) -> TokenStream {
     let block_inner = quote! {
         #(#statements)*
         #block
@@ -298,7 +298,9 @@ fn make_gen_body(statements: &[Local], block: &Block) -> TokenStream {
         gen_body_inner.to_tokens(tokens);
     });
 
-    gen_body
+    quote! {
+        #gen_function (static move || -> () #gen_body)
+    }
 }
 
 fn expand_async_stream_fn(item: FnSig, args: &Args) -> TokenStream {
@@ -311,8 +313,6 @@ fn expand_async_stream_fn(item: FnSig, args: &Args) -> TokenStream {
     // Visit `#[for_await]` and `.await`.
     Visitor::new(Stream).visit_block_mut(&mut block);
 
-    let gen_body = make_gen_body(&statements, &block);
-
     let item = &args.item;
 
     // Give the invocation of the `from_generator` function the same span as the `item`
@@ -321,9 +321,8 @@ fn expand_async_stream_fn(item: FnSig, args: &Args) -> TokenStream {
     let output_span = first_last(item);
     let gen_function = quote!(::futures_async_stream::stream::from_generator);
     let gen_function = respan(gen_function, output_span);
-    let mut body_inner = quote! {
-        #gen_function (static move || -> () #gen_body)
-    };
+    let mut body_inner = make_gen_body(&statements, &block, &gen_function);
+
     if let ReturnTypeKind::Boxed { .. } = args.boxed {
         let body = quote! { ::futures_async_stream::alloc_reexport::boxed::Box::pin(#body_inner) };
         body_inner = respan(body, output_span);
@@ -380,20 +379,6 @@ pub(super) fn async_stream_block(input: TokenStream) -> Result<TokenStream> {
 fn expand_async_stream_block(mut expr: Expr) -> TokenStream {
     Visitor::new(Stream).visit_expr_mut(&mut expr);
 
-    let gen_body = quote! {{
-        let (): () = #expr;
-
-        // Ensure that this closure is a generator, even if it doesn't
-        // have any `yield` statements.
-        #[allow(unreachable_code)]
-        {
-            return;
-            loop { yield ::futures_async_stream::core_reexport::task::Poll::Pending }
-        }
-    }};
-
     let gen_function = quote!(::futures_async_stream::stream::from_generator);
-    quote! {
-        #gen_function (static move || -> () #gen_body)
-    }
+    make_gen_body(&[], &block(vec![Stmt::Expr(expr)]), &gen_function)
 }
