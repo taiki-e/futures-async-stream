@@ -17,27 +17,27 @@ pub use futures_core::stream::Stream;
 /// This function returns a `GenStream` underneath, but hides it in `impl Trait` to give
 /// better error messages (`impl Stream` rather than `GenStream<[closure.....]>`).
 #[doc(hidden)]
-pub fn from_generator<U, T>(x: T) -> impl Stream<Item = U>
+pub fn from_generator<G, T>(gen: G) -> impl Stream<Item = T>
 where
-    T: Generator<Yield = Poll<U>, Return = ()>,
+    G: Generator<Yield = Poll<T>, Return = ()>,
 {
-    GenStream { gen: x, _phantom: PhantomData }
+    GenStream { gen, _phantom: PhantomData }
 }
 
 /// A wrapper around generators used to implement `Stream` for `async`/`await` code.
 #[pin_project]
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
-struct GenStream<U, T> {
+struct GenStream<G, T> {
     #[pin]
-    gen: T,
-    _phantom: PhantomData<U>,
+    gen: G,
+    _phantom: PhantomData<T>,
 }
 
-impl<U, T> Stream for GenStream<U, T>
+impl<G, T> Stream for GenStream<G, T>
 where
-    T: Generator<Yield = Poll<U>, Return = ()>,
+    G: Generator<Yield = Poll<T>, Return = ()>,
 {
-    type Item = U;
+    type Item = T;
 
     fn poll_next(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
         let this = self.project();
@@ -47,6 +47,9 @@ where
         })
     }
 }
+
+// =================================================================================================
+// Poll
 
 /// Polls a stream in the current thread-local task waker.
 #[doc(hidden)]
