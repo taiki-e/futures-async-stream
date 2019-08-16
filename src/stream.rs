@@ -1,11 +1,12 @@
-use pin_project::pin_project;
-use std::{
-    future::{self, Future},
+use core::{
+    future::Future,
     marker::PhantomData,
     ops::{Generator, GeneratorState},
     pin::Pin,
     task::{Context, Poll},
 };
+use pin_project::pin_project;
+use std::future;
 
 pub use futures_core::stream::Stream;
 

@@ -210,13 +210,10 @@ pub use futures_async_stream_macro::async_stream_block;
 pub mod stream;
 
 #[doc(hidden)]
-pub mod core_reexport {
+pub mod reexport {
     #[doc(hidden)]
-    pub use core::*;
-}
+    pub use core::{option, pin, result, task};
 
-#[doc(hidden)]
-pub mod alloc_reexport {
     #[doc(hidden)]
     pub use alloc::boxed;
 }

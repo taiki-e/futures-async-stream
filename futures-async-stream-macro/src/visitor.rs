@@ -69,24 +69,24 @@ impl Visitor {
                 Future => {
                     quote! {
                         match ::futures_async_stream::stream::next(&mut __pinned).await {
-                            ::futures_async_stream::core_reexport::option::Option::Some(e) => e,
-                            ::futures_async_stream::core_reexport::option::Option::None => break,
+                            ::futures_async_stream::reexport::option::Option::Some(e) => e,
+                            ::futures_async_stream::reexport::option::Option::None => break,
                         }
                     }
                 }
                 Stream => {
                     quote! {
                         match ::futures_async_stream::stream::poll_next_with_tls_context(
-                            ::futures_async_stream::core_reexport::pin::Pin::as_mut(&mut __pinned),
+                            ::futures_async_stream::reexport::pin::Pin::as_mut(&mut __pinned),
                         ) {
-                            ::futures_async_stream::core_reexport::task::Poll::Ready(
-                                ::futures_async_stream::core_reexport::option::Option::Some(e),
+                            ::futures_async_stream::reexport::task::Poll::Ready(
+                                ::futures_async_stream::reexport::option::Option::Some(e),
                             ) => e,
-                            ::futures_async_stream::core_reexport::task::Poll::Ready(
-                                ::futures_async_stream::core_reexport::option::Option::None,
+                            ::futures_async_stream::reexport::task::Poll::Ready(
+                                ::futures_async_stream::reexport::option::Option::None,
                             ) => break,
-                            ::futures_async_stream::core_reexport::task::Poll::Pending => {
-                                yield ::futures_async_stream::core_reexport::task::Poll::Pending;
+                            ::futures_async_stream::reexport::task::Poll::Pending => {
+                                yield ::futures_async_stream::reexport::task::Poll::Pending;
                                 continue
                             }
                         }
@@ -105,7 +105,7 @@ impl Visitor {
             *expr = syn::parse_quote! {{
                 let mut __pinned = #e;
                 let mut __pinned = unsafe {
-                    ::futures_async_stream::core_reexport::pin::Pin::new_unchecked(&mut __pinned)
+                    ::futures_async_stream::reexport::pin::Pin::new_unchecked(&mut __pinned)
                 };
                 #label
                 loop {
@@ -125,7 +125,7 @@ impl Visitor {
         // Desugar `yield <expr>` into `yield Poll::Ready(<expr>)`.
         replace_boxed_expr(&mut expr.expr, |expr| {
             syn::parse_quote! {
-                ::futures_async_stream::core_reexport::task::Poll::Ready(#expr)
+                ::futures_async_stream::reexport::task::Poll::Ready(#expr)
             }
         });
     }
@@ -162,15 +162,15 @@ impl Visitor {
             *expr = syn::parse2(quote_spanned! { await_token.span() => {
                 let mut __pinned = #base;
                 loop {
-                    if let ::futures_async_stream::core_reexport::task::Poll::Ready(x) =
+                    if let ::futures_async_stream::reexport::task::Poll::Ready(x) =
                         ::futures_async_stream::stream::poll_with_tls_context(unsafe {
-                            ::futures_async_stream::core_reexport::pin::Pin::new_unchecked(&mut __pinned)
+                            ::futures_async_stream::reexport::pin::Pin::new_unchecked(&mut __pinned)
                         })
                     {
                         break x;
                     }
 
-                    yield ::futures_async_stream::core_reexport::task::Poll::Pending
+                    yield ::futures_async_stream::reexport::task::Poll::Pending
                 }
             }})
             .unwrap();
