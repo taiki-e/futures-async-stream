@@ -32,7 +32,7 @@
 //! This is a reimplement of [futures-await]'s `#[async_stream]` for futures 0.3 and is an experimental implementation of [the idea listed as the next step of async/await](https://github.com/rust-lang/rfcs/blob/master/text/2394-async_await.md#generators-and-streams).
 //!
 //! ```rust
-//! #![feature(async_await, generators)]
+//! #![feature(generators)]
 //! use futures::stream::Stream;
 //! use futures_async_stream::async_stream;
 //!
@@ -54,7 +54,7 @@
 //! You can create a stream directly as an expression using an `async_stream_block!` macro:
 //!
 //! ```rust
-//! #![feature(async_await, generators, proc_macro_hygiene)]
+//! #![feature(generators, proc_macro_hygiene)]
 //! use futures::stream::Stream;
 //! use futures_async_stream::async_stream_block;
 //!
@@ -72,7 +72,7 @@
 //! You can use async stream functions in traits by passing `boxed` or `boxed_local` as an argument.
 //!
 //! ```rust
-//! #![feature(async_await, generators)]
+//! #![feature(generators)]
 //! use futures_async_stream::async_stream;
 //!
 //! trait Foo {
@@ -97,7 +97,7 @@
 //! If you passed `boxed_local` instead of `boxed`, async stream function returns a non-threadsafe stream (`Pin<Box<dyn Stream<Item = item> + 'lifetime>>`).
 //!
 //! ```rust
-//! #![feature(async_await, generators)]
+//! #![feature(generators)]
 //! use futures::stream::Stream;
 //! use futures_async_stream::async_stream;
 //! use std::pin::Pin;
@@ -148,7 +148,6 @@
 //! You can write this by manually implementing the combinator:
 //!
 //! ```rust
-//! #![feature(async_await)]
 //! use futures::{
 //!     stream::Stream,
 //!     ready,
@@ -193,7 +192,7 @@
 #![doc(test(attr(deny(warnings), allow(dead_code, unused_assignments, unused_variables))))]
 #![warn(rust_2018_idioms, unreachable_pub, single_use_lifetimes)]
 #![warn(clippy::all, clippy::pedantic)]
-#![feature(gen_future, generator_trait, generators)]
+#![feature(gen_future, generator_trait)]
 
 extern crate alloc;
 

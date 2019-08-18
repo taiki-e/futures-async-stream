@@ -1,5 +1,5 @@
 #![warn(rust_2018_idioms)]
-#![feature(async_await, generators)]
+#![feature(generators)]
 
 use futures_async_stream::async_stream;
 
