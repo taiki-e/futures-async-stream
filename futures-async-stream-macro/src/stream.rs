@@ -1,4 +1,4 @@
-use proc_macro2::TokenStream;
+use proc_macro2::{Group, TokenStream, TokenTree};
 use quote::{format_ident, quote, ToTokens};
 use syn::{
     parse::{Parse, ParseStream},
@@ -383,7 +383,7 @@ fn expand_async_stream_fn(item: FnSig, args: &Args) -> TokenStream {
 // async_stream_block
 
 pub(super) fn block_macro(input: TokenStream) -> Result<TokenStream> {
-    syn::parse2(input).map(expand_async_stream_block)
+    syn::parse2(replace_for_await(input)).map(expand_async_stream_block)
 }
 
 fn expand_async_stream_block(mut expr: Expr) -> TokenStream {
@@ -391,4 +391,32 @@ fn expand_async_stream_block(mut expr: Expr) -> TokenStream {
 
     let gen_function = quote!(::futures_async_stream::stream::from_generator);
     make_gen_body(&[], &block(vec![Stmt::Expr(expr)]), &gen_function, &quote!(), &quote!(()))
+}
+
+fn replace_for_await(input: TokenStream) -> TokenStream {
+    let mut input = input.into_iter().peekable();
+    let mut tokens = Vec::new();
+
+    while let Some(token) = input.next() {
+        match token {
+            TokenTree::Ident(ident) => {
+                match input.peek() {
+                    Some(TokenTree::Ident(next)) if ident == "for" && next == "await" => {
+                        let next = format_ident!("for_{}", next);
+                        tokens.extend(quote!(#[#next]));
+                        let _ = input.next();
+                    }
+                    _ => {}
+                }
+                tokens.push(ident.into());
+            }
+            TokenTree::Group(group) => {
+                let stream = replace_for_await(group.stream());
+                tokens.push(Group::new(group.delimiter(), stream).into());
+            }
+            _ => tokens.push(token),
+        }
+    }
+
+    tokens.into_iter().collect()
 }

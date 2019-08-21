@@ -52,6 +52,14 @@ pub fn in_async_stream_block() -> impl Stream<Item = i32> {
     }
 }
 
+pub fn for_await_syntax() -> impl Stream<Item = i32> {
+    async_stream_block! {
+        for await item in in_async_stream_fn() {
+            yield item
+        }
+    }
+}
+
 #[test]
 fn test() {
     block_on(async {
