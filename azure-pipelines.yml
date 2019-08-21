@@ -15,7 +15,7 @@ jobs:
 - template: ci/azure-test.yml
   parameters:
     name: minrust
-    rust: nightly-2019-07-02
+    rust: nightly-2019-08-21
 
 - template: ci/azure-test.yml
   parameters:

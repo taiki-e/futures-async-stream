@@ -18,7 +18,7 @@
 
 Async stream for Rust and the futures crate.
 
-This crate provides useful features for streams, using unstable `async_await` and `generators`.
+This crate provides useful features for streams, using `async_await` and unstable `generators`.
 
 ## Usage
 
@@ -30,7 +30,7 @@ futures-async-stream = "0.1.0-alpha.3"
 futures-preview = "0.3.0-alpha.17"
 ```
 
-The current futures-async-stream requires Rust nightly 2019-07-02 or later.
+The current futures-async-stream requires Rust nightly 2019-08-21 or later.
 
 ## \#\[for_await\]
 
@@ -39,7 +39,7 @@ Processes streams using a for loop.
 This is a reimplement of [futures-await]'s `#[async]` for loops for futures 0.3 and is an experimental implementation of [the idea listed as the next step of async/await](https://github.com/rust-lang/rfcs/blob/master/text/2394-async_await.md#for-await-and-processing-streams).
 
 ```rust
-#![feature(async_await, stmt_expr_attributes, proc_macro_hygiene)]
+#![feature(stmt_expr_attributes, proc_macro_hygiene)]
 use futures::stream::Stream;
 use futures_async_stream::for_await;
 
@@ -166,7 +166,6 @@ impl Foo for Bar {
 You can write this by combining `while let` loop, `.await`, `pin_mut` macro, and `StreamExt::next()` method:
 
 ```rust
-#![feature(async_await)]
 use futures::{
     pin_mut,
     stream::{Stream, StreamExt},

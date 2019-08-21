@@ -1,5 +1,5 @@
 #![warn(rust_2018_idioms)]
-#![feature(async_await, generators, stmt_expr_attributes, proc_macro_hygiene)]
+#![feature(generators, stmt_expr_attributes, proc_macro_hygiene)]
 
 use futures::{
     executor::block_on,

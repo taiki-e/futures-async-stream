@@ -1,6 +1,6 @@
 //! Async stream API experiment that may be introduced as a language feature in the future.
 //!
-//! This crate provides useful features for streams, using unstable `async_await` and `generators`.
+//! This crate provides useful features for streams, using `async_await` and unstable `generators`.
 //!
 //! ## \#\[for_await\]
 //!
@@ -9,7 +9,7 @@
 //! This is a reimplement of [futures-await]'s `#[async]` for loops for futures 0.3 and is an experimental implementation of [the idea listed as the next step of async/await](https://github.com/rust-lang/rfcs/blob/master/text/2394-async_await.md#for-await-and-processing-streams).
 //!
 //! ```rust
-//! #![feature(async_await, stmt_expr_attributes, proc_macro_hygiene)]
+//! #![feature(stmt_expr_attributes, proc_macro_hygiene)]
 //! use futures::stream::Stream;
 //! use futures_async_stream::for_await;
 //!
@@ -127,7 +127,6 @@
 //! You can write this by combining `while let` loop, `.await`, `pin_mut` macro, and `StreamExt::next()` method:
 //!
 //! ```rust
-//! #![feature(async_await)]
 //! use futures::{
 //!     pin_mut,
 //!     stream::{Stream, StreamExt},

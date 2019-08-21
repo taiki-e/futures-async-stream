@@ -1,7 +1,7 @@
 // compile-fail
 
 #![deny(warnings)]
-#![feature(async_await, generators, stmt_expr_attributes, proc_macro_hygiene)]
+#![feature(generators, stmt_expr_attributes, proc_macro_hygiene)]
 
 use futures::stream;
 use futures_async_stream::for_await;

@@ -1,4 +1,4 @@
-#![feature(async_await, stmt_expr_attributes, proc_macro_hygiene)]
+#![feature(stmt_expr_attributes, proc_macro_hygiene)]
 
 // TODO: switch to tokio 0.2-alpha
 
