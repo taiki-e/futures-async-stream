@@ -24,6 +24,11 @@ async fn c() {
     yield 1;
 }
 
+#[async_stream(item = i32 item = i32)] //~ ERROR unexpected token
+async fn d() {
+    yield 1;
+}
+
 #[async_stream(item = i32, item = i32)] //~ ERROR duplicate `item` argument
 async fn duplicate_item() {
     yield 1;
@@ -40,7 +45,7 @@ async fn duplicate_boxed_local() {
 }
 
 #[async_stream(item = i32, boxed_local, boxed)] //~ ERROR `boxed` and `boxed_local` cannot be used at the same time.
-async fn c() {
+async fn combine() {
     yield 1;
 }
 

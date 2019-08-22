@@ -84,7 +84,10 @@ impl ReturnTypeKind {
             } else {
                 f(input)?;
             }
-            let _: Option<Token![,]> = input.parse()?;
+
+            if !input.is_empty() {
+                let _: Comma = input.parse()?;
+            }
         }
 
         Ok(())
