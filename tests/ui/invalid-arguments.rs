@@ -24,7 +24,7 @@ async fn c() {
     yield 1;
 }
 
-#[async_stream(item = i32 item = i32)] //~ ERROR unexpected token
+#[async_stream(item = i32 item = i32)] //~ ERROR expected `,`
 async fn d() {
     yield 1;
 }

@@ -19,7 +19,7 @@ error: expected `item`
 error: expected `,`
   --> $DIR/invalid-arguments.rs:27:27
    |
-27 | #[async_stream(item = i32 item = i32)] //~ ERROR unexpected token
+27 | #[async_stream(item = i32 item = i32)] //~ ERROR expected `,`
    |                           ^^^^
 
 error: duplicate `item` argument
