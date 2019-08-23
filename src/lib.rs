@@ -187,7 +187,7 @@
 //!
 //! [futures-await]: https://github.com/alexcrichton/futures-await
 
-#![doc(html_root_url = "https://docs.rs/futures-async-stream/0.1.0-alpha.3")]
+#![doc(html_root_url = "https://docs.rs/futures-async-stream/0.1.0-alpha.4")]
 #![doc(test(attr(deny(warnings), allow(dead_code, unused_assignments, unused_variables))))]
 #![warn(rust_2018_idioms, unreachable_pub, single_use_lifetimes)]
 #![warn(clippy::all, clippy::pedantic)]

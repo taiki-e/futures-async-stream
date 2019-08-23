@@ -1,5 +1,11 @@
 # Unreleased
 
+# 0.1.0-alpha.4 - 2019-08-23
+
+* Removed usage of some feature gates.
+
+* Updated `pin-project` to 0.4.0-alpha.4.
+
 # 0.1.0-alpha.3 - 2019-08-14
 
 * Updated `proc-macro2`, `syn`, and `quote` to 1.0.
