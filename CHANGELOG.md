@@ -1,5 +1,9 @@
 # Unreleased
 
+# 0.1.0-alpha.5 - 2019-08-29
+
+* Pined the version of pin-project dependency
+
 # 0.1.0-alpha.4 - 2019-08-23
 
 * Removed usage of some feature gates.
