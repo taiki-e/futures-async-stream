@@ -27,7 +27,7 @@ where
 
 /// A wrapper around generators used to implement `Stream` for `async`/`await` code.
 #[pin_project]
-#[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
+#[derive(Debug)]
 struct GenStream<G, T> {
     #[pin]
     gen: G,

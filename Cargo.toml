@@ -6,9 +6,9 @@ edition = "2018"
 license = "Apache-2.0/MIT"
 repository = "https://github.com/taiki-e/futures-async-stream"
 documentation = "https://docs.rs/futures-async-stream/"
-readme = "README.md"
 keywords = ["async", "future", "futures", "stream", "macros"]
 categories = ["asynchronous"]
+readme = "README.md"
 description = """
 Async stream for Rust and the futures crate.
 """
@@ -21,7 +21,7 @@ members = ["futures-async-stream-macro"]
 [dependencies]
 futures-async-stream-macro = { version = "=0.1.0-alpha.5", path = "futures-async-stream-macro", default-features = false }
 futures-core-preview = { version = "0.3.0-alpha.18", default-features = false }
-pin-project = { version = "=0.4.0-alpha.6", default-features = false }
+pin-project = { version = "0.4.0-alpha.9" }
 
 [dev-dependencies]
 compiletest = { version = "0.3.21", package = "compiletest_rs", features = ["stable", "tmp"] }
