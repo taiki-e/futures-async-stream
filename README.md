@@ -26,7 +26,7 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-futures-async-stream = "0.1.0-alpha.5"
+futures-async-stream = "0.1.0-alpha.6"
 futures-preview = "0.3.0-alpha.18"
 ```
 
@@ -150,7 +150,7 @@ impl Foo for Bar {
 }
 ```
 
-## `#[async_try_stream]` and `async_try_stream_block!`
+## \#\[async_try_stream\] and async_try_stream_block!
 
 `?` operator can be used with the `#[async_try_stream]` and `async_try_stream_block!`. The `Item` of the returned stream is `Result` with `Ok` being the value yielded and `Err` the error type returned by `?` operator or `return Err(...)`.
 

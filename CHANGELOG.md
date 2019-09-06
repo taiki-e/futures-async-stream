@@ -1,8 +1,30 @@
 # Unreleased
 
+# 0.1.0-alpha.6 - 2019-09-06
+
+* [Added `async_try_stream` to support `?` operator in async stream.][15] e.g. You can write the following:
+
+  ```rust
+  #![feature(generators)]
+  use futures::stream::Stream;
+  use futures_async_stream::async_try_stream;
+
+  #[async_try_stream(ok = i32, error = Box<dyn std::error::Error + Send + Sync>)]
+  async fn foo(stream: impl Stream<Item = String>) {
+      #[for_await]
+      for x in stream {
+          yield x.parse()?;
+      }
+  }
+  ```
+
+* Updated `pin-project` to 0.4.0-alpha.9.
+
+[15]: https://github.com/taiki-e/futures-async-stream/pull/15
+
 # 0.1.0-alpha.5 - 2019-08-29
 
-* Pined the version of pin-project dependency
+* Pinned the version of pin-project dependency.
 
 # 0.1.0-alpha.4 - 2019-08-23
 

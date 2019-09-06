@@ -120,7 +120,7 @@
 //! }
 //! ```
 //!
-//! ## `#[async_try_stream]` and `async_try_stream_block!`
+//! ## \#\[async_try_stream\] and async_try_stream_block!
 //!
 //! `?` operator can be used with the `#[async_try_stream]` and `async_try_stream_block!`. The `Item` of the returned stream is `Result` with `Ok` being the value yielded and `Err` the error type returned by `?` operator or `return Err(...)`.
 //!
@@ -204,7 +204,7 @@
 //!
 //! [futures-await]: https://github.com/alexcrichton/futures-await
 
-#![doc(html_root_url = "https://docs.rs/futures-async-stream/0.1.0-alpha.5")]
+#![doc(html_root_url = "https://docs.rs/futures-async-stream/0.1.0-alpha.6")]
 #![doc(test(
     no_crate_inject,
     attr(deny(warnings, rust_2018_idioms, single_use_lifetimes), allow(dead_code))
