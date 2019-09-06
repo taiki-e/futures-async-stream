@@ -58,13 +58,13 @@ impl ReturnTypeKind {
                 match self {
                     ReturnTypeKind::Default => *self = ReturnTypeKind::Boxed { send: true },
                     ReturnTypeKind::Boxed { send: true } => {
-                        return Err(error!(i, "duplicate `boxed` argument"))
+                        return Err(error!(i, "duplicate `boxed` argument"));
                     }
                     ReturnTypeKind::Boxed { send: false } => {
                         return Err(error!(
                             i,
                             "`boxed` and `boxed_local` cannot be used at the same time."
-                        ))
+                        ));
                     }
                 }
             } else if input.peek(kw::boxed_local) {
@@ -72,13 +72,13 @@ impl ReturnTypeKind {
                 match self {
                     ReturnTypeKind::Default => *self = ReturnTypeKind::Boxed { send: false },
                     ReturnTypeKind::Boxed { send: false } => {
-                        return Err(error!(i, "duplicate `boxed_local` argument"))
+                        return Err(error!(i, "duplicate `boxed_local` argument"));
                     }
                     ReturnTypeKind::Boxed { send: true } => {
                         return Err(error!(
                             i,
                             "`boxed` and `boxed_local` cannot be used at the same time."
-                        ))
+                        ));
                     }
                 }
             } else {
