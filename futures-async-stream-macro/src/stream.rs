@@ -17,7 +17,7 @@ use crate::{
 // =================================================================================================
 // async_stream
 
-pub(super) fn async_stream(args: TokenStream, input: TokenStream) -> Result<TokenStream> {
+pub(super) fn attribute(args: TokenStream, input: TokenStream) -> Result<TokenStream> {
     parse_async_stream_fn(args, input)
 }
 
@@ -38,9 +38,8 @@ impl Parse for Item {
     }
 }
 
-// TODO: rename to `ReturnType`
 #[derive(Clone, Copy)]
-enum ReturnTypeKind {
+pub(super) enum ReturnTypeKind {
     // impl Stream<Item = ..> $(+ $lifetime)?
     Default,
     // Pin<Box<dyn Stream<Item = ..> (+ Send)? $(+ $lifetime)?>>
@@ -122,16 +121,16 @@ impl Parse for Args {
     }
 }
 
-struct FnSig {
-    attrs: Vec<Attribute>,
-    vis: Visibility,
-    sig: Signature,
-    block: Block,
-    semi: Option<Token![;]>,
+pub(super) struct FnSig {
+    pub(super) attrs: Vec<Attribute>,
+    pub(super) vis: Visibility,
+    pub(super) sig: Signature,
+    pub(super) block: Block,
+    pub(super) semi: Option<Token![;]>,
 }
 
 impl FnSig {
-    fn parse(input: TokenStream, boxed: ReturnTypeKind) -> Result<Self> {
+    pub(super) fn parse(input: TokenStream, boxed: ReturnTypeKind) -> Result<Self> {
         match boxed {
             ReturnTypeKind::Default => syn::parse2(input).map(ItemFn::into),
             ReturnTypeKind::Boxed { .. } => {
@@ -167,7 +166,7 @@ impl From<TraitItemMethod> for FnSig {
     }
 }
 
-fn validate_async_stream_fn(item: &FnSig) -> Result<()> {
+pub(super) fn validate_async_stream_fn(item: &FnSig) -> Result<()> {
     if item.sig.asyncness.is_none() {
         return Err(error!(item.sig.fn_token, "async stream must be declared as async"));
     }
@@ -193,15 +192,7 @@ fn validate_async_stream_fn(item: &FnSig) -> Result<()> {
     Ok(())
 }
 
-fn parse_async_stream_fn(args: TokenStream, input: TokenStream) -> Result<TokenStream> {
-    let args: Args = syn::parse2(args)?;
-    let item = FnSig::parse(input, args.boxed)?;
-
-    validate_async_stream_fn(&item)?;
-    Ok(expand_async_stream_fn(item, &args))
-}
-
-fn expand_async_body(inputs: Punctuated<FnArg, Comma>) -> (Vec<FnArg>, Vec<Local>) {
+pub(super) fn expand_async_body(inputs: Punctuated<FnArg, Comma>) -> (Vec<FnArg>, Vec<Local>) {
     let mut arguments: Vec<FnArg> = Vec::new();
     let mut statements: Vec<Local> = Vec::new();
 
@@ -274,7 +265,13 @@ fn expand_async_body(inputs: Punctuated<FnArg, Comma>) -> (Vec<FnArg>, Vec<Local
     (arguments, statements)
 }
 
-fn make_gen_body(statements: &[Local], block: &Block, gen_function: &TokenStream) -> TokenStream {
+pub(super) fn make_gen_body(
+    statements: &[Local],
+    block: &Block,
+    gen_function: &TokenStream,
+    ret_value: &TokenStream,
+    ret_ty: &TokenStream,
+) -> TokenStream {
     let block_inner = quote! {
         #(#statements)*
         #block
@@ -292,7 +289,7 @@ fn make_gen_body(statements: &[Local], block: &Block, gen_function: &TokenStream
         // have any `yield` statements.
         #[allow(unreachable_code)]
         {
-            return;
+            return #ret_value;
             loop { yield ::futures_async_stream::reexport::task::Poll::Pending }
         }
     };
@@ -302,8 +299,16 @@ fn make_gen_body(statements: &[Local], block: &Block, gen_function: &TokenStream
     });
 
     quote! {
-        #gen_function (static move || -> () #gen_body)
+        #gen_function(static move || -> #ret_ty #gen_body)
     }
+}
+
+fn parse_async_stream_fn(args: TokenStream, input: TokenStream) -> Result<TokenStream> {
+    let args: Args = syn::parse2(args)?;
+    let item = FnSig::parse(input, args.boxed)?;
+
+    validate_async_stream_fn(&item)?;
+    Ok(expand_async_stream_fn(item, &args))
 }
 
 fn expand_async_stream_fn(item: FnSig, args: &Args) -> TokenStream {
@@ -324,7 +329,7 @@ fn expand_async_stream_fn(item: FnSig, args: &Args) -> TokenStream {
     let output_span = first_last(item);
     let gen_function = quote!(::futures_async_stream::stream::from_generator);
     let gen_function = respan(gen_function, output_span);
-    let mut body_inner = make_gen_body(&statements, &block, &gen_function);
+    let mut body_inner = make_gen_body(&statements, &block, &gen_function, &quote!(), &quote!(()));
 
     if let ReturnTypeKind::Boxed { .. } = args.boxed {
         let body = quote! { ::futures_async_stream::reexport::boxed::Box::pin(#body_inner) };
@@ -344,7 +349,7 @@ fn expand_async_stream_fn(item: FnSig, args: &Args) -> TokenStream {
             // Raw `impl` breaks syntax highlighting in some editors.
             let impl_token = token::Impl::default();
             quote! {
-                #impl_token ::futures_async_stream::stream::Stream<Item = #item> + #(#lifetimes +)*
+                #impl_token ::futures_async_stream::reexport::Stream<Item = #item> + #(#lifetimes +)*
             }
         }
         ReturnTypeKind::Boxed { send } => {
@@ -352,7 +357,7 @@ fn expand_async_stream_fn(item: FnSig, args: &Args) -> TokenStream {
             quote! {
                 ::futures_async_stream::reexport::pin::Pin<
                     ::futures_async_stream::reexport::boxed::Box<
-                        dyn ::futures_async_stream::stream::Stream<Item = #item> #send + #(#lifetimes +)*
+                        dyn ::futures_async_stream::reexport::Stream<Item = #item> #send + #(#lifetimes +)*
                     >
                 >
             }
@@ -375,7 +380,7 @@ fn expand_async_stream_fn(item: FnSig, args: &Args) -> TokenStream {
 // =================================================================================================
 // async_stream_block
 
-pub(super) fn async_stream_block(input: TokenStream) -> Result<TokenStream> {
+pub(super) fn block_macro(input: TokenStream) -> Result<TokenStream> {
     syn::parse2(input).map(expand_async_stream_block)
 }
 
@@ -383,5 +388,5 @@ fn expand_async_stream_block(mut expr: Expr) -> TokenStream {
     Visitor::new(Stream).visit_expr_mut(&mut expr);
 
     let gen_function = quote!(::futures_async_stream::stream::from_generator);
-    make_gen_body(&[], &block(vec![Stmt::Expr(expr)]), &gen_function)
+    make_gen_body(&[], &block(vec![Stmt::Expr(expr)]), &gen_function, &quote!(), &quote!(()))
 }

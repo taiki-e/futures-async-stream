@@ -12,6 +12,9 @@ description = """
 Definition of the `#[async_stream]` macro for the `futures-async-stream` crate as well as a few other assorted macros.
 """
 
+[package.metadata.docs.rs]
+all-features = true
+
 [lib]
 proc-macro = true
 

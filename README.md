@@ -27,7 +27,7 @@ Add this to your `Cargo.toml`:
 ```toml
 [dependencies]
 futures-async-stream = "0.1.0-alpha.5"
-futures-preview = "0.3.0-alpha.17"
+futures-preview = "0.3.0-alpha.18"
 ```
 
 The current futures-async-stream requires Rust nightly 2019-08-21 or later.
@@ -150,10 +150,27 @@ impl Foo for Bar {
 }
 ```
 
+## `#[async_try_stream]` and `async_try_stream_block!`
+
+`?` operator can be used with the `#[async_try_stream]` and `async_try_stream_block!`. The `Item` of the returned stream is `Result` with `Ok` being the value yielded and `Err` the error type returned by `?` operator or `return Err(...)`.
+
+```rust
+#![feature(generators)]
+use futures::stream::Stream;
+use futures_async_stream::async_try_stream;
+
+#[async_try_stream(ok = i32, error = Box<dyn std::error::Error + Send + Sync>)]
+async fn foo(stream: impl Stream<Item = String>) {
+    #[for_await]
+    for x in stream {
+        yield x.parse()?;
+    }
+}
+```
+
 <!--
 ## List of features that may be added in the future as an extension of this feature:
 
-  * `async_try_stream` (https://github.com/rust-lang-nursery/futures-rs/pull/1548#discussion_r287558350)
   * `async_sink` (https://github.com/rust-lang-nursery/futures-rs/pull/1548#issuecomment-486205382)
   * Support `.await` in macro (https://github.com/rust-lang-nursery/futures-rs/pull/1548#discussion_r285341883)
   * Parallel version of `for_await` (https://github.com/rustasync/runtime/pull/25)
@@ -214,8 +231,7 @@ where
     type Item = i32;
 
     fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
-        let this = self.project();
-        if let Some(x) = ready!(this.stream.poll_next(cx)) {
+        if let Some(x) = ready!(self.project().stream.poll_next(cx)) {
             Poll::Ready(Some(x.parse().unwrap()))
         } else {
             Poll::Ready(None)

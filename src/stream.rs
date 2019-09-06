@@ -5,10 +5,9 @@ use core::{
     pin::Pin,
     task::{Context, Poll},
 };
+use futures_core::stream::Stream;
 use pin_project::pin_project;
 use std::future;
-
-pub use futures_core::stream::Stream;
 
 // =================================================================================================
 // GenStream
