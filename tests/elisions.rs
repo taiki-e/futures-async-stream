@@ -33,3 +33,6 @@ pub async fn single_ref(x: &i32) {
 pub async fn check_for_name_colision<'_async0, T>(_x: &T, _y: &'_async0 i32) {
     yield
 }
+
+#[test]
+fn test() {}

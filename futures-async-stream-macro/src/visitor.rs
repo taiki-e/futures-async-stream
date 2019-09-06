@@ -7,11 +7,11 @@ use syn::{
 };
 
 use crate::{
-    async_stream_block,
+    async_stream_block, async_try_stream_block,
     utils::{expr_compile_error, replace_boxed_expr, replace_expr},
 };
 
-pub(crate) use Scope::{Closure, Future, Stream};
+pub(crate) use Scope::{Closure, Future, Stream, TryStream};
 
 // =================================================================================================
 // Visitor
@@ -27,10 +27,22 @@ pub(crate) enum Scope {
     /// `#[async_stream]` or `async_stream_block! {}`
     Stream,
 
+    /// `#[async_try_stream]` or `async_try_stream_block! {}`
+    TryStream,
+
     /// `||`, `move ||`, or `static move ||`.
     ///
     /// It cannot call `#[for_await]` or `.await` in this scope.
     Closure,
+}
+
+impl Scope {
+    fn is_stream(self) -> bool {
+        match self {
+            Stream | TryStream => true,
+            _ => false,
+        }
+    }
 }
 
 impl Default for Scope {
@@ -74,7 +86,7 @@ impl Visitor {
                         }
                     }
                 }
-                Stream => {
+                Stream | TryStream => {
                     quote! {
                         match ::futures_async_stream::stream::poll_next_with_tls_context(
                             ::futures_async_stream::reexport::pin::Pin::as_mut(&mut __pinned),
@@ -118,7 +130,7 @@ impl Visitor {
 
     /// Visits `yield <expr>` in `async_stream` scope.
     fn visit_yield(&self, expr: &mut ExprYield) {
-        if self.scope != Stream {
+        if !self.scope.is_stream() {
             return;
         }
 
@@ -134,14 +146,15 @@ impl Visitor {
     fn visit_macro(&self, expr: &mut Expr) {
         replace_expr(expr, |expr| {
             if let Expr::Macro(mut expr) = expr {
-                if expr.mac.path.is_ident("async_stream_block") {
-                    let mut e: ExprCall =
-                        syn::parse(async_stream_block(expr.mac.tokens.into())).unwrap();
-                    e.attrs.append(&mut expr.attrs);
-                    Expr::Call(e)
+                let mut e: ExprCall = if expr.mac.path.is_ident("async_stream_block") {
+                    syn::parse(async_stream_block(expr.mac.tokens.into())).unwrap()
+                } else if expr.mac.path.is_ident("async_try_stream_block") {
+                    syn::parse(async_try_stream_block(expr.mac.tokens.into())).unwrap()
                 } else {
-                    Expr::Macro(expr)
-                }
+                    return Expr::Macro(expr);
+                };
+                e.attrs.append(&mut expr.attrs);
+                Expr::Call(e)
             } else {
                 expr
             }
@@ -154,7 +167,7 @@ impl Visitor {
     /// async fn yield `()` type, but generators used internally by `async_stream` yield
     /// `Poll<U>` type.
     fn visit_await(&self, expr: &mut Expr) {
-        if self.scope != Stream {
+        if !self.scope.is_stream() {
             return;
         }
 
@@ -189,6 +202,9 @@ impl VisitMut for Visitor {
             }
             Expr::Macro(expr) if expr.mac.path.is_ident("async_stream_block") => {
                 self.scope = Stream
+            }
+            Expr::Macro(expr) if expr.mac.path.is_ident("async_try_stream_block") => {
+                self.scope = TryStream
             }
             _ => {}
         }

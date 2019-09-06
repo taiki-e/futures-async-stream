@@ -3,7 +3,6 @@
 
 use futures::{
     executor::block_on,
-    future,
     stream::{self, Stream},
 };
 use futures_async_stream::{async_stream, async_stream_block, for_await};
@@ -14,22 +13,22 @@ pub async fn nested() {
     let _ = async {
         #[for_await]
         for i in stream::iter(vec![1, 2]) {
-            future::lazy(|_| i * i).await;
+            async { i * i }.await;
         }
     };
-    future::lazy(|_| ()).await;
+    async {}.await;
 }
 
 pub async fn nested2() {
     let s = async_stream_block! {
         #[for_await]
         for i in stream::iter(vec![1, 2]) {
-            future::lazy(|_| i * i).await;
+            yield async { i * i }.await;
         }
     };
     #[for_await]
     for _i in s {
-        future::lazy(|_| ()).await;
+        async {}.await;
     }
 }
 

@@ -13,6 +13,9 @@ description = """
 Async stream for Rust and the futures crate.
 """
 
+[package.metadata.docs.rs]
+all-features = true
+
 [workspace]
 members = ["futures-async-stream-macro"]
 

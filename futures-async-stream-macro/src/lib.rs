@@ -22,6 +22,7 @@ mod utils;
 
 mod elision;
 mod stream;
+mod try_stream;
 mod visitor;
 
 /// Processes streams using a for loop.
@@ -40,12 +41,25 @@ pub fn for_await(args: TokenStream, input: TokenStream) -> TokenStream {
 /// Creates streams via generators.
 #[proc_macro_attribute]
 pub fn async_stream(args: TokenStream, input: TokenStream) -> TokenStream {
-    stream::async_stream(args.into(), input.into()).unwrap_or_else(|e| e.to_compile_error()).into()
+    stream::attribute(args.into(), input.into()).unwrap_or_else(|e| e.to_compile_error()).into()
 }
 
 /// Creates streams via generators.
 #[proc_macro]
 pub fn async_stream_block(input: TokenStream) -> TokenStream {
     let input = TokenStream::from(TokenTree::Group(Group::new(Delimiter::Brace, input)));
-    stream::async_stream_block(input.into()).unwrap_or_else(|e| e.to_compile_error()).into()
+    stream::block_macro(input.into()).unwrap_or_else(|e| e.to_compile_error()).into()
+}
+
+/// Creates streams via generators.
+#[proc_macro_attribute]
+pub fn async_try_stream(args: TokenStream, input: TokenStream) -> TokenStream {
+    try_stream::attribute(args.into(), input.into()).unwrap_or_else(|e| e.to_compile_error()).into()
+}
+
+/// Creates streams via generators.
+#[proc_macro]
+pub fn async_try_stream_block(input: TokenStream) -> TokenStream {
+    let input = TokenStream::from(TokenTree::Group(Group::new(Delimiter::Brace, input)));
+    try_stream::block_macro(input.into()).unwrap_or_else(|e| e.to_compile_error()).into()
 }

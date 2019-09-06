@@ -120,6 +120,24 @@
 //! }
 //! ```
 //!
+//! ## `#[async_try_stream]` and `async_try_stream_block!`
+//!
+//! `?` operator can be used with the `#[async_try_stream]` and `async_try_stream_block!`. The `Item` of the returned stream is `Result` with `Ok` being the value yielded and `Err` the error type returned by `?` operator or `return Err(...)`.
+//!
+//! ```rust
+//! #![feature(generators)]
+//! use futures::stream::Stream;
+//! use futures_async_stream::async_try_stream;
+//!
+//! #[async_try_stream(ok = i32, error = Box<dyn std::error::Error + Send + Sync>)]
+//! async fn foo(stream: impl Stream<Item = String>) {
+//!     #[for_await]
+//!     for x in stream {
+//!         yield x.parse()?;
+//!     }
+//! }
+//! ```
+//!
 //! ## How to write the equivalent code without this API?
 //!
 //! ### \#\[for_await\]
@@ -175,8 +193,7 @@
 //!     type Item = i32;
 //!
 //!     fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
-//!         let this = self.project();
-//!         if let Some(x) = ready!(this.stream.poll_next(cx)) {
+//!         if let Some(x) = ready!(self.project().stream.poll_next(cx)) {
 //!             Poll::Ready(Some(x.parse().unwrap()))
 //!         } else {
 //!             Poll::Ready(None)
@@ -198,8 +215,6 @@
 #![warn(clippy::all, clippy::pedantic)]
 #![feature(gen_future, generator_trait)]
 
-extern crate alloc;
-
 /// Processes streams using a for loop.
 pub use futures_async_stream_macro::for_await;
 
@@ -209,14 +224,29 @@ pub use futures_async_stream_macro::async_stream;
 /// Creates streams via generators.
 pub use futures_async_stream_macro::async_stream_block;
 
+/// Creates streams via generators.
+pub use futures_async_stream_macro::async_try_stream;
+
+/// Creates streams via generators.
+pub use futures_async_stream_macro::async_try_stream_block;
+
+// Not public API.
 #[doc(hidden)]
 pub mod stream;
 
+// Not public API.
+#[doc(hidden)]
+pub mod try_stream;
+
+// Not public API.
 #[doc(hidden)]
 pub mod reexport {
     #[doc(hidden)]
     pub use core::{option, pin, result, task};
 
     #[doc(hidden)]
-    pub use alloc::boxed;
+    pub use std::boxed;
+
+    #[doc(hidden)]
+    pub use futures_core::stream::Stream;
 }
