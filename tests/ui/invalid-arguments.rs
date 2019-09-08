@@ -1,15 +1,20 @@
 // compile-fail
 
-#![deny(warnings)]
 #![feature(generators)]
 
-use futures::stream;
 use futures_async_stream::async_stream;
+
+#[async_stream(item = i32)]
+async fn stream(x: i32) {
+    for i in 1..=x {
+        yield i
+    }
+}
 
 #[async_stream(item = i32)]
 async fn a() {
     #[for_await(bar)] //~ ERROR unexpected token
-    for i in stream::iter(vec![1, 2]) {
+    for i in stream(2) {
         yield i;
     }
 }

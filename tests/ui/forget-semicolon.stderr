@@ -1,7 +1,7 @@
 error[E0308]: mismatched types
-  --> $DIR/forget-semicolon.rs:11:5
+  --> $DIR/forget-semicolon.rs:10:5
    |
-11 |     Some(()) //~ ERROR mismatched types
+10 |     Some(()) //~ ERROR mismatched types
    |     ^^^^^^^^- help: try adding a semicolon: `;`
    |     |
    |     expected (), found enum `std::option::Option`

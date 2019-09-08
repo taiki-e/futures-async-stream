@@ -1,6 +1,5 @@
 // compile-fail
 
-#![deny(warnings)]
 #![feature(generators)]
 
 use futures_async_stream::async_stream;

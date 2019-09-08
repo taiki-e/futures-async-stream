@@ -1,49 +1,49 @@
 error: unexpected token
-  --> $DIR/invalid-arguments.rs:11:16
+  --> $DIR/invalid-arguments.rs:16:16
    |
-11 |     #[for_await(bar)] //~ ERROR unexpected token
+16 |     #[for_await(bar)] //~ ERROR unexpected token
    |                ^
 
 error: expected `item`
-  --> $DIR/invalid-arguments.rs:17:16
+  --> $DIR/invalid-arguments.rs:22:16
    |
-17 | #[async_stream(baz, item = i32)] //~ ERROR expected `item`
+22 | #[async_stream(baz, item = i32)] //~ ERROR expected `item`
    |                ^^^
 
 error: expected `item`
-  --> $DIR/invalid-arguments.rs:22:28
+  --> $DIR/invalid-arguments.rs:27:28
    |
-22 | #[async_stream(item = i32, baz)] //~ ERROR unexpected token
+27 | #[async_stream(item = i32, baz)] //~ ERROR unexpected token
    |                            ^^^
 
 error: expected `,`
-  --> $DIR/invalid-arguments.rs:27:27
+  --> $DIR/invalid-arguments.rs:32:27
    |
-27 | #[async_stream(item = i32 item = i32)] //~ ERROR expected `,`
+32 | #[async_stream(item = i32 item = i32)] //~ ERROR expected `,`
    |                           ^^^^
 
 error: duplicate `item` argument
-  --> $DIR/invalid-arguments.rs:32:35
+  --> $DIR/invalid-arguments.rs:37:35
    |
-32 | #[async_stream(item = i32, item = i32)] //~ ERROR duplicate `item` argument
+37 | #[async_stream(item = i32, item = i32)] //~ ERROR duplicate `item` argument
    |                                   ^^^
 
 error: duplicate `boxed` argument
-  --> $DIR/invalid-arguments.rs:37:35
+  --> $DIR/invalid-arguments.rs:42:35
    |
-37 | #[async_stream(item = i32, boxed, boxed)] //~ ERROR duplicate `boxed` argument
+42 | #[async_stream(item = i32, boxed, boxed)] //~ ERROR duplicate `boxed` argument
    |                                   ^^^^^
 
 error: duplicate `boxed_local` argument
-  --> $DIR/invalid-arguments.rs:42:41
+  --> $DIR/invalid-arguments.rs:47:41
    |
-42 | #[async_stream(item = i32, boxed_local, boxed_local)] //~ ERROR duplicate `boxed_local` argument
+47 | #[async_stream(item = i32, boxed_local, boxed_local)] //~ ERROR duplicate `boxed_local` argument
    |                                         ^^^^^^^^^^^
 
 error: `boxed` and `boxed_local` cannot be used at the same time.
-  --> $DIR/invalid-arguments.rs:47:41
+  --> $DIR/invalid-arguments.rs:52:41
    |
-47 | #[async_stream(item = i32, boxed_local, boxed)] //~ ERROR `boxed` and `boxed_local` cannot be used at the same time.
+52 | #[async_stream(item = i32, boxed_local, boxed)] //~ ERROR `boxed` and `boxed_local` cannot be used at the same time.
    |                                         ^^^^^
 
 error: aborting due to 8 previous errors
