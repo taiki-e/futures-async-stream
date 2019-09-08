@@ -1,31 +1,31 @@
 error: only foreign functions are allowed to be C-variadic
-  --> $DIR/invalid-function.rs:12:16
+  --> $DIR/invalid-function.rs:11:16
    |
-12 | fn variadic(_: ...) {} //~ ERROR async stream may not be variadic
+11 | fn variadic(_: ...) {} //~ ERROR async stream may not be variadic
    |                ^^^
 
 error: async stream must be declared as async
- --> $DIR/invalid-function.rs:9:7
+ --> $DIR/invalid-function.rs:8:7
   |
-9 | const fn constness() {} //~ ERROR async stream must be declared as async
+8 | const fn constness() {} //~ ERROR async stream must be declared as async
   |       ^^
 
 error: expected `:`
-  --> $DIR/invalid-function.rs:11:1
+  --> $DIR/invalid-function.rs:10:1
    |
-11 | #[async_stream(item = ())]
+10 | #[async_stream(item = ())]
    | ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 error: async stream must be declared as async
-  --> $DIR/invalid-function.rs:15:1
+  --> $DIR/invalid-function.rs:14:1
    |
-15 | fn asyncness() {} //~ ERROR async stream must be declared as async
+14 | fn asyncness() {} //~ ERROR async stream must be declared as async
    | ^^
 
 error: async stream must return the unit type
-  --> $DIR/invalid-function.rs:18:22
+  --> $DIR/invalid-function.rs:17:22
    |
-18 | async fn output() -> i32 {} //~ ERROR async stream must return the unit type
+17 | async fn output() -> i32 {} //~ ERROR async stream must return the unit type
    |                      ^^^
 
 error: aborting due to 5 previous errors

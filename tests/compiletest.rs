@@ -12,7 +12,6 @@ fn run_mode(mode: &'static str) {
         "--edition=2018 \
          -Z unstable-options \
          --extern futures_async_stream \
-         --extern futures \
          -L {}",
         me.display()
     ));

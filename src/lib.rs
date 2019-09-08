@@ -213,6 +213,7 @@
 #![warn(unsafe_code)]
 #![warn(rust_2018_idioms, unreachable_pub, single_use_lifetimes)]
 #![warn(clippy::all, clippy::pedantic)]
+#![allow(clippy::used_underscore_binding)]
 #![feature(gen_future, generator_trait)]
 
 /// Processes streams using a for loop.

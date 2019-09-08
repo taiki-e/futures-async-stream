@@ -1,18 +1,22 @@
 #![warn(rust_2018_idioms)]
 #![feature(generators, stmt_expr_attributes, proc_macro_hygiene)]
 
-use futures::{
-    executor::block_on,
-    stream::{self, Stream},
-};
+use futures::{executor::block_on, stream::Stream};
 use futures_async_stream::{async_stream, async_stream_block, for_await};
 use std::{pin::Pin, rc::Rc, sync::Arc};
+
+#[async_stream(item = i32)]
+async fn stream(x: i32) {
+    for i in 1..=x {
+        yield i
+    }
+}
 
 #[async_stream(item = i32)]
 pub async fn nested() {
     let _ = async {
         #[for_await]
-        for i in stream::iter(vec![1, 2]) {
+        for i in stream(2) {
             async { i * i }.await;
         }
     };
@@ -22,7 +26,7 @@ pub async fn nested() {
 pub async fn nested2() {
     let s = async_stream_block! {
         #[for_await]
-        for i in stream::iter(vec![1, 2]) {
+        for i in stream(2) {
             yield async { i * i }.await;
         }
     };
@@ -48,7 +52,7 @@ pub async fn stream2<T: Clone>(t: T) {
 async fn stream3() {
     let mut cnt = 0;
     #[for_await]
-    for x in stream::iter(vec![1, 2, 3, 4]) {
+    for x in stream(4) {
         cnt += x;
         yield x;
     }

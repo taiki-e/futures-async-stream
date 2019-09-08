@@ -1,19 +1,18 @@
 error[E0412]: cannot find type `Left` in this scope
- --> $DIR/unresolved-type.rs:8:23
+ --> $DIR/unresolved-type.rs:7:23
   |
-8 | #[async_stream(item = Left)] //~ ERROR cannot find type `Left` in this scope
+7 | #[async_stream(item = Left)] //~ ERROR cannot find type `Left` in this scope
   |                       ^^^^ not found in this scope
-help: there is an enum variant `core::fmt::Alignment::Left` and 7 others; try using the variant's enum
+help: there is an enum variant `core::fmt::Alignment::Left` and 4 others; try using the variant's enum
   |
-8 | #[async_stream(item = core::fmt::Alignment)] //~ ERROR cannot find type `Left` in this scope
+7 | #[async_stream(item = core::fmt::Alignment)] //~ ERROR cannot find type `Left` in this scope
   |                       ^^^^^^^^^^^^^^^^^^^^
-8 | #[async_stream(item = core::fmt::rt::v1::Alignment)] //~ ERROR cannot find type `Left` in this scope
+7 | #[async_stream(item = core::fmt::rt::v1::Alignment)] //~ ERROR cannot find type `Left` in this scope
   |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-8 | #[async_stream(item = futures::core_reexport::fmt::Alignment)] //~ ERROR cannot find type `Left` in this scope
-  |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-8 | #[async_stream(item = futures::core_reexport::fmt::rt::v1::Alignment)] //~ ERROR cannot find type `Left` in this scope
-  |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-and 3 other candidates
+7 | #[async_stream(item = std::fmt::Alignment)] //~ ERROR cannot find type `Left` in this scope
+  |                       ^^^^^^^^^^^^^^^^^^^
+7 | #[async_stream(item = std::fmt::rt::v1::Alignment)] //~ ERROR cannot find type `Left` in this scope
+  |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 error: aborting due to previous error
 
