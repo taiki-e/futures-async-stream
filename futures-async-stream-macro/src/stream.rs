@@ -332,7 +332,7 @@ fn expand_async_stream_fn(item: FnSig, args: &Args) -> TokenStream {
     let mut body_inner = make_gen_body(&statements, &block, &gen_function, &quote!(), &quote!(()));
 
     if let ReturnTypeKind::Boxed { .. } = args.boxed {
-        let body = quote! { ::futures_async_stream::reexport::boxed::Box::pin(#body_inner) };
+        let body = quote! { Box::pin(#body_inner) };
         body_inner = respan(body, output_span);
     }
 
@@ -353,12 +353,14 @@ fn expand_async_stream_fn(item: FnSig, args: &Args) -> TokenStream {
             }
         }
         ReturnTypeKind::Boxed { send } => {
-            let send = if send { Some(quote!(+ Send)) } else { None };
+            let send = if send {
+                quote!(+ ::futures_async_stream::reexport::marker::Send)
+            } else {
+                TokenStream::new()
+            };
             quote! {
                 ::futures_async_stream::reexport::pin::Pin<
-                    ::futures_async_stream::reexport::boxed::Box<
-                        dyn ::futures_async_stream::reexport::Stream<Item = #item> #send + #(#lifetimes +)*
-                    >
+                    Box<dyn ::futures_async_stream::reexport::Stream<Item = #item> #send + #(#lifetimes +)*>
                 >
             }
         }

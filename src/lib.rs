@@ -243,10 +243,7 @@ pub mod try_stream;
 #[doc(hidden)]
 pub mod reexport {
     #[doc(hidden)]
-    pub use core::{option, pin, result, task};
-
-    #[doc(hidden)]
-    pub use std::boxed;
+    pub use core::{marker, option, pin, result, task};
 
     #[doc(hidden)]
     pub use futures_core::stream::Stream;
