@@ -24,7 +24,7 @@ members = ["futures-async-stream-macro"]
 [dependencies]
 futures-async-stream-macro = { version = "=0.1.0-alpha.6", path = "futures-async-stream-macro", default-features = false }
 futures-core-preview = { version = "0.3.0-alpha.18", default-features = false }
-pin-project = { version = "=0.4.0-alpha.10" }
+pin-project = { version = "=0.4.0-alpha.11" }
 
 [dev-dependencies]
 compiletest = { version = "0.3.21", package = "compiletest_rs", features = ["stable", "tmp"] }
