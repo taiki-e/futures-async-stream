@@ -39,7 +39,7 @@ where
 {
     type Item = T;
 
-    fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
+    fn poll_next(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
         let this = self.project();
         future::set_task_context(cx, || match this.gen.resume() {
             GeneratorState::Yielded(x) => x.map(Some),

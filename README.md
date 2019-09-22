@@ -230,7 +230,7 @@ where
 {
     type Item = i32;
 
-    fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
+    fn poll_next(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
         if let Some(x) = ready!(self.project().stream.poll_next(cx)) {
             Poll::Ready(Some(x.parse().unwrap()))
         } else {
