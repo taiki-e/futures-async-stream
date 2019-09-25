@@ -1,5 +1,7 @@
 # Unreleased
 
+* Updated `pin-project` to 0.4.
+
 # 0.1.0-alpha.6 - 2019-09-06
 
 * [Added `async_try_stream` to support `?` operator in async stream.][15] e.g. You can write the following:
