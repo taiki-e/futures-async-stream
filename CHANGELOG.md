@@ -1,5 +1,7 @@
 # Unreleased
 
+# 0.1.0-alpha.7 - 2019-09-25
+
 * Updated `pin-project` to 0.4.
 
 # 0.1.0-alpha.6 - 2019-09-06

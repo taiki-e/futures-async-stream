@@ -1,7 +1,7 @@
 //! Procedural macro for the `#[async_stream]` attribute.
 
 #![recursion_limit = "256"]
-#![doc(html_root_url = "https://docs.rs/futures-async-stream-macro/0.1.0-alpha.6")]
+#![doc(html_root_url = "https://docs.rs/futures-async-stream-macro/0.1.0-alpha.7")]
 #![doc(test(
     no_crate_inject,
     attr(deny(warnings, rust_2018_idioms, single_use_lifetimes), allow(dead_code))
