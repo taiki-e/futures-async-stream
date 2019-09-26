@@ -45,6 +45,3 @@ error: `boxed` and `boxed_local` cannot be used at the same time.
    |
 52 | #[async_stream(item = i32, boxed_local, boxed)] //~ ERROR `boxed` and `boxed_local` cannot be used at the same time.
    |                                         ^^^^^
-
-error: aborting due to 8 previous errors
-

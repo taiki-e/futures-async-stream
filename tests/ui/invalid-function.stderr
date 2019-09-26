@@ -27,6 +27,3 @@ error: async stream must return the unit type
    |
 17 | async fn output() -> i32 {} //~ ERROR async stream must return the unit type
    |                      ^^^
-
-error: aborting due to 5 previous errors
-

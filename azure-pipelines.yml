@@ -40,10 +40,7 @@ jobs:
       parameters:
         toolchain: nightly
     - script: |
-        cargo clean
-        cargo test -p futures-async-stream --all-features --test compiletest
-      env:
-        RUSTFLAGS: -Dwarnings --cfg compiletest
+        RUSTFLAGS='-Dwarnings --cfg compiletest' cargo test -p futures-async-stream --all-features --test compiletest
       displayName: compiletest
 
 - job: clippy
@@ -116,7 +113,5 @@ jobs:
       parameters:
         toolchain: nightly
     - script: |
-        cargo doc --no-deps --all --all-features
-      env:
-        RUSTDOCFLAGS: -Dwarnings
+        RUSTDOCFLAGS=-Dwarnings cargo doc --no-deps --all --all-features
       displayName: cargo doc

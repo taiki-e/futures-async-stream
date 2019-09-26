@@ -8,4 +8,5 @@
 # . ./compiletest.sh
 # ```
 
-rm -rf target/debug/deps/libfutures_async_stream* && RUSTFLAGS='--cfg compiletest' cargo +nightly test -p futures-async-stream --all-features --test compiletest
+TRYBUILD=overwrite RUSTFLAGS='--cfg compiletest' cargo +nightly test -p futures-async-stream --all-features --test compiletest
+# RUSTFLAGS='--cfg compiletest' cargo +nightly test -p futures-async-stream --all-features --test compiletest
