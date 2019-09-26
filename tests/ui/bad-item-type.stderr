@@ -125,7 +125,5 @@ note: the type is part of the generator because of this `yield`
 18 | #[async_stream(item = (i32, i32))]
    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-error: aborting due to 11 previous errors
-
 Some errors have detailed explanations: E0271, E0308, E0698.
 For more information about an error, try `rustc --explain E0271`.

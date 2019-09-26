@@ -3,6 +3,3 @@ error: unexpected end of input, expected `item`
   |
 7 | #[async_stream] //~ ERROR unexpected end of input, expected `item`
   | ^^^^^^^^^^^^^^^
-
-error: aborting due to previous error
-

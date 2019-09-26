@@ -154,7 +154,5 @@ error[E0277]: the `?` operator can only be applied to values that implement `std
    = help: the trait `std::ops::Try` is not implemented for `()`
    = note: required by `std::ops::Try::into_result`
 
-error: aborting due to 14 previous errors
-
 Some errors have detailed explanations: E0277, E0698.
 For more information about an error, try `rustc --explain E0277`.
