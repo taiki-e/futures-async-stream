@@ -1,8 +1,8 @@
 #![warn(rust_2018_idioms)]
 #![feature(generators, stmt_expr_attributes, proc_macro_hygiene)]
 
-use futures::{executor::block_on, stream::Stream};
 use futures_async_stream::{async_stream, async_stream_block, for_await};
+use futures_util::stream::Stream;
 use std::{pin::Pin, rc::Rc, sync::Arc};
 
 #[async_stream(item = i32)]
@@ -184,30 +184,28 @@ impl Trait for A {
     }
 }
 
-#[test]
-fn test() {
+#[tokio::test]
+async fn test() {
     // https://github.com/alexcrichton/futures-await/issues/45
     #[async_stream(item = ())]
     async fn _stream10() {
         yield;
     }
 
-    block_on(async {
-        let mut v = 0..=1;
-        #[for_await]
-        for x in stream1() {
-            assert_eq!(x, v.next().unwrap());
-        }
+    let mut v = 0..=1;
+    #[for_await]
+    for x in stream1() {
+        assert_eq!(x, v.next().unwrap());
+    }
 
-        let mut v = [1, 2, 3, 4, 10].iter();
-        #[for_await]
-        for x in stream3() {
-            assert_eq!(x, *v.next().unwrap());
-        }
+    let mut v = [1, 2, 3, 4, 10].iter();
+    #[for_await]
+    for x in stream3() {
+        assert_eq!(x, *v.next().unwrap());
+    }
 
-        #[for_await]
-        for x in A(11).take_self() {
-            assert_eq!(x, 11);
-        }
-    });
+    #[for_await]
+    for x in A(11).take_self() {
+        assert_eq!(x, 11);
+    }
 }
