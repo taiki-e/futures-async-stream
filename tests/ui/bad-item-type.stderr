@@ -1,14 +1,14 @@
 error[E0308]: mismatched types
-  --> $DIR/bad-item-type.rs:15:11
-   |
-15 |     yield val; //~ ERROR mismatched types
-   |           ^^^
-   |           |
-   |           expected enum `std::option::Option`, found integer
-   |           help: try using a variant of the expected type: `Some(val)`
-   |
-   = note: expected type `std::option::Option<_>`
-              found type `{integer}`
+ --> $DIR/bad-item-type.rs:15:11
+  |
+15|     yield val; //~ ERROR mismatched types
+  |           ^^^
+  |           |
+  |           expected enum `std::option::Option`, found integer
+  |           help: try using a variant of the expected type: `Some(val)`
+  |
+  = note: expected type `std::option::Option<_>`
+             found type `{integer}`
 
 error[E0698]: type inside generator must be known in this context
  --> $DIR/bad-item-type.rs:9:9
@@ -23,47 +23,47 @@ note: the type is part of the generator because of this `yield`
   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 error[E0698]: type inside generator must be known in this context
-  --> $DIR/bad-item-type.rs:14:9
-   |
-14 |     let val = val.unwrap();
-   |         ^^^ cannot infer type for `{integer}`
-   |
+ --> $DIR/bad-item-type.rs:14:9
+  |
+14|     let val = val.unwrap();
+  |         ^^^ cannot infer type for `{integer}`
+  |
 note: the type is part of the generator because of this `yield`
-  --> $DIR/bad-item-type.rs:7:1
-   |
-7  | #[async_stream(item = Option<i32>)]
-   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ --> $DIR/bad-item-type.rs:7:1
+  |
+7 | #[async_stream(item = Option<i32>)]
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 error[E0698]: type inside generator must be known in this context
-  --> $DIR/bad-item-type.rs:15:11
-   |
-15 |     yield val; //~ ERROR mismatched types
-   |           ^^^ cannot infer type for `{integer}`
-   |
+ --> $DIR/bad-item-type.rs:15:11
+  |
+15|     yield val; //~ ERROR mismatched types
+  |           ^^^ cannot infer type for `{integer}`
+  |
 note: the type is part of the generator because of this `yield`
-  --> $DIR/bad-item-type.rs:7:1
-   |
-7  | #[async_stream(item = Option<i32>)]
-   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ --> $DIR/bad-item-type.rs:7:1
+  |
+7 | #[async_stream(item = Option<i32>)]
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 error[E0308]: mismatched types
-  --> $DIR/bad-item-type.rs:23:11
-   |
-23 |     yield (1, 2) //~ ERROR mismatched types
-   |           ^^^^^^ expected integer, found tuple
-   |
-   = note: expected type `{integer}`
-              found type `({integer}, {integer})`
+ --> $DIR/bad-item-type.rs:23:11
+  |
+23|     yield (1, 2) //~ ERROR mismatched types
+  |           ^^^^^^ expected integer, found tuple
+  |
+  = note: expected type `{integer}`
+             found type `({integer}, {integer})`
 
 error[E0271]: type mismatch resolving `<impl futures_core::stream::Stream as futures_core::stream::Stream>::Item == (i32, i32)`
-  --> $DIR/bad-item-type.rs:18:23
-   |
-18 | #[async_stream(item = (i32, i32))]
-   |                       ^^^^^^^^^^ expected integer, found tuple
-   |
-   = note: expected type `{integer}`
-              found type `(i32, i32)`
-   = note: the return type of a function must have a statically known size
+ --> $DIR/bad-item-type.rs:18:23
+  |
+18| #[async_stream(item = (i32, i32))]
+  |                       ^^^^^^^^^^ expected integer, found tuple
+  |
+  = note: expected type `{integer}`
+             found type `(i32, i32)`
+  = note: the return type of a function must have a statically known size
 
 error[E0698]: type inside generator must be known in this context
   --> $DIR/bad-item-type.rs:18:1
@@ -124,6 +124,3 @@ note: the type is part of the generator because of this `yield`
    |
 18 | #[async_stream(item = (i32, i32))]
    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Some errors have detailed explanations: E0271, E0308, E0698.
-For more information about an error, try `rustc --explain E0271`.

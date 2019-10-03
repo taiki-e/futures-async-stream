@@ -1,11 +1,11 @@
 error[E0277]: the `?` operator can only be applied to values that implement `std::ops::Try`
-  --> $DIR/question-mark-await-type-error.rs:16:9
-   |
-16 |         async {}.await?; //~ ERROR the `?` operator can only be applied to values that implement `std::ops::Try`
-   |         ^^^^^^^^^^^^^^^ the `?` operator cannot be applied to type `()`
-   |
-   = help: the trait `std::ops::Try` is not implemented for `()`
-   = note: required by `std::ops::Try::into_result`
+ --> $DIR/question-mark-await-type-error.rs:16:9
+  |
+16|         async {}.await?; //~ ERROR the `?` operator can only be applied to values that implement `std::ops::Try`
+  |         ^^^^^^^^^^^^^^^ the `?` operator cannot be applied to type `()`
+  |
+  = help: the trait `std::ops::Try` is not implemented for `()`
+  = note: required by `std::ops::Try::into_result`
 
 error[E0698]: type inside `async` object must be known in this context
   --> $DIR/question-mark-await-type-error.rs:15:15
@@ -44,18 +44,6 @@ note: the type is part of the `async` object because of this `await`
    |         ^^^^^^^^^^^^^^
 
 error[E0698]: type inside `async` object must be known in this context
-  --> $DIR/question-mark-await-type-error.rs:15:15
-   |
-15 |     for _i in 1..2 {
-   |               ^^^^ cannot infer type for `{integer}`
-   |
-note: the type is part of the `async` object because of this `await`
-  --> $DIR/question-mark-await-type-error.rs:16:9
-   |
-16 |         async {}.await?; //~ ERROR the `?` operator can only be applied to values that implement `std::ops::Try`
-   |         ^^^^^^^^^^^^^^
-
-error[E0698]: type inside `async` object must be known in this context
   --> $DIR/question-mark-await-type-error.rs:15:9
    |
 15 |     for _i in 1..2 {
@@ -68,22 +56,22 @@ note: the type is part of the `async` object because of this `await`
    |         ^^^^^^^^^^^^^^
 
 error[E0277]: the `?` operator can only be applied to values that implement `std::ops::Try`
-  --> $DIR/question-mark-await-type-error.rs:29:5
-   |
-29 |     #[for_await]
-   |     ^^^^^^^^^^^^ the `?` operator cannot be applied to type `()`
-   |
-   = help: the trait `std::ops::Try` is not implemented for `()`
-   = note: required by `std::ops::Try::into_result`
+ --> $DIR/question-mark-await-type-error.rs:29:5
+  |
+29|     #[for_await]
+  |     ^^^^^^^^^^^^ the `?` operator cannot be applied to type `()`
+  |
+  = help: the trait `std::ops::Try` is not implemented for `()`
+  = note: required by `std::ops::Try::into_result`
 
 error[E0277]: the `?` operator can only be applied to values that implement `std::ops::Try`
-  --> $DIR/question-mark-await-type-error.rs:23:18
-   |
-23 |         async {}.await?; //~ ERROR the `?` operator can only be applied to values that implement `std::ops::Try`
-   |                  ^^^^^^ the `?` operator cannot be applied to type `()`
-   |
-   = help: the trait `std::ops::Try` is not implemented for `()`
-   = note: required by `std::ops::Try::into_result`
+ --> $DIR/question-mark-await-type-error.rs:23:18
+  |
+23|         async {}.await?; //~ ERROR the `?` operator can only be applied to values that implement `std::ops::Try`
+  |                  ^^^^^^ the `?` operator cannot be applied to type `()`
+  |
+  = help: the trait `std::ops::Try` is not implemented for `()`
+  = note: required by `std::ops::Try::into_result`
 
 error[E0698]: type inside generator must be known in this context
   --> $DIR/question-mark-await-type-error.rs:22:15
@@ -122,18 +110,6 @@ note: the type is part of the generator because of this `yield`
    |                  ^^^^^
 
 error[E0698]: type inside generator must be known in this context
-  --> $DIR/question-mark-await-type-error.rs:22:15
-   |
-22 |     for _i in 1..2 {
-   |               ^^^^ cannot infer type for `{integer}`
-   |
-note: the type is part of the generator because of this `yield`
-  --> $DIR/question-mark-await-type-error.rs:23:18
-   |
-23 |         async {}.await?; //~ ERROR the `?` operator can only be applied to values that implement `std::ops::Try`
-   |                  ^^^^^
-
-error[E0698]: type inside generator must be known in this context
   --> $DIR/question-mark-await-type-error.rs:22:9
    |
 22 |     for _i in 1..2 {
@@ -146,13 +122,10 @@ note: the type is part of the generator because of this `yield`
    |                  ^^^^^
 
 error[E0277]: the `?` operator can only be applied to values that implement `std::ops::Try`
-  --> $DIR/question-mark-await-type-error.rs:42:18
-   |
-42 |         async {}.await?;
-   |                  ^^^^^^ the `?` operator cannot be applied to type `()`
-   |
-   = help: the trait `std::ops::Try` is not implemented for `()`
-   = note: required by `std::ops::Try::into_result`
-
-Some errors have detailed explanations: E0277, E0698.
-For more information about an error, try `rustc --explain E0277`.
+ --> $DIR/question-mark-await-type-error.rs:42:18
+  |
+42|         async {}.await?;
+  |                  ^^^^^^ the `?` operator cannot be applied to type `()`
+  |
+  = help: the trait `std::ops::Try` is not implemented for `()`
+  = note: required by `std::ops::Try::into_result`
