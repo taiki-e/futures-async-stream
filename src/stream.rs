@@ -75,7 +75,7 @@ where
 // =================================================================================================
 // Next
 
-// This is equivalent to the `futures::StreamExt::next` method.
+// This is equivalent to the `futures_util::StreamExt::next` method.
 // But we want to make this crate dependency as small as possible, so we define our `next` function.
 #[doc(hidden)]
 pub fn next<S>(stream: &mut S) -> impl Future<Output = Option<S::Item>> + '_

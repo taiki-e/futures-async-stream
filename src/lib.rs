@@ -10,7 +10,7 @@
 //!
 //! ```rust
 //! #![feature(stmt_expr_attributes, proc_macro_hygiene)]
-//! use futures::stream::Stream;
+//! use futures_util::stream::Stream;
 //! use futures_async_stream::for_await;
 //!
 //! async fn collect(stream: impl Stream<Item = i32>) -> Vec<i32> {
@@ -33,7 +33,7 @@
 //!
 //! ```rust
 //! #![feature(generators)]
-//! use futures::stream::Stream;
+//! use futures_util::stream::Stream;
 //! use futures_async_stream::async_stream;
 //!
 //! // Returns a stream of i32
@@ -55,7 +55,7 @@
 //!
 //! ```rust
 //! #![feature(generators, proc_macro_hygiene)]
-//! use futures::stream::Stream;
+//! use futures_util::stream::Stream;
 //! use futures_async_stream::async_stream_block;
 //!
 //! fn foo() -> impl Stream<Item = i32> {
@@ -98,7 +98,7 @@
 //!
 //! ```rust
 //! #![feature(generators)]
-//! use futures::stream::Stream;
+//! use futures_util::stream::Stream;
 //! use futures_async_stream::async_stream;
 //! use std::pin::Pin;
 //!
@@ -126,7 +126,7 @@
 //!
 //! ```rust
 //! #![feature(generators)]
-//! use futures::stream::Stream;
+//! use futures_util::stream::Stream;
 //! use futures_async_stream::async_try_stream;
 //!
 //! #[async_try_stream(ok = i32, error = Box<dyn std::error::Error + Send + Sync>)]
@@ -145,7 +145,7 @@
 //! You can write this by combining `while let` loop, `.await`, `pin_mut` macro, and `StreamExt::next()` method:
 //!
 //! ```rust
-//! use futures::{
+//! use futures_util::{
 //!     pin_mut,
 //!     stream::{Stream, StreamExt},
 //! };
@@ -165,7 +165,7 @@
 //! You can write this by manually implementing the combinator:
 //!
 //! ```rust
-//! use futures::{
+//! use futures_util::{
 //!     stream::Stream,
 //!     ready,
 //!     task::{Context, Poll},
