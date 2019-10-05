@@ -1,13 +1,10 @@
 # futures-async-stream
 
-[![ci-badge]][ci-url]
 [![crates-badge]][crates-url]
 [![docs-badge]][docs-url]
 [![license-badge]][license]
 ![rustc-badge]
 
-[ci-badge]: https://github.com/taiki-e/futures-async-stream/workflows/ci/badge.svg
-[ci-url]: https://github.com/taiki-e/futures-async-stream/actions?workflow=ci
 [crates-badge]: https://img.shields.io/crates/v/futures-async-stream.svg
 [crates-url]: https://crates.io/crates/futures-async-stream/
 [docs-badge]: https://docs.rs/futures-async-stream/badge.svg
