@@ -1,19 +1,19 @@
 # futures-async-stream
 
-[![Build Status][azure-badge]][azure-url]
-[![Crates.io][crates-version-badge]][crates-url]
-[![Docs.rs][docs-badge]][docs-url]
-[![License][crates-license-badge]][crates-url]
-![Minimum supported Rust version][rustc-badge]
+[![ci-badge]][ci-url]
+[![crates-badge]][crates-url]
+[![docs-badge]][docs-url]
+[![license-badge]][license]
+![rustc-badge]
 
-[azure-badge]: https://dev.azure.com/taiki-e/taiki-e/_apis/build/status/taiki-e.futures-async-stream?branchName=master
-[azure-url]: https://dev.azure.com/taiki-e/taiki-e/_build/latest?definitionId=4&branchName=master
-[crates-version-badge]: https://img.shields.io/crates/v/futures-async-stream.svg
-[crates-license-badge]: https://img.shields.io/crates/l/futures-async-stream.svg
+[ci-badge]: https://github.com/taiki-e/futures-async-stream/workflows/ci/badge.svg
+[ci-url]: https://github.com/taiki-e/futures-async-stream/actions?workflow=ci
 [crates-badge]: https://img.shields.io/crates/v/futures-async-stream.svg
 [crates-url]: https://crates.io/crates/futures-async-stream/
 [docs-badge]: https://docs.rs/futures-async-stream/badge.svg
 [docs-url]: https://docs.rs/futures-async-stream/
+[license-badge]: https://img.shields.io/crates/l/futures-async-stream.svg
+[license]: #license
 [rustc-badge]: https://img.shields.io/badge/rustc-nightly-lightgray.svg
 
 Async stream for Rust and the futures crate.
