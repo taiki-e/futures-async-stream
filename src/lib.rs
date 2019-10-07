@@ -10,8 +10,8 @@
 //!
 //! ```rust
 //! #![feature(stmt_expr_attributes, proc_macro_hygiene)]
-//! use futures_util::stream::Stream;
 //! use futures_async_stream::for_await;
+//! use futures_util::stream::Stream;
 //!
 //! async fn collect(stream: impl Stream<Item = i32>) -> Vec<i32> {
 //!     let mut vec = Vec::new();
@@ -55,8 +55,8 @@
 //!
 //! ```rust
 //! #![feature(generators, proc_macro_hygiene)]
-//! use futures_util::stream::Stream;
 //! use futures_async_stream::async_stream_block;
+//! use futures_util::stream::Stream;
 //!
 //! fn foo() -> impl Stream<Item = i32> {
 //!     async_stream_block! {
@@ -98,8 +98,8 @@
 //!
 //! ```rust
 //! #![feature(generators)]
-//! use futures_util::stream::Stream;
 //! use futures_async_stream::async_stream;
+//! use futures_util::stream::Stream;
 //! use std::pin::Pin;
 //!
 //! // The trait itself can be defined without unstable features.
@@ -126,8 +126,8 @@
 //!
 //! ```rust
 //! #![feature(generators)]
-//! use futures_util::stream::Stream;
 //! use futures_async_stream::async_try_stream;
+//! use futures_util::stream::Stream;
 //!
 //! #[async_try_stream(ok = i32, error = Box<dyn std::error::Error + Send + Sync>)]
 //! async fn foo(stream: impl Stream<Item = String>) {
@@ -166,8 +166,8 @@
 //!
 //! ```rust
 //! use futures_util::{
-//!     stream::Stream,
 //!     ready,
+//!     stream::Stream,
 //!     task::{Context, Poll},
 //! };
 //! use pin_project::pin_project;
