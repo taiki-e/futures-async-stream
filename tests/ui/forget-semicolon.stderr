@@ -1,10 +1,10 @@
 error[E0308]: mismatched types
-  --> $DIR/forget-semicolon.rs:10:5
-   |
-10 |     Some(()) //~ ERROR mismatched types
-   |     ^^^^^^^^- help: try adding a semicolon: `;`
-   |     |
-   |     expected (), found enum `std::option::Option`
-   |
-   = note: expected type `()`
-              found type `std::option::Option<()>`
+ --> $DIR/forget-semicolon.rs:8:5
+  |
+8 |     Some(()) //~ ERROR mismatched types
+  |     ^^^^^^^^- help: try adding a semicolon: `;`
+  |     |
+  |     expected (), found enum `std::option::Option`
+  |
+  = note: expected type `()`
+             found type `std::option::Option<()>`

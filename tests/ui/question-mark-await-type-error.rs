@@ -1,5 +1,3 @@
-// compile-fail
-
 #![feature(generators, stmt_expr_attributes, proc_macro_hygiene)]
 
 use futures_async_stream::{async_stream, for_await};
