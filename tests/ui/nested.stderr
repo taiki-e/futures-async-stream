@@ -1,5 +1,5 @@
 error[E0727]: `async` generators are not yet supported
-  --> $DIR/nested.rs:19:13
+  --> $DIR/nested.rs:17:13
    |
-19 |             yield i * i; //~ ERROR `async` generators are not yet supported [E0727]
+17 |             yield i * i; //~ ERROR `async` generators are not yet supported [E0727]
    |             ^^^^^^^^^^^

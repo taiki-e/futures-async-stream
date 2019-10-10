@@ -1,5 +1,5 @@
 error: unexpected end of input, expected `item`
- --> $DIR/missing-item.rs:7:1
+ --> $DIR/missing-item.rs:5:1
   |
-7 | #[async_stream] //~ ERROR unexpected end of input, expected `item`
+5 | #[async_stream] //~ ERROR unexpected end of input, expected `item`
   | ^^^^^^^^^^^^^^^
