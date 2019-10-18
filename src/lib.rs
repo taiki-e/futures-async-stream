@@ -211,8 +211,7 @@
 ))]
 #![warn(unsafe_code)]
 #![warn(missing_docs, rust_2018_idioms, single_use_lifetimes, unreachable_pub)]
-#![warn(clippy::all, clippy::pedantic)]
-#![allow(clippy::used_underscore_binding)]
+#![warn(clippy::all)]
 #![feature(gen_future, generator_trait)]
 
 /// Processes streams using a for loop.
