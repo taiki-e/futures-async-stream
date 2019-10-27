@@ -3,6 +3,7 @@ error[E0412]: cannot find type `Left` in this scope
   |
 5 | #[async_stream(item = Left)] //~ ERROR cannot find type `Left` in this scope
   |                       ^^^^ not found in this scope
+  |
 help: there is an enum variant `core::fmt::Alignment::Left` and 9 others; try using the variant's enum
   |
 5 | #[async_stream(item = core::fmt::Alignment)] //~ ERROR cannot find type `Left` in this scope
