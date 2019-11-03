@@ -1,7 +1,7 @@
-error: only foreign functions are allowed to be C-variadic
+error[E0743]: only foreign functions are allowed to be C-variadic
  --> $DIR/invalid-function.rs:9:16
   |
-9 | fn variadic(_: ...) {} //~ ERROR async stream may not be variadic
+9 | fn variadic(_: ...) {} //~ ERROR only foreign functions are allowed to be C-variadic
   |                ^^^
 
 error: async stream must be declared as async
