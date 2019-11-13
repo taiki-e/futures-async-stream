@@ -2,8 +2,8 @@
 #![feature(generators, stmt_expr_attributes, proc_macro_hygiene, impl_trait_in_bindings)]
 #![allow(incomplete_features)]
 
+use futures::{executor::block_on, stream::Stream};
 use futures_async_stream::{async_stream, async_try_stream, async_try_stream_block, for_await};
-use futures_util::stream::Stream;
 
 #[async_stream(item = T)]
 async fn iter<T>(iter: impl IntoIterator<Item = T>) {
@@ -66,22 +66,24 @@ pub async fn dyn_trait(stream: impl Stream<Item = String>) {
     }
 }
 
-#[tokio::test]
-async fn test() {
-    let mut v = [Ok(0), Err(1)].iter();
-    #[for_await]
-    for x in stream1() {
-        assert_eq!(x, *v.next().unwrap());
-    }
+#[test]
+fn test() {
+    block_on(async {
+        let mut v = [Ok(0), Err(1)].iter();
+        #[for_await]
+        for x in stream1() {
+            assert_eq!(x, *v.next().unwrap());
+        }
 
-    let mut v = [1, 2, 3, 4, 10].iter();
-    #[for_await]
-    for x in stream3(v.clone().cloned().take(4)) {
-        assert_eq!(x.unwrap(), *v.next().unwrap());
-    }
+        let mut v = [1, 2, 3, 4, 10].iter();
+        #[for_await]
+        for x in stream3(v.clone().cloned().take(4)) {
+            assert_eq!(x.unwrap(), *v.next().unwrap());
+        }
 
-    #[for_await]
-    for x in stream3(Vec::new()) {
-        assert_eq!(Err(0), x)
-    }
+        #[for_await]
+        for x in stream3(Vec::new()) {
+            assert_eq!(Err(0), x)
+        }
+    })
 }

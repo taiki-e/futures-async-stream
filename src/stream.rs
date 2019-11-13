@@ -26,7 +26,6 @@ where
 
 /// A wrapper around generators used to implement `Stream` for `async`/`await` code.
 #[pin_project]
-#[derive(Debug)]
 struct GenStream<G, T> {
     #[pin]
     gen: G,
@@ -75,7 +74,7 @@ where
 // =================================================================================================
 // Next
 
-// This is equivalent to the `futures_util::StreamExt::next` method.
+// This is equivalent to the `futures::stream::StreamExt::next` method.
 // But we want to make this crate dependency as small as possible, so we define our `next` function.
 #[doc(hidden)]
 pub fn next<S>(stream: &mut S) -> impl Future<Output = Option<S::Item>> + '_
@@ -85,12 +84,9 @@ where
     Next { stream }
 }
 
-#[derive(Debug)]
 struct Next<'a, S> {
     stream: &'a mut S,
 }
-
-impl<S> Unpin for Next<'_, S> where S: Unpin {}
 
 impl<S> Future for Next<'_, S>
 where

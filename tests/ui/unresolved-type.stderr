@@ -10,10 +10,10 @@ help: there is an enum variant `core::fmt::Alignment::Left` and 9 others; try us
   |                       ^^^^^^^^^^^^^^^^^^^^
 5 | #[async_stream(item = core::fmt::rt::v1::Alignment)] //~ ERROR cannot find type `Left` in this scope
   |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-5 | #[async_stream(item = futures_core::core_reexport::fmt::Alignment)] //~ ERROR cannot find type `Left` in this scope
-  |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-5 | #[async_stream(item = futures_core::core_reexport::fmt::rt::v1::Alignment)] //~ ERROR cannot find type `Left` in this scope
-  |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+5 | #[async_stream(item = futures::core_reexport::fmt::Alignment)] //~ ERROR cannot find type `Left` in this scope
+  |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+5 | #[async_stream(item = futures::core_reexport::fmt::rt::v1::Alignment)] //~ ERROR cannot find type `Left` in this scope
+  |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     and 5 other candidates
 
 error[E0698]: type inside generator must be known in this context
