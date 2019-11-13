@@ -204,7 +204,7 @@
 //!
 //! [futures-await]: https://github.com/alexcrichton/futures-await
 
-#![doc(html_root_url = "https://docs.rs/futures-async-stream/0.1.0")]
+#![doc(html_root_url = "https://docs.rs/futures-async-stream/0.1.1")]
 #![doc(test(
     no_crate_inject,
     attr(deny(warnings, rust_2018_idioms, single_use_lifetimes), allow(dead_code))
