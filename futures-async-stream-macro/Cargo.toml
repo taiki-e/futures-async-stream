@@ -1,6 +1,6 @@
 [package]
 name = "futures-async-stream-macro"
-version = "0.1.0-alpha.7"
+version = "0.1.0"
 authors = ["Taiki Endo <te316e89@gmail.com>"]
 edition = "2018"
 license = "Apache-2.0 OR MIT"
@@ -12,13 +12,8 @@ description = """
 Definition of the `#[async_stream]` macro for the `futures-async-stream` crate as well as a few other assorted macros.
 """
 
-[package.metadata.docs.rs]
-all-features = true
-
 [lib]
 proc-macro = true
-
-[features]
 
 [dependencies]
 proc-macro2 = "1.0"

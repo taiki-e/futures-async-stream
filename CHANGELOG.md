@@ -6,6 +6,10 @@ This project adheres to [Semantic Versioning](https://semver.org).
 
 ## [Unreleased]
 
+## [0.1.0] - 2019-11-13
+
+* Updated `futures` to 0.3.0.
+
 ## [0.1.0-alpha.7] - 2019-09-25
 
 * Updated `pin-project` to 0.4.
@@ -78,7 +82,8 @@ This project adheres to [Semantic Versioning](https://semver.org).
 
 Initial release
 
-[Unreleased]: https://github.com/taiki-e/futures-async-stream/compare/v0.1.0-alpha.7...HEAD
+[Unreleased]: https://github.com/taiki-e/futures-async-stream/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/taiki-e/futures-async-stream/compare/v0.1.0-alpha.7...v0.1.0
 [0.1.0-alpha.7]: https://github.com/taiki-e/futures-async-stream/compare/v0.1.0-alpha.6...v0.1.0-alpha.7
 [0.1.0-alpha.6]: https://github.com/taiki-e/futures-async-stream/compare/v0.1.0-alpha.5...v0.1.0-alpha.6
 [0.1.0-alpha.5]: https://github.com/taiki-e/futures-async-stream/compare/v0.1.0-alpha.4...v0.1.0-alpha.5

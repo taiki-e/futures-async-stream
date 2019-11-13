@@ -23,8 +23,8 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-futures-async-stream = "0.1.0-alpha.7"
-futures-preview = "0.3.0-alpha.19"
+futures-async-stream = "0.1"
+futures = "0.3"
 ```
 
 The current futures-async-stream requires Rust nightly 2019-08-21 or later.
@@ -201,8 +201,8 @@ You can write this by manually implementing the combinator:
 
 ```rust
 use futures::{
-    stream::Stream,
     ready,
+    stream::Stream,
     task::{Context, Poll},
 };
 use pin_project::pin_project;
