@@ -215,19 +215,19 @@
 #![warn(clippy::all)]
 #![feature(gen_future, generator_trait)]
 
-/// Processes streams using a for loop.
+#[doc(inline)]
 pub use futures_async_stream_macro::for_await;
 
-/// Creates streams via generators.
+#[doc(inline)]
 pub use futures_async_stream_macro::async_stream;
 
-/// Creates streams via generators.
+#[doc(inline)]
 pub use futures_async_stream_macro::async_stream_block;
 
-/// Creates streams via generators.
+#[doc(inline)]
 pub use futures_async_stream_macro::async_try_stream;
 
-/// Creates streams via generators.
+#[doc(inline)]
 pub use futures_async_stream_macro::async_try_stream_block;
 
 // Not public API.
