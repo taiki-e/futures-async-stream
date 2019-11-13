@@ -10,8 +10,8 @@
 //!
 //! ```rust
 //! #![feature(stmt_expr_attributes, proc_macro_hygiene)]
+//! use futures::stream::Stream;
 //! use futures_async_stream::for_await;
-//! use futures_util::stream::Stream;
 //!
 //! async fn collect(stream: impl Stream<Item = i32>) -> Vec<i32> {
 //!     let mut vec = Vec::new();
@@ -33,7 +33,7 @@
 //!
 //! ```rust
 //! #![feature(generators)]
-//! use futures_util::stream::Stream;
+//! use futures::stream::Stream;
 //! use futures_async_stream::async_stream;
 //!
 //! // Returns a stream of i32
@@ -55,8 +55,8 @@
 //!
 //! ```rust
 //! #![feature(generators, proc_macro_hygiene)]
+//! use futures::stream::Stream;
 //! use futures_async_stream::async_stream_block;
-//! use futures_util::stream::Stream;
 //!
 //! fn foo() -> impl Stream<Item = i32> {
 //!     async_stream_block! {
@@ -98,8 +98,8 @@
 //!
 //! ```rust
 //! #![feature(generators)]
+//! use futures::stream::Stream;
 //! use futures_async_stream::async_stream;
-//! use futures_util::stream::Stream;
 //! use std::pin::Pin;
 //!
 //! // The trait itself can be defined without unstable features.
@@ -126,8 +126,8 @@
 //!
 //! ```rust
 //! #![feature(generators)]
+//! use futures::stream::Stream;
 //! use futures_async_stream::async_try_stream;
-//! use futures_util::stream::Stream;
 //!
 //! #[async_try_stream(ok = i32, error = Box<dyn std::error::Error + Send + Sync>)]
 //! async fn foo(stream: impl Stream<Item = String>) {
@@ -145,7 +145,7 @@
 //! You can write this by combining `while let` loop, `.await`, `pin_mut` macro, and `StreamExt::next()` method:
 //!
 //! ```rust
-//! use futures_util::{
+//! use futures::{
 //!     pin_mut,
 //!     stream::{Stream, StreamExt},
 //! };
@@ -165,7 +165,7 @@
 //! You can write this by manually implementing the combinator:
 //!
 //! ```rust
-//! use futures_util::{
+//! use futures::{
 //!     ready,
 //!     stream::Stream,
 //!     task::{Context, Poll},
@@ -210,7 +210,8 @@
     attr(deny(warnings, rust_2018_idioms, single_use_lifetimes), allow(dead_code))
 ))]
 #![warn(unsafe_code)]
-#![warn(missing_docs, rust_2018_idioms, single_use_lifetimes, unreachable_pub)]
+#![warn(missing_docs)]
+#![warn(rust_2018_idioms, single_use_lifetimes, unreachable_pub)]
 #![warn(clippy::all)]
 #![feature(gen_future, generator_trait)]
 
