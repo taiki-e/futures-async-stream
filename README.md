@@ -6,9 +6,9 @@
 ![rustc-badge]
 
 [crates-badge]: https://img.shields.io/crates/v/futures-async-stream.svg
-[crates-url]: https://crates.io/crates/futures-async-stream/
+[crates-url]: https://crates.io/crates/futures-async-stream
 [docs-badge]: https://docs.rs/futures-async-stream/badge.svg
-[docs-url]: https://docs.rs/futures-async-stream/
+[docs-url]: https://docs.rs/futures-async-stream
 [license-badge]: https://img.shields.io/crates/l/futures-async-stream.svg
 [license]: #license
 [rustc-badge]: https://img.shields.io/badge/rustc-nightly-lightgray.svg
