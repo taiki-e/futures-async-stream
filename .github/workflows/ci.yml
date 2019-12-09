@@ -26,6 +26,7 @@ jobs:
           #
           # Tests are not run as tests may require newer versions of Rust.
           - nightly-2019-08-21
+          - nightly-2019-12-09
           - nightly
     steps:
       - uses: actions/checkout@master

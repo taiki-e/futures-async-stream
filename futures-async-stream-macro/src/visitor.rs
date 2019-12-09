@@ -176,7 +176,7 @@ impl Visitor {
                 let mut __pinned = #base;
                 loop {
                     if let ::futures_async_stream::reexport::task::Poll::Ready(x) =
-                        ::futures_async_stream::stream::poll_with_tls_context(unsafe {
+                        ::futures_async_stream::future::poll_with_tls_context(unsafe {
                             ::futures_async_stream::reexport::pin::Pin::new_unchecked(&mut __pinned)
                         })
                     {
