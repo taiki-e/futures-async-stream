@@ -23,9 +23,8 @@ jobs:
           # This is the minimum supported Rust version of this crate.
           # When updating this, the reminder to update the minimum supported
           # Rust version in README.md.
-          #
-          # Tests are not run as tests may require newer versions of Rust.
           - nightly-2019-08-21
+          - nightly-2019-12-09
           - nightly
     steps:
       - uses: actions/checkout@master
@@ -37,14 +36,14 @@ jobs:
         if: matrix.rust == 'nightly'
         run: |
           cargo install cargo-hack
-      - name: cargo check
-        if: matrix.rust == 'nightly-2019-08-21'
-        run: |
-          cargo check --all
       - name: cargo test
-        if: matrix.rust != 'nightly-2019-08-21'
+        if: matrix.rust != 'nightly'
         run: |
           cargo test --all
+      - name: cargo test
+        if: matrix.rust == 'nightly'
+        run: |
+          cargo test --all --all-features -- -Zunstable-options --include-ignored
       # Refs: https://github.com/rust-lang/cargo/issues/5657
       - name: cargo check -Zminimal-versions
         if: matrix.rust == 'nightly'

@@ -1,5 +1,6 @@
 #![warn(rust_2018_idioms)]
 
+#[ignore]
 #[test]
 fn ui() {
     let t = trybuild::TestCases::new();

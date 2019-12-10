@@ -7,7 +7,7 @@ error[E0308]: mismatched types
    |           expected enum `std::option::Option`, found integer
    |           help: try using a variant of the expected enum: `Some(val)`
    |
-   = note: expected type `std::option::Option<_>`
+   = note: expected enum `std::option::Option<_>`
               found type `{integer}`
 
 error[E0698]: type inside generator must be known in this context
@@ -53,7 +53,7 @@ error[E0308]: mismatched types
    |           ^^^^^^ expected integer, found tuple
    |
    = note: expected type `{integer}`
-              found type `({integer}, {integer})`
+             found tuple `({integer}, {integer})`
 
 error[E0271]: type mismatch resolving `<impl futures_core::stream::Stream as futures_core::stream::Stream>::Item == (i32, i32)`
   --> $DIR/bad-item-type.rs:16:23
@@ -62,7 +62,7 @@ error[E0271]: type mismatch resolving `<impl futures_core::stream::Stream as fut
    |                       ^^^^^^^^^^ expected integer, found tuple
    |
    = note: expected type `{integer}`
-              found type `(i32, i32)`
+             found tuple `(i32, i32)`
    = note: the return type of a function must have a statically known size
 
 error[E0698]: type inside generator must be known in this context
