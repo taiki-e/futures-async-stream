@@ -6,6 +6,12 @@ This project adheres to [Semantic Versioning](https://semver.org).
 
 ## [Unreleased]
 
+## [0.1.2] - 2019-12-10
+
+* [Fixed build failure on latest nightly.][31]
+
+[31]: https://github.com/taiki-e/futures-async-stream/pull/31
+
 ## [0.1.1] - 2019-11-13
 
 * Fixed duplicate documentation.
@@ -86,7 +92,8 @@ This project adheres to [Semantic Versioning](https://semver.org).
 
 Initial release
 
-[Unreleased]: https://github.com/taiki-e/futures-async-stream/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/taiki-e/futures-async-stream/compare/v0.1.2...HEAD
+[0.1.2]: https://github.com/taiki-e/futures-async-stream/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/taiki-e/futures-async-stream/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/taiki-e/futures-async-stream/compare/v0.1.0-alpha.7...v0.1.0
 [0.1.0-alpha.7]: https://github.com/taiki-e/futures-async-stream/compare/v0.1.0-alpha.6...v0.1.0-alpha.7

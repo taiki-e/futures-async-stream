@@ -1,6 +1,6 @@
 [package]
 name = "futures-async-stream"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["Taiki Endo <te316e89@gmail.com>"]
 edition = "2018"
 license = "Apache-2.0 OR MIT"
@@ -18,7 +18,7 @@ Async stream for Rust and the futures crate.
 members = ["futures-async-stream-macro"]
 
 [dependencies]
-futures-async-stream-macro = { version = "=0.1.1", path = "futures-async-stream-macro", default-features = false }
+futures-async-stream-macro = { version = "=0.1.2", path = "futures-async-stream-macro", default-features = false }
 futures-core = { version = "0.3", default-features = false }
 pin-project = "0.4"
 
