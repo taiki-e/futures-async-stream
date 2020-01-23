@@ -1,6 +1,7 @@
 #![warn(rust_2018_idioms)]
-#![feature(generators, stmt_expr_attributes, proc_macro_hygiene, impl_trait_in_bindings)]
 #![allow(incomplete_features)]
+#![allow(clippy::try_err)]
+#![feature(generators, stmt_expr_attributes, proc_macro_hygiene, impl_trait_in_bindings)]
 
 use futures::{executor::block_on, stream::Stream};
 use futures_async_stream::{async_stream, async_try_stream, async_try_stream_block, for_await};
