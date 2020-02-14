@@ -294,7 +294,7 @@ pub mod future {
         fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
             let this = self.project();
             let _guard = unsafe { set_task_context(cx) };
-            match this.0.resume() {
+            match this.0.resume(()) {
                 GeneratorState::Yielded(()) => Poll::Pending,
                 GeneratorState::Complete(x) => Poll::Ready(x),
             }
@@ -376,7 +376,7 @@ pub mod stream {
         fn poll_next(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
             let this = self.project();
             let _guard = unsafe { set_task_context(cx) };
-            match this.gen.resume() {
+            match this.gen.resume(()) {
                 GeneratorState::Yielded(x) => x.map(Some),
                 GeneratorState::Complete(()) => Poll::Ready(None),
             }
@@ -492,7 +492,7 @@ pub mod try_stream {
 
             let this = self.project();
             let _guard = unsafe { set_task_context(cx) };
-            let res = match this.gen.resume() {
+            let res = match this.gen.resume(()) {
                 GeneratorState::Yielded(x) => x.map(|x| Some(Ok(x))),
                 GeneratorState::Complete(Err(e)) => Poll::Ready(Some(Err(e))),
                 GeneratorState::Complete(Ok(())) => Poll::Ready(None),
