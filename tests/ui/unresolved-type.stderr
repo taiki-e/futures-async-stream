@@ -27,3 +27,4 @@ note: the type is part of the generator because of this `yield`
   |
 5 | #[async_stream(item = Left)] //~ ERROR cannot find type `Left` in this scope
   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  = note: this error originates in an attribute macro (in Nightly builds, run with -Z macro-backtrace for more info)

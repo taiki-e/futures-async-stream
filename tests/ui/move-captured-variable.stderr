@@ -11,7 +11,6 @@ error[E0507]: cannot move out of `a`, a captured variable in an `FnMut` closure
    | |                   move occurs because `a` has type `std::string::String`, which does not implement the `Copy` trait
    | |                   move occurs due to use in generator
 12 | |         };
-   | |          ^
-   | |          |
-   | |__________move out of `a` occurs here
-   |            in this macro invocation
+   | |__________^ move out of `a` occurs here
+   |
+   = note: this error originates in a macro (in Nightly builds, run with -Z macro-backtrace for more info)

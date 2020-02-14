@@ -1,5 +1,5 @@
 status = [
-    "test (nightly-2020-02-08)",
+    "test (nightly-2020-02-14)",
     "test (nightly)",
     "style (clippy)",
     "style (rustfmt)",

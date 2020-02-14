@@ -3,3 +3,5 @@ error: unexpected end of input, expected `item`
   |
 5 | #[async_stream] //~ ERROR unexpected end of input, expected `item`
   | ^^^^^^^^^^^^^^^
+  |
+  = note: this error originates in an attribute macro (in Nightly builds, run with -Z macro-backtrace for more info)
