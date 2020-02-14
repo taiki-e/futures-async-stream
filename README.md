@@ -27,7 +27,7 @@ futures-async-stream = "0.1"
 futures = "0.3"
 ```
 
-The current futures-async-stream requires Rust nightly 2019-08-21 or later.
+The current futures-async-stream requires Rust nightly 2020-02-08 or later.
 
 ## \#\[for_await\]
 
