@@ -6,6 +6,12 @@ This project adheres to [Semantic Versioning](https://semver.org).
 
 ## [Unreleased]
 
+## [0.1.3] - 2020-02-20
+
+* [Fixed build failure on latest nightly.][33]
+
+[33]: https://github.com/taiki-e/futures-async-stream/pull/33
+
 ## [0.1.2] - 2019-12-10
 
 * [Fixed build failure on latest nightly.][31]
