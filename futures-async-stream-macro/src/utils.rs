@@ -50,19 +50,6 @@ where
     *this = f(mem::replace(this, Expr::Verbatim(TokenStream::new())));
 }
 
-pub(super) fn replace_boxed_expr<F>(expr: &mut Option<Box<Expr>>, f: F)
-where
-    F: FnOnce(Expr) -> Expr,
-{
-    if expr.is_none() {
-        expr.replace(Box::new(unit()));
-    }
-
-    if let Some(expr) = expr {
-        replace_expr(&mut **expr, f);
-    }
-}
-
 macro_rules! error {
     ($span:expr, $msg:expr) => {
         syn::Error::new_spanned($span, $msg)

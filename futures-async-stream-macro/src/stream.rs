@@ -290,7 +290,7 @@ pub(super) fn make_gen_body(
         #[allow(unreachable_code)]
         {
             return #ret_value;
-            loop { yield ::futures_async_stream::reexport::task::Poll::Pending }
+            loop { __task_context = yield ::futures_async_stream::reexport::task::Poll::Pending }
         }
     };
     let mut gen_body = TokenStream::new();
@@ -299,7 +299,10 @@ pub(super) fn make_gen_body(
     });
 
     quote! {
-        #gen_function(static move || -> #ret_ty #gen_body)
+        #gen_function(
+            static move |mut __task_context: ::futures_async_stream::future::ResumeTy| -> #ret_ty
+            #gen_body
+        )
     }
 }
 
