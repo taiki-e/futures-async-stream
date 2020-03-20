@@ -204,6 +204,7 @@
 //!
 //! [futures-await]: https://github.com/alexcrichton/futures-await
 
+#![no_std]
 #![doc(html_root_url = "https://docs.rs/futures-async-stream/0.1.3")]
 #![doc(test(
     no_crate_inject,
@@ -229,31 +230,6 @@ pub use futures_async_stream_macro::async_try_stream;
 #[doc(inline)]
 pub use futures_async_stream_macro::async_try_stream_block;
 
-use core::{cell::Cell, ptr::NonNull, task::Context};
-
-thread_local! {
-    static TLS_CX: Cell<Option<NonNull<Context<'static>>>> = Cell::new(None);
-}
-
-struct SetOnDrop(Option<NonNull<Context<'static>>>);
-
-impl Drop for SetOnDrop {
-    fn drop(&mut self) {
-        TLS_CX.with(|tls_cx| {
-            tls_cx.set(self.0.take());
-        });
-    }
-}
-
-// Safety: the returned guard must drop before `cx` is dropped and before
-// any previous guard is dropped.
-unsafe fn set_task_context(cx: &mut Context<'_>) -> SetOnDrop {
-    // transmute the context's lifetime to 'static so we can store it.
-    let cx = core::mem::transmute::<&mut Context<'_>, &mut Context<'static>>(cx);
-    let old_cx = TLS_CX.with(|tls_cx| tls_cx.replace(Some(NonNull::from(cx))));
-    SetOnDrop(old_cx)
-}
-
 // Not public API.
 #[doc(hidden)]
 pub mod future {
@@ -261,69 +237,67 @@ pub mod future {
         future::Future,
         ops::{Generator, GeneratorState},
         pin::Pin,
+        ptr::NonNull,
         task::{Context, Poll},
     };
     use pin_project::pin_project;
 
-    use super::{set_task_context, SetOnDrop, TLS_CX};
+    /// This type is needed because:
+    ///
+    /// a) Generators cannot implement `for<'a, 'b> Generator<&'a mut Context<'b>>`, so we need to pass
+    ///    a raw pointer.
+    /// b) Raw pointers and `NonNull` aren't `Send` or `Sync`, so that would make every single future
+    ///    non-Send/Sync as well, and we don't want that.
+    ///
+    /// It also simplifies the HIR lowering of `.await`.
+    #[doc(hidden)]
+    #[derive(Debug, Copy, Clone)]
+    pub struct ResumeTy(pub(crate) NonNull<Context<'static>>);
 
-    // =================================================================================================
-    // GenFuture
+    unsafe impl Send for ResumeTy {}
+
+    unsafe impl Sync for ResumeTy {}
 
     /// Wrap a generator in a future.
     ///
     /// This function returns a `GenFuture` underneath, but hides it in `impl Trait` to give
     /// better error messages (`impl Future` rather than `GenFuture<[closure.....]>`).
     #[doc(hidden)]
-    pub fn from_generator<T: Generator<Yield = ()>>(x: T) -> impl Future<Output = T::Return> {
-        GenFuture(x)
+    pub fn from_generator<G>(gen: G) -> impl Future<Output = G::Return>
+    where
+        G: Generator<ResumeTy, Yield = ()>,
+    {
+        GenFuture { gen }
     }
 
     /// A wrapper around generators used to implement `Future` for `async`/`await` code.
     #[pin_project]
-    struct GenFuture<T>(#[pin] T);
+    struct GenFuture<G> {
+        #[pin]
+        gen: G,
+    }
 
-    impl<T> Future for GenFuture<T>
+    impl<G> Future for GenFuture<G>
     where
-        T: Generator<Yield = ()>,
+        G: Generator<ResumeTy, Yield = ()>,
     {
-        type Output = T::Return;
+        type Output = G::Return;
 
         fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
             let this = self.project();
-            let _guard = unsafe { set_task_context(cx) };
-            match this.0.resume(()) {
+            match this.gen.resume(ResumeTy(NonNull::from(cx).cast::<Context<'static>>())) {
                 GeneratorState::Yielded(()) => Poll::Pending,
                 GeneratorState::Complete(x) => Poll::Ready(x),
             }
         }
     }
 
-    // =================================================================================================
-    // Poll
-
-    /// Polls a future in the current thread-local task waker.
     #[doc(hidden)]
-    pub fn poll_with_tls_context<F>(f: Pin<&mut F>) -> Poll<F::Output>
+    pub unsafe fn poll_with_context<F>(f: Pin<&mut F>, mut cx: ResumeTy) -> Poll<F::Output>
     where
         F: Future,
     {
-        let cx_ptr = TLS_CX.with(|tls_cx| {
-            // Clear the entry so that nested `get_task_waker` calls
-            // will fail or set their own value.
-            tls_cx.replace(None)
-        });
-        let _reset = SetOnDrop(cx_ptr);
-
-        let mut cx_ptr = cx_ptr.expect("TLS Context not set.");
-
-        // Safety: we've ensured exclusive access to the context by
-        // removing the pointer from TLS, only to be replaced once
-        // we're done with it.
-        //
-        // The pointer that was inserted came from an `&mut Context<'_>`,
-        // so it is safe to treat as mutable.
-        unsafe { F::poll(f, cx_ptr.as_mut()) }
+        F::poll(f, cx.0.as_mut())
     }
 }
 
@@ -335,15 +309,13 @@ pub mod stream {
         marker::PhantomData,
         ops::{Generator, GeneratorState},
         pin::Pin,
+        ptr::NonNull,
         task::{Context, Poll},
     };
     use futures_core::stream::Stream;
     use pin_project::pin_project;
 
-    use super::{set_task_context, SetOnDrop, TLS_CX};
-
-    // =================================================================================================
-    // GenStream
+    use super::future::ResumeTy;
 
     /// Wrap a generator in a stream.
     ///
@@ -352,7 +324,7 @@ pub mod stream {
     #[doc(hidden)]
     pub fn from_generator<G, T>(gen: G) -> impl Stream<Item = T>
     where
-        G: Generator<Yield = Poll<T>, Return = ()>,
+        G: Generator<ResumeTy, Yield = Poll<T>, Return = ()>,
     {
         GenStream { gen, _phantom: PhantomData }
     }
@@ -367,49 +339,29 @@ pub mod stream {
 
     impl<G, T> Stream for GenStream<G, T>
     where
-        G: Generator<Yield = Poll<T>, Return = ()>,
+        G: Generator<ResumeTy, Yield = Poll<T>, Return = ()>,
     {
         type Item = T;
 
         fn poll_next(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
             let this = self.project();
-            let _guard = unsafe { set_task_context(cx) };
-            match this.gen.resume(()) {
+            match this.gen.resume(ResumeTy(NonNull::from(cx).cast::<Context<'static>>())) {
                 GeneratorState::Yielded(x) => x.map(Some),
                 GeneratorState::Complete(()) => Poll::Ready(None),
             }
         }
     }
 
-    // =================================================================================================
-    // Poll
-
-    /// Polls a future in the current thread-local task waker.
     #[doc(hidden)]
-    pub fn poll_next_with_tls_context<S>(s: Pin<&mut S>) -> Poll<Option<S::Item>>
+    pub unsafe fn poll_next_with_context<S>(
+        s: Pin<&mut S>,
+        mut cx: ResumeTy,
+    ) -> Poll<Option<S::Item>>
     where
         S: Stream,
     {
-        let cx_ptr = TLS_CX.with(|tls_cx| {
-            // Clear the entry so that nested `get_task_waker` calls
-            // will fail or set their own value.
-            tls_cx.replace(None)
-        });
-        let _reset = SetOnDrop(cx_ptr);
-
-        let mut cx_ptr = cx_ptr.expect("TLS Context not set.");
-
-        // Safety: we've ensured exclusive access to the context by
-        // removing the pointer from TLS, only to be replaced once
-        // we're done with it.
-        //
-        // The pointer that was inserted came from an `&mut Context<'_>`,
-        // so it is safe to treat as mutable.
-        unsafe { S::poll_next(s, cx_ptr.as_mut()) }
+        S::poll_next(s, cx.0.as_mut())
     }
-
-    // =================================================================================================
-    // Next
 
     // This is equivalent to the `futures::stream::StreamExt::next` method.
     // But we want to make this crate dependency as small as possible, so we define our `next` function.
@@ -444,15 +396,13 @@ pub mod try_stream {
         marker::PhantomData,
         ops::{Generator, GeneratorState},
         pin::Pin,
+        ptr::NonNull,
         task::{Context, Poll},
     };
     use futures_core::stream::{FusedStream, Stream};
     use pin_project::pin_project;
 
-    use super::set_task_context;
-
-    // =================================================================================================
-    // GenStream
+    use super::future::ResumeTy;
 
     /// Wrap a generator in a stream.
     ///
@@ -463,7 +413,7 @@ pub mod try_stream {
         gen: G,
     ) -> impl Stream<Item = Result<T, E>> + FusedStream<Item = Result<T, E>>
     where
-        G: Generator<Yield = Poll<T>, Return = Result<(), E>>,
+        G: Generator<ResumeTy, Yield = Poll<T>, Return = Result<(), E>>,
     {
         GenTryStream { gen, done: false, _phantom: PhantomData }
     }
@@ -479,7 +429,7 @@ pub mod try_stream {
 
     impl<G, T, E> Stream for GenTryStream<G, T, E>
     where
-        G: Generator<Yield = Poll<T>, Return = Result<(), E>>,
+        G: Generator<ResumeTy, Yield = Poll<T>, Return = Result<(), E>>,
     {
         type Item = Result<T, E>;
 
@@ -489,8 +439,8 @@ pub mod try_stream {
             }
 
             let this = self.project();
-            let _guard = unsafe { set_task_context(cx) };
-            let res = match this.gen.resume(()) {
+            let res = match this.gen.resume(ResumeTy(NonNull::from(cx).cast::<Context<'static>>()))
+            {
                 GeneratorState::Yielded(x) => x.map(|x| Some(Ok(x))),
                 GeneratorState::Complete(Err(e)) => Poll::Ready(Some(Err(e))),
                 GeneratorState::Complete(Ok(())) => Poll::Ready(None),
@@ -504,7 +454,7 @@ pub mod try_stream {
 
     impl<G, T, E> FusedStream for GenTryStream<G, T, E>
     where
-        G: Generator<Yield = Poll<T>, Return = Result<(), E>>,
+        G: Generator<ResumeTy, Yield = Poll<T>, Return = Result<(), E>>,
     {
         fn is_terminated(&self) -> bool {
             self.done

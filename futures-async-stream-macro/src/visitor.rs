@@ -8,7 +8,7 @@ use syn::{
 
 use crate::{
     async_stream_block, async_try_stream_block,
-    utils::{expr_compile_error, replace_boxed_expr, replace_expr},
+    utils::{expr_compile_error, replace_expr, unit},
 };
 
 pub(crate) use Scope::{Closure, Future, Stream, TryStream};
@@ -88,9 +88,10 @@ impl Visitor {
                 }
                 Stream | TryStream => {
                     quote! {
-                        match ::futures_async_stream::stream::poll_next_with_tls_context(
+                        match unsafe { ::futures_async_stream::stream::poll_next_with_context(
                             ::futures_async_stream::reexport::pin::Pin::as_mut(&mut __pinned),
-                        ) {
+                            __task_context,
+                        ) } {
                             ::futures_async_stream::reexport::task::Poll::Ready(
                                 ::futures_async_stream::reexport::option::Option::Some(e),
                             ) => e,
@@ -98,7 +99,7 @@ impl Visitor {
                                 ::futures_async_stream::reexport::option::Option::None,
                             ) => break,
                             ::futures_async_stream::reexport::task::Poll::Pending => {
-                                yield ::futures_async_stream::reexport::task::Poll::Pending;
+                                __task_context = yield ::futures_async_stream::reexport::task::Poll::Pending;
                                 continue
                             }
                         }
@@ -129,17 +130,21 @@ impl Visitor {
     }
 
     /// Visits `yield <expr>` in `async_stream` scope.
-    fn visit_yield(&self, expr: &mut ExprYield) {
+    fn visit_yield(&self, expr: &mut Expr) {
         if !self.scope.is_stream() {
             return;
         }
 
-        // Desugar `yield <expr>` into `yield Poll::Ready(<expr>)`.
-        replace_boxed_expr(&mut expr.expr, |expr| {
-            syn::parse_quote! {
-                ::futures_async_stream::reexport::task::Poll::Ready(#expr)
+        // Desugar `yield <expr>` into `__task_context = yield Poll::Ready(<expr>)`.
+        if let Expr::Yield(ExprYield { yield_token, expr: e, .. }) = expr {
+            if e.is_none() {
+                e.replace(Box::new(unit()));
             }
-        });
+
+            *expr = syn::parse_quote!(
+                __task_context = #yield_token ::futures_async_stream::reexport::task::Poll::Ready(#e)
+            );
+        }
     }
 
     /// Visits `async_stream_block!` macro.
@@ -176,14 +181,15 @@ impl Visitor {
                 let mut __pinned = #base;
                 loop {
                     if let ::futures_async_stream::reexport::task::Poll::Ready(x) =
-                        ::futures_async_stream::future::poll_with_tls_context(unsafe {
-                            ::futures_async_stream::reexport::pin::Pin::new_unchecked(&mut __pinned)
-                        })
+                        unsafe { ::futures_async_stream::future::poll_with_context(
+                            ::futures_async_stream::reexport::pin::Pin::new_unchecked(&mut __pinned),
+                            __task_context,
+                        )}
                     {
                         break x;
                     }
 
-                    yield ::futures_async_stream::reexport::task::Poll::Pending
+                    __task_context = yield ::futures_async_stream::reexport::task::Poll::Pending;
                 }
             }})
             .unwrap();
@@ -211,7 +217,7 @@ impl VisitMut for Visitor {
 
         visit_mut::visit_expr_mut(self, expr);
         match expr {
-            Expr::Yield(expr) => self.visit_yield(expr),
+            Expr::Yield(_) => self.visit_yield(expr),
             Expr::Await(_) => self.visit_await(expr),
             Expr::ForLoop(_) => self.visit_for_loop(expr),
             Expr::Macro(_) => self.visit_macro(expr),
