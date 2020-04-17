@@ -2,7 +2,7 @@ error[E0277]: `dyn futures_core::stream::Stream<Item = i32>` cannot be sent betw
   --> $DIR/threads-sendsync.rs:27:17
    |
 5  | fn assert_send<T: Send>(_: T) {}
-   |    -----------    ---- required by this bound in `assert_send`
+   |                   ---- required by this bound in `assert_send`
 ...
 27 |     assert_send(boxed_local()); //~ ERROR `dyn futures_core::stream::Stream<Item = i32>` cannot be sent between threads safely
    |                 ^^^^^^^^^^^^^ `dyn futures_core::stream::Stream<Item = i32>` cannot be sent between threads safely

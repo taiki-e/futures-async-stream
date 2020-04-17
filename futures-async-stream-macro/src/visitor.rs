@@ -63,6 +63,25 @@ impl Visitor {
 
     /// Visits `#[for_await] for <pat> in <expr> { .. }`.
     pub(crate) fn visit_for_loop(&self, expr: &mut Expr) {
+        // Desugar
+        // from:
+        //
+        // #[for_await]
+        // <label> for <pat> in <e> {
+        //     <body.stmts>
+        // }
+        //
+        // into:
+        //
+        // {
+        //     let mut __pinned = <e>;
+        //     let mut __pinned = unsafe { Pin::new_unchecked(&mut __pinned) };
+        //     <label> loop {
+        //         let <pat> = <match_next>;
+        //         <body.stmts>
+        //     }
+        // }
+        //
         if let Expr::ForLoop(ExprForLoop { attrs, label, pat, expr: e, body, .. }) = expr {
             // TODO: Should we allow other attributes?
             if !(attrs.len() == 1 && attrs[0].path.is_ident("for_await")) {
@@ -115,16 +134,13 @@ impl Visitor {
                 }
             };
 
+            body.stmts.insert(0, syn::parse_quote! { let #pat = #match_next; });
             *expr = syn::parse_quote! {{
                 let mut __pinned = #e;
                 let mut __pinned = unsafe {
                     ::futures_async_stream::reexport::pin::Pin::new_unchecked(&mut __pinned)
                 };
-                #label
-                loop {
-                    let #pat = #match_next;
-                    #body
-                }
+                #label loop #body
             }}
         }
     }
