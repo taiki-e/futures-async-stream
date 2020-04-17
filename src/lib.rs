@@ -234,13 +234,15 @@ pub use futures_async_stream_macro::async_try_stream_block;
 #[doc(hidden)]
 pub mod future {
     use core::{
-        future::Future,
         ops::{Generator, GeneratorState},
         pin::Pin,
         ptr::NonNull,
         task::{Context, Poll},
     };
     use pin_project::pin_project;
+
+    #[doc(hidden)]
+    pub use core::future::Future;
 
     /// This type is needed because:
     ///
@@ -293,11 +295,8 @@ pub mod future {
     }
 
     #[doc(hidden)]
-    pub unsafe fn poll_with_context<F>(f: Pin<&mut F>, mut cx: ResumeTy) -> Poll<F::Output>
-    where
-        F: Future,
-    {
-        F::poll(f, cx.0.as_mut())
+    pub unsafe fn get_context<'a, 'b>(cx: ResumeTy) -> &'a mut Context<'b> {
+        &mut *cx.0.as_ptr().cast()
     }
 }
 
@@ -312,10 +311,12 @@ pub mod stream {
         ptr::NonNull,
         task::{Context, Poll},
     };
-    use futures_core::stream::Stream;
     use pin_project::pin_project;
 
     use super::future::ResumeTy;
+
+    #[doc(hidden)]
+    pub use futures_core::stream::Stream;
 
     /// Wrap a generator in a stream.
     ///
@@ -350,17 +351,6 @@ pub mod stream {
                 GeneratorState::Complete(()) => Poll::Ready(None),
             }
         }
-    }
-
-    #[doc(hidden)]
-    pub unsafe fn poll_next_with_context<S>(
-        s: Pin<&mut S>,
-        mut cx: ResumeTy,
-    ) -> Poll<Option<S::Item>>
-    where
-        S: Stream,
-    {
-        S::poll_next(s, cx.0.as_mut())
     }
 
     // This is equivalent to the `futures::stream::StreamExt::next` method.
