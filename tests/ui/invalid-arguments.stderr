@@ -1,8 +1,8 @@
-error: unexpected token
+error: unexpected token: (bar)
   --> $DIR/invalid-arguments.rs:14:16
    |
 14 |     #[for_await(bar)] //~ ERROR unexpected token
-   |                ^
+   |                ^^^^^
 
 error: expected `item`
   --> $DIR/invalid-arguments.rs:20:16

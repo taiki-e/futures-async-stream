@@ -1,6 +1,5 @@
 use quote::{quote, quote_spanned};
 use syn::{
-    parse::Nothing,
     spanned::Spanned,
     visit_mut::{self, VisitMut},
     Expr, ExprAwait, ExprCall, ExprForLoop, ExprYield, Item,
@@ -8,7 +7,7 @@ use syn::{
 
 use crate::{
     async_stream_block, async_try_stream_block,
-    utils::{expr_compile_error, replace_expr, unit},
+    utils::{expr_compile_error, parse_as_empty, replace_expr, unit},
 };
 
 pub(crate) use Scope::{Closure, Future, Stream, TryStream};
@@ -88,7 +87,7 @@ impl Visitor {
                 return;
             }
             let attr = attrs.pop().unwrap();
-            if let Err(e) = syn::parse2::<Nothing>(attr.tokens) {
+            if let Err(e) = parse_as_empty(&attr.tokens) {
                 *expr = expr_compile_error(&e);
                 return;
             }

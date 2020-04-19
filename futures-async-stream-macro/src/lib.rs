@@ -12,7 +12,7 @@
 
 use proc_macro::{Delimiter, Group, TokenStream, TokenTree};
 use quote::ToTokens;
-use syn::{parse::Nothing, Expr, ExprForLoop};
+use syn::{Expr, ExprForLoop};
 
 #[macro_use]
 mod utils;
@@ -25,8 +25,9 @@ mod visitor;
 /// Processes streams using a for loop.
 #[proc_macro_attribute]
 pub fn for_await(args: TokenStream, input: TokenStream) -> TokenStream {
-    // TODO: Concurrent versions are not supported yet.
-    let _: Nothing = syn::parse_macro_input!(args);
+    if let Err(e) = utils::parse_as_empty(&args.into()) {
+        return e.to_compile_error().into();
+    }
     let mut expr: ExprForLoop = syn::parse_macro_input!(input);
 
     expr.attrs.push(syn::parse_quote!(#[for_await]));
