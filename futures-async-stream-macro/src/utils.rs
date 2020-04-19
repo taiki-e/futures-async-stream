@@ -2,7 +2,16 @@ use std::mem;
 
 use proc_macro2::{Span, TokenStream, TokenTree};
 use quote::ToTokens;
-use syn::{punctuated::Punctuated, token, Block, Expr, ExprTuple, Stmt};
+use syn::{punctuated::Punctuated, token, Block, Expr, ExprTuple, Result, Stmt};
+
+macro_rules! error {
+    ($span:expr, $msg:expr) => {
+        syn::Error::new_spanned($span, $msg)
+    };
+    ($span:expr, $($tt:tt)*) => {
+        error!($span, format!($($tt)*))
+    };
+}
 
 pub(crate) fn first_last<T>(tokens: &T) -> (Span, Span)
 where
@@ -50,11 +59,9 @@ where
     *this = f(mem::replace(this, Expr::Verbatim(TokenStream::new())));
 }
 
-macro_rules! error {
-    ($span:expr, $msg:expr) => {
-        syn::Error::new_spanned($span, $msg)
-    };
-    ($span:expr, $($tt:tt)*) => {
-        error!($span, format!($($tt)*))
-    };
+/// Check if `tokens` is an empty `TokenStream`.
+/// This is almost equivalent to `syn::parse2::<Nothing>()`,
+/// but produces a better error message and does not require ownership of `tokens`.
+pub(crate) fn parse_as_empty(tokens: &TokenStream) -> Result<()> {
+    if tokens.is_empty() { Ok(()) } else { Err(error!(tokens, "unexpected token: {}", tokens)) }
 }
