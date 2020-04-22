@@ -31,6 +31,10 @@ jobs:
         shell: bash
         run: |
           . ./ci/install-rust.sh ${{ matrix.rust }}
+      - name: Add targets
+        if: matrix.rust == 'nightly'
+        run: |
+          rustup target add thumbv7m-none-eabi
       - name: Install cargo-hack
         if: matrix.rust == 'nightly'
         run: |
@@ -43,6 +47,10 @@ jobs:
         if: matrix.rust == 'nightly'
         run: |
           cargo test --all --all-features -- -Zunstable-options --include-ignored
+      - name: cargo check --target thumbv7m-none-eabi
+        if: matrix.rust == 'nightly'
+        run: |
+          cargo check --target thumbv7m-none-eabi --manifest-path tests/no-std/Cargo.toml
       # Refs: https://github.com/rust-lang/cargo/issues/5657
       - name: cargo check -Zminimal-versions
         if: matrix.rust == 'nightly'
