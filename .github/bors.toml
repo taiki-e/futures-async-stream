@@ -1,8 +1,2 @@
-status = [
-    "test (nightly-2020-02-14)",
-    "test (nightly)",
-    "style (clippy)",
-    "style (rustfmt)",
-    "style (rustdoc)",
-]
+status = ["ci"]
 delete_merged_branches = true
