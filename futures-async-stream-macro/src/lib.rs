@@ -15,6 +15,7 @@
 mod utils;
 
 mod elision;
+mod sink;
 mod stream;
 mod visitor;
 

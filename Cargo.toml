@@ -25,6 +25,7 @@ futures-async-stream-macro = { version = "=0.1.5", path = "futures-async-stream-
 futures-core = { version = "0.3", default-features = false }
 futures-sink = { version = "0.3", default-features = false }
 pin-project = "0.4.10"
+futures = { version = "0.3", default-features = false, features = ["executor"] }
 
 [dev-dependencies]
 trybuild = "1.0"

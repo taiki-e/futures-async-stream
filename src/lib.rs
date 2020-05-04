@@ -525,7 +525,7 @@ pub mod sink {
     /// This function returns a `GenStream` underneath, but hides it in `impl Trait` to give
     /// better error messages (`impl Stream` rather than `GenStream<[closure.....]>`).
     #[doc(hidden)]
-    pub fn from_generator<G, T, E>(gen: G) -> impl Sink<T, Error = Complete>
+    pub fn from_generator<G, T>(gen: G) -> impl Sink<T, Error = Complete>
     where
         G: Generator<Arg<T>, Yield = Res, Return = ()>,
     {
@@ -583,78 +583,6 @@ pub mod sink {
             }
         }
     }
-
-    macro_rules! await_in_sink {
-        ($arg:ident, $e:expr) => {{}};
-    }
-
-    macro_rules! await_item {
-        ($arg:ident) => {{}};
-    }
-
-    extern crate std;
-    use std::string::String;
-
-    async fn bar(s: String) -> Result<(), String> {
-        if s == "bang" { Err(s) } else { Ok(()) }
-    }
-
-    fn foo() -> impl Sink<String, Error = String> {
-        from_generator(static move |mut arg: Arg<String>| -> Result<(), String> {
-            while let Some(item) = {
-                let mut item = None;
-                loop {
-                    match item {
-                        Some(item) => break item,
-                        None => {
-                            arg = match arg {
-                                Arg::StartSend(i) => {
-                                    item = Some(Some(i));
-                                    yield Res::Accepted
-                                }
-                                Arg::Flush(cx) => yield Res::Idle,
-                                Arg::Close(cx) => {
-                                    item = Some(None);
-                                    Arg::Close(cx)
-                                }
-                            };
-                        }
-                    }
-                }
-            } {
-                // await_in_sink!(arg, bar(item))
-                let e = bar(item);
-                let _i = {
-                    use crate::future::MaybeDone;
-                    let mut future = MaybeDone::Future(e);
-                    let mut future = unsafe { Pin::new_unchecked(&mut future) };
-                    loop {
-                        if let Some(e) = future.as_mut().take_output() {
-                            break e;
-                        }
-                        arg = match arg {
-                            Arg::StartSend(item) => yield Res::Pending,
-                            Arg::Flush(cx) | Arg::Close(cx) => {
-                                if let Poll::Ready(()) = unsafe {
-                                    core::future::Future::poll(
-                                        future.as_mut(),
-                                        crate::future::get_context(cx),
-                                    )
-                                } {}
-                                yield Res::Pending
-                            }
-                        }
-                    }
-                };
-            }
-
-            Ok(())
-        })
-    }
-
-    // fn test() {
-    //     let sink = foo();
-    // }
 }
 
 // Not public API.
@@ -687,8 +615,8 @@ pub mod try_sink {
 
     /// Wrap a generator in a sink.
     ///
-    /// This function returns a `GenStream` underneath, but hides it in `impl Trait` to give
-    /// better error messages (`impl Stream` rather than `GenStream<[closure.....]>`).
+    /// This function returns a `GenSink` underneath, but hides it in `impl Trait` to give
+    /// better error messages (`impl Stream` rather than `GenSink<[closure.....]>`).
     #[doc(hidden)]
     pub fn from_generator<G, T, E>(gen: G) -> impl Sink<T, Error = E>
     where
