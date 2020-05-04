@@ -1,4 +1,4 @@
-#![warn(rust_2018_idioms)]
+#![warn(rust_2018_idioms, single_use_lifetimes)]
 #![feature(generators, stmt_expr_attributes, proc_macro_hygiene)]
 
 use futures::{executor::block_on, stream::Stream};

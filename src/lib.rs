@@ -212,7 +212,7 @@
 ))]
 #![warn(missing_docs)]
 #![warn(rust_2018_idioms, single_use_lifetimes, unreachable_pub)]
-#![warn(clippy::all)]
+#![warn(clippy::all, clippy::default_trait_access)]
 #![feature(generator_trait)]
 
 #[doc(inline)]

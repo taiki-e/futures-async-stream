@@ -1,4 +1,5 @@
 #![warn(rust_2018_idioms)]
+// #![warn(single_use_lifetimes)] // FIXME
 #![allow(clippy::trivially_copy_pass_by_ref)]
 #![feature(generators)]
 

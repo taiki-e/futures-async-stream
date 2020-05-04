@@ -1,4 +1,5 @@
 #![warn(rust_2018_idioms)]
+// #![warn(single_use_lifetimes)] // FIXME
 #![feature(generators, stmt_expr_attributes, proc_macro_hygiene)]
 
 use futures::{executor::block_on, stream::Stream};
