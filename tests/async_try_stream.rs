@@ -39,6 +39,51 @@ pub async fn nested2() -> Result<(), i32> {
     Ok::<(), i32>(())
 }
 
+pub async fn async_block1() -> Result<(), i32> {
+    let s: impl Stream<Item = Result<i32, i32>> = {
+        #[async_try_stream]
+        async {
+            #[for_await]
+            for i in iter(vec![Ok(1), Err(2)]) {
+                yield async { i }.await?;
+            }
+        }
+    };
+    #[for_await]
+    for _i in s {}
+    Ok::<(), i32>(())
+}
+
+pub async fn async_block2() -> Result<(), i32> {
+    let s: impl Stream<Item = Result<i32, i32>> = {
+        #[async_try_stream]
+        async move {
+            #[for_await]
+            for i in iter(vec![Ok(1), Err(2)]) {
+                yield async { i }.await?;
+            }
+        }
+    };
+    #[for_await]
+    for _i in s {}
+    Ok::<(), i32>(())
+}
+
+#[async_try_stream(ok = i32, error = i32)]
+pub async fn async_block3() {
+    let s: impl Stream<Item = Result<i32, i32>> = {
+        #[async_try_stream]
+        async move {
+            #[for_await]
+            for i in iter(vec![Ok(1), Err(2)]) {
+                yield async { i }.await?;
+            }
+        }
+    };
+    #[for_await]
+    for _i in s {}
+}
+
 #[async_try_stream(ok = u64, error = i32)]
 async fn stream1() {
     yield 0;

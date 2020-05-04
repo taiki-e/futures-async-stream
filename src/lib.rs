@@ -120,9 +120,9 @@
 //! }
 //! ```
 //!
-//! ## \#\[async_try_stream\] and async_try_stream_block!
+//! ## \#\[async_try_stream\]
 //!
-//! `?` operator can be used with the `#[async_try_stream]` and `async_try_stream_block!`. The `Item` of the returned stream is `Result` with `Ok` being the value yielded and `Err` the error type returned by `?` operator or `return Err(...)`.
+//! `?` operator can be used with the `#[async_try_stream]`. The `Item` of the returned stream is `Result` with `Ok` being the value yielded and `Err` the error type returned by `?` operator or `return Err(...)`.
 //!
 //! ```rust
 //! #![feature(generators)]
@@ -454,10 +454,7 @@ pub mod try_stream {
 
 // Not public API.
 #[doc(hidden)]
-pub mod reexport {
+pub mod __reexport {
     #[doc(hidden)]
     pub use core::{marker, option, pin, result, task};
-
-    #[doc(hidden)]
-    pub use futures_core::stream::Stream;
 }

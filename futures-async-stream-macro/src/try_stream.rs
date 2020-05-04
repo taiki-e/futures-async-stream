@@ -2,14 +2,15 @@ use proc_macro2::TokenStream;
 use quote::{quote, ToTokens};
 use syn::{
     parse::{Parse, ParseStream},
+    token,
     visit_mut::VisitMut,
-    *,
+    Expr, ExprAsync, Item, Result, Signature, Stmt, Token, TraitItemMethod, Type,
 };
 
 use crate::{
     elision,
-    stream::{expand_async_body, make_gen_body, validate_async_stream_fn, FnSig, ReturnTypeKind},
-    utils::{block, first_last, respan},
+    stream::{expand_async_body, make_gen_body, validate_stream_fn, FnSig, ReturnTypeKind},
+    utils::{block, first_last, parse_as_empty, respan},
     visitor::{TryStream, Visitor},
 };
 
@@ -17,34 +18,29 @@ use crate::{
 // async_try_stream
 
 pub(super) fn attribute(args: TokenStream, input: TokenStream) -> Result<TokenStream> {
-    parse_async_try_stream_fn(args, input)
+    let stmt = syn::parse2(input.clone());
+    match stmt {
+        Ok(Stmt::Item(Item::Fn(item))) => parse_try_stream_fn(args, item.into()),
+        Ok(Stmt::Expr(Expr::Async(mut expr))) | Ok(Stmt::Semi(Expr::Async(mut expr), _)) => {
+            parse_as_empty(&args)?;
+            Ok(expand_try_stream_block2(&mut expr))
+        }
+        _ => {
+            if let Ok(item) = syn::parse2::<TraitItemMethod>(input.clone()) {
+                parse_try_stream_fn(args, item.into())
+            } else {
+                Err(error!(
+                    input,
+                    "#[async_try_stream] attribute may not be used on async functions or async blocks"
+                ))
+            }
+        }
+    }
 }
 
 mod kw {
     syn::custom_keyword!(ok);
     syn::custom_keyword!(error);
-}
-
-// ok = <Type>
-struct Ok_(Type);
-
-impl Parse for Ok_ {
-    fn parse(input: ParseStream<'_>) -> Result<Self> {
-        let _: kw::ok = input.parse()?;
-        let _: Token![=] = input.parse()?;
-        input.parse().map(Self)
-    }
-}
-
-// error = <Type>
-struct Error_(Type);
-
-impl Parse for Error_ {
-    fn parse(input: ParseStream<'_>) -> Result<Self> {
-        let _: kw::error = input.parse()?;
-        let _: Token![=] = input.parse()?;
-        input.parse().map(Self)
-    }
 }
 
 struct Args {
@@ -54,7 +50,27 @@ struct Args {
 }
 
 impl Parse for Args {
-    fn parse(input: ParseStream<'_>) -> syn::Result<Self> {
+    fn parse(input: ParseStream<'_>) -> Result<Self> {
+        // ok = <Type>
+        struct Ok_(Type);
+        impl Parse for Ok_ {
+            fn parse(input: ParseStream<'_>) -> Result<Self> {
+                let _: kw::ok = input.parse()?;
+                let _: Token![=] = input.parse()?;
+                input.parse().map(Self)
+            }
+        }
+
+        // error = <Type>
+        struct Error_(Type);
+        impl Parse for Error_ {
+            fn parse(input: ParseStream<'_>) -> Result<Self> {
+                let _: kw::error = input.parse()?;
+                let _: Token![=] = input.parse()?;
+                input.parse().map(Self)
+            }
+        }
+
         let mut ok = None;
         let mut error = None;
         let mut boxed = ReturnTypeKind::Default;
@@ -86,20 +102,19 @@ impl Parse for Args {
     }
 }
 
-fn parse_async_try_stream_fn(args: TokenStream, input: TokenStream) -> Result<TokenStream> {
+fn parse_try_stream_fn(args: TokenStream, item: FnSig) -> Result<TokenStream> {
     let args: Args = syn::parse2(args)?;
-    let item = FnSig::parse(input, args.boxed)?;
 
-    validate_async_stream_fn(&item)?;
-    Ok(expand_async_try_stream_fn(item, &args))
+    validate_stream_fn(&item)?;
+    Ok(expand_try_stream_fn(item, &args))
 }
 
-fn expand_async_try_stream_fn(item: FnSig, args: &Args) -> TokenStream {
+fn expand_try_stream_fn(item: FnSig, args: &Args) -> TokenStream {
     let FnSig { attrs, vis, sig, mut block, semi } = item;
     let Signature { unsafety, abi, fn_token, ident, mut generics, inputs, .. } = sig;
     let where_clause = &generics.where_clause;
 
-    let (mut arguments, statements) = expand_async_body(inputs);
+    let (mut arguments, mut statements) = expand_async_body(inputs);
 
     // Visit `#[for_await]` and `.await`.
     Visitor::new(TryStream).visit_block_mut(&mut block);
@@ -113,9 +128,16 @@ fn expand_async_try_stream_fn(item: FnSig, args: &Args) -> TokenStream {
     let output_span = first_last(ok);
     let gen_function = quote!(::futures_async_stream::try_stream::from_generator);
     let gen_function = respan(gen_function, output_span);
-    let ret_ty = quote!(::futures_async_stream::reexport::result::Result<(), #error>);
-    let mut body_inner =
-        make_gen_body(&statements, &block, &gen_function, &quote!(Ok(())), &ret_ty);
+    let ret_ty = quote!(::futures_async_stream::__reexport::result::Result<(), #error>);
+    statements.append(&mut block.stmts);
+    block.stmts = statements;
+    let mut body_inner = make_gen_body(
+        Some(token::Move::default()),
+        &block,
+        &gen_function,
+        &quote!(Ok(())),
+        &ret_ty,
+    );
 
     if let ReturnTypeKind::Boxed { .. } = args.boxed {
         let body = quote! { Box::pin(#body_inner) };
@@ -135,21 +157,21 @@ fn expand_async_try_stream_fn(item: FnSig, args: &Args) -> TokenStream {
             // Raw `impl` breaks syntax highlighting in some editors.
             let impl_token = token::Impl::default();
             quote! {
-                #impl_token ::futures_async_stream::reexport::Stream<
-                    Item = ::futures_async_stream::reexport::result::Result<#ok, #error>
+                #impl_token ::futures_async_stream::stream::Stream<
+                    Item = ::futures_async_stream::__reexport::result::Result<#ok, #error>
                 > + #(#lifetimes +)*
             }
         }
         ReturnTypeKind::Boxed { send } => {
             let send = if send {
-                quote!(+ ::futures_async_stream::reexport::marker::Send)
+                quote!(+ ::futures_async_stream::__reexport::marker::Send)
             } else {
                 TokenStream::new()
             };
             quote! {
-                ::futures_async_stream::reexport::pin::Pin<
-                    Box<dyn ::futures_async_stream::reexport::Stream<
-                        Item = ::futures_async_stream::reexport::result::Result<#ok, #error>
+                ::futures_async_stream::__reexport::pin::Pin<
+                    Box<dyn ::futures_async_stream::stream::Stream<
+                        Item = ::futures_async_stream::__reexport::result::Result<#ok, #error>
                     > #send + #(#lifetimes +)*>
                 >
             }
@@ -173,13 +195,27 @@ fn expand_async_try_stream_fn(item: FnSig, args: &Args) -> TokenStream {
 // async_try_stream_block
 
 pub(super) fn block_macro(input: TokenStream) -> Result<TokenStream> {
-    syn::parse2(input).map(expand_async_try_stream_block)
+    syn::parse2(input).map(expand_try_stream_block)
 }
 
-fn expand_async_try_stream_block(mut expr: Expr) -> TokenStream {
+fn expand_try_stream_block(mut expr: Expr) -> TokenStream {
     Visitor::new(TryStream).visit_expr_mut(&mut expr);
 
     let gen_function = quote!(::futures_async_stream::try_stream::from_generator);
-    let ret_ty = quote!(::futures_async_stream::reexport::result::Result<(), _>);
-    make_gen_body(&[], &block(vec![Stmt::Expr(expr)]), &gen_function, &quote!(Ok(())), &ret_ty)
+    let ret_ty = quote!(::futures_async_stream::__reexport::result::Result<(), _>);
+    make_gen_body(
+        Some(token::Move::default()),
+        &block(vec![Stmt::Expr(expr)]),
+        &gen_function,
+        &quote!(Ok(())),
+        &ret_ty,
+    )
+}
+
+pub(super) fn expand_try_stream_block2(expr: &mut ExprAsync) -> TokenStream {
+    Visitor::new(TryStream).visit_expr_async_mut(expr);
+
+    let gen_function = quote!(::futures_async_stream::try_stream::from_generator);
+    let ret_ty = quote!(::futures_async_stream::__reexport::result::Result<(), _>);
+    make_gen_body(expr.capture, &expr.block, &gen_function, &quote!(Ok(())), &ret_ty)
 }

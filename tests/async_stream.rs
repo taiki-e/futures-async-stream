@@ -36,6 +36,49 @@ pub async fn nested2() {
     }
 }
 
+pub async fn async_block1() {
+    let s = {
+        #[async_stream]
+        async {
+            #[for_await]
+            for i in stream(2) {
+                yield async { i * i }.await;
+            }
+        }
+    };
+    #[for_await]
+    for _i in s {}
+}
+
+pub async fn async_block2() {
+    let s = {
+        #[async_stream]
+        async move {
+            #[for_await]
+            for i in stream(2) {
+                yield async { i * i }.await;
+            }
+        }
+    };
+    #[for_await]
+    for _i in s {}
+}
+
+#[async_stream(item = u64)]
+pub async fn async_block3() {
+    let s = {
+        #[async_stream]
+        async move {
+            #[for_await]
+            for i in stream(2) {
+                yield async { i * i }.await;
+            }
+        }
+    };
+    #[for_await]
+    for _i in s {}
+}
+
 #[async_stream(item = u64)]
 async fn stream1() {
     yield 0;
