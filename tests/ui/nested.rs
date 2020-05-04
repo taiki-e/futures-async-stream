@@ -1,15 +1,15 @@
 #![feature(generators)]
 
-use futures_async_stream::async_stream;
+use futures_async_stream::stream;
 
-#[async_stream(item = i32)]
+#[stream(item = i32)]
 async fn stream(x: i32) {
     for i in 1..=x {
         yield i
     }
 }
 
-#[async_stream(item = i32)]
+#[stream(item = i32)]
 async fn _stream1() {
     async {
         #[for_await]
@@ -17,7 +17,7 @@ async fn _stream1() {
             yield i * i; //~ ERROR `async` generators are not yet supported [E0727]
         }
     }
-        .await;
+    .await;
 }
 
 fn main() {}

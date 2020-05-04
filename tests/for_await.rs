@@ -2,9 +2,9 @@
 #![feature(generators, stmt_expr_attributes, proc_macro_hygiene)]
 
 use futures::{executor::block_on, stream::Stream};
-use futures_async_stream::{async_stream, async_stream_block, for_await};
+use futures_async_stream::{for_await, stream, stream_block};
 
-#[async_stream(item = T)]
+#[stream(item = T)]
 async fn iter<T>(iter: impl IntoIterator<Item = T>) {
     for x in iter {
         yield x;
@@ -35,7 +35,7 @@ async fn nested() -> bool {
     cnt == sum
 }
 
-#[async_stream(item = i32)]
+#[stream(item = i32)]
 pub async fn in_async_stream_fn() {
     #[for_await]
     for i in iter(1..10) {
@@ -43,8 +43,8 @@ pub async fn in_async_stream_fn() {
     }
 }
 
-pub fn in_async_stream_block() -> impl Stream<Item = i32> {
-    async_stream_block! {
+pub fn in_stream_block() -> impl Stream<Item = i32> {
+    stream_block! {
         #[for_await]
         for item in in_async_stream_fn() {
             yield item

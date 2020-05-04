@@ -2,16 +2,16 @@
 #![warn(rust_2018_idioms, single_use_lifetimes)]
 #![feature(generators)]
 
-use futures_async_stream::async_stream;
+use futures_async_stream::stream;
 
-#[async_stream(item = T)]
+#[stream(item = T)]
 async fn iter<T>(iter: impl IntoIterator<Item = T>) {
     for x in iter {
         yield x;
     }
 }
 
-#[async_stream(item = i32)]
+#[stream(item = i32)]
 pub async fn stream() {
     let mut cnt = 0;
     #[for_await]

@@ -31,7 +31,7 @@ pub(super) fn attribute(args: TokenStream, input: TokenStream) -> Result<TokenSt
             } else {
                 Err(error!(
                     input,
-                    "#[async_stream] attribute may not be used on async functions or async blocks"
+                    "#[stream] attribute may not be used on async functions or async blocks"
                 ))
             }
         }
@@ -208,7 +208,7 @@ pub(super) fn expand_async_body(inputs: Punctuated<FnArg, Comma>) -> (Vec<FnArg>
     // Desugar `async fn`
     // from:
     //
-    //      #[async_stream(item = u32)]
+    //      #[stream(item = u32)]
     //      async fn foo(ref a: u32) {
     //          // ...
     //      }
@@ -378,7 +378,7 @@ fn expand_stream_fn(item: FnSig, args: &Args) -> TokenStream {
 }
 
 // =================================================================================================
-// async_stream_block
+// stream_block
 
 pub(super) fn block_macro(input: TokenStream) -> Result<TokenStream> {
     syn::parse2(input).map(expand_stream_block)

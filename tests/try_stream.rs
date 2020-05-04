@@ -4,16 +4,16 @@
 #![feature(generators, stmt_expr_attributes, proc_macro_hygiene, impl_trait_in_bindings)]
 
 use futures::{executor::block_on, stream::Stream};
-use futures_async_stream::{async_stream, async_try_stream, async_try_stream_block, for_await};
+use futures_async_stream::{for_await, stream, try_stream, try_stream_block};
 
-#[async_stream(item = T)]
+#[stream(item = T)]
 async fn iter<T>(iter: impl IntoIterator<Item = T>) {
     for x in iter {
         yield x;
     }
 }
 
-#[async_try_stream(ok = i32, error = i32)]
+#[try_stream(ok = i32, error = i32)]
 pub async fn nested() {
     let f = async {
         #[for_await]
@@ -26,7 +26,7 @@ pub async fn nested() {
 }
 
 pub async fn nested2() -> Result<(), i32> {
-    let s: impl Stream<Item = Result<i32, i32>> = async_try_stream_block! {
+    let s: impl Stream<Item = Result<i32, i32>> = try_stream_block! {
         #[for_await]
         for i in iter(vec![Ok(1), Err(2)]) {
             yield async { i }.await?;
@@ -41,7 +41,7 @@ pub async fn nested2() -> Result<(), i32> {
 
 pub async fn async_block1() -> Result<(), i32> {
     let s: impl Stream<Item = Result<i32, i32>> = {
-        #[async_try_stream]
+        #[try_stream]
         async {
             #[for_await]
             for i in iter(vec![Ok(1), Err(2)]) {
@@ -56,7 +56,7 @@ pub async fn async_block1() -> Result<(), i32> {
 
 pub async fn async_block2() -> Result<(), i32> {
     let s: impl Stream<Item = Result<i32, i32>> = {
-        #[async_try_stream]
+        #[try_stream]
         async move {
             #[for_await]
             for i in iter(vec![Ok(1), Err(2)]) {
@@ -69,10 +69,10 @@ pub async fn async_block2() -> Result<(), i32> {
     Ok::<(), i32>(())
 }
 
-#[async_try_stream(ok = i32, error = i32)]
+#[try_stream(ok = i32, error = i32)]
 pub async fn async_block3() {
     let s: impl Stream<Item = Result<i32, i32>> = {
-        #[async_try_stream]
+        #[try_stream]
         async move {
             #[for_await]
             for i in iter(vec![Ok(1), Err(2)]) {
@@ -84,13 +84,13 @@ pub async fn async_block3() {
     for _i in s {}
 }
 
-#[async_try_stream(ok = u64, error = i32)]
+#[try_stream(ok = u64, error = i32)]
 async fn stream1() {
     yield 0;
     yield Err(1)?;
 }
 
-#[async_try_stream(ok = u32, error = i32)]
+#[try_stream(ok = u32, error = i32)]
 async fn stream3(iter1: impl IntoIterator<Item = u32>) {
     let mut sum = 0;
     #[for_await]
@@ -104,7 +104,7 @@ async fn stream3(iter1: impl IntoIterator<Item = u32>) {
     yield sum;
 }
 
-#[async_try_stream(ok = i32, error = Box<dyn std::error::Error + Send + Sync + 'static>)]
+#[try_stream(ok = i32, error = Box<dyn std::error::Error + Send + Sync + 'static>)]
 pub async fn dyn_trait(stream: impl Stream<Item = String>) {
     #[for_await]
     for x in stream {
