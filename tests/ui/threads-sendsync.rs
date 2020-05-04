@@ -1,21 +1,21 @@
 #![feature(generators)]
 
-use futures_async_stream::async_stream;
+use futures_async_stream::stream;
 
 fn assert_send<T: Send>(_: T) {}
 fn assert_sync<T: Send>(_: T) {}
 
-#[async_stream(item = i32)]
+#[stream(item = i32)]
 pub async fn unboxed() {
     yield 0;
 }
 
-#[async_stream(boxed, item = i32)]
+#[stream(boxed, item = i32)]
 pub async fn boxed() {
     yield 0;
 }
 
-#[async_stream(boxed_local, item = i32)]
+#[stream(boxed_local, item = i32)]
 pub async fn boxed_local() {
     yield 0;
 }

@@ -15,7 +15,7 @@ use crate::{
 };
 
 // =================================================================================================
-// async_try_stream
+// try_stream
 
 pub(super) fn attribute(args: TokenStream, input: TokenStream) -> Result<TokenStream> {
     let stmt = syn::parse2(input.clone());
@@ -31,7 +31,7 @@ pub(super) fn attribute(args: TokenStream, input: TokenStream) -> Result<TokenSt
             } else {
                 Err(error!(
                     input,
-                    "#[async_try_stream] attribute may not be used on async functions or async blocks"
+                    "#[try_stream] attribute may not be used on async functions or async blocks"
                 ))
             }
         }
@@ -192,7 +192,7 @@ fn expand_try_stream_fn(item: FnSig, args: &Args) -> TokenStream {
 }
 
 // =================================================================================================
-// async_try_stream_block
+// try_stream_block
 
 pub(super) fn block_macro(input: TokenStream) -> Result<TokenStream> {
     syn::parse2(input).map(expand_try_stream_block)

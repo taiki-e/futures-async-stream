@@ -1,30 +1,30 @@
 error[E0412]: cannot find type `Left` in this scope
- --> $DIR/unresolved-type.rs:5:23
+ --> $DIR/unresolved-type.rs:5:17
   |
-5 | #[async_stream(item = Left)] //~ ERROR cannot find type `Left` in this scope
-  |                       ^^^^ not found in this scope
+5 | #[stream(item = Left)] //~ ERROR cannot find type `Left` in this scope
+  |                 ^^^^ not found in this scope
   |
 help: there is an enum variant `core::fmt::Alignment::Left` and 9 others; try using the variant's enum
   |
-5 | #[async_stream(item = core::fmt::Alignment)] //~ ERROR cannot find type `Left` in this scope
-  |                       ^^^^^^^^^^^^^^^^^^^^
-5 | #[async_stream(item = core::fmt::rt::v1::Alignment)] //~ ERROR cannot find type `Left` in this scope
-  |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-5 | #[async_stream(item = futures::core_reexport::fmt::Alignment)] //~ ERROR cannot find type `Left` in this scope
-  |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-5 | #[async_stream(item = futures::core_reexport::fmt::rt::v1::Alignment)] //~ ERROR cannot find type `Left` in this scope
-  |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+5 | #[stream(item = core::fmt::Alignment)] //~ ERROR cannot find type `Left` in this scope
+  |                 ^^^^^^^^^^^^^^^^^^^^
+5 | #[stream(item = core::fmt::rt::v1::Alignment)] //~ ERROR cannot find type `Left` in this scope
+  |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+5 | #[stream(item = futures::core_reexport::fmt::Alignment)] //~ ERROR cannot find type `Left` in this scope
+  |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+5 | #[stream(item = futures::core_reexport::fmt::rt::v1::Alignment)] //~ ERROR cannot find type `Left` in this scope
+  |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     and 5 other candidates
 
 error[E0698]: type inside generator must be known in this context
  --> $DIR/unresolved-type.rs:5:1
   |
-5 | #[async_stream(item = Left)] //~ ERROR cannot find type `Left` in this scope
-  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ cannot infer type for type parameter `T` declared on the enum `Poll`
+5 | #[stream(item = Left)] //~ ERROR cannot find type `Left` in this scope
+  | ^^^^^^^^^^^^^^^^^^^^^^ cannot infer type for type parameter `T` declared on the enum `Poll`
   |
 note: the type is part of the generator because of this `yield`
  --> $DIR/unresolved-type.rs:5:1
   |
-5 | #[async_stream(item = Left)] //~ ERROR cannot find type `Left` in this scope
-  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+5 | #[stream(item = Left)] //~ ERROR cannot find type `Left` in this scope
+  | ^^^^^^^^^^^^^^^^^^^^^^
   = note: this error originates in an attribute macro (in Nightly builds, run with -Z macro-backtrace for more info)

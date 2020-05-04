@@ -1,8 +1,8 @@
 #![feature(generators)]
 
-use futures_async_stream::async_stream;
+use futures_async_stream::stream;
 
-#[async_stream(item = ())]
+#[stream(item = ())]
 async fn foo() {
     yield;
     Some(()) //~ ERROR mismatched types

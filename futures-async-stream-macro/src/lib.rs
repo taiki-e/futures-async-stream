@@ -1,4 +1,4 @@
-//! Procedural macro for the `#[async_stream]` attribute.
+//! Procedural macro for the `#[stream]` attribute.
 
 #![recursion_limit = "256"]
 #![doc(html_root_url = "https://docs.rs/futures-async-stream-macro/0.1.5")]
@@ -38,26 +38,26 @@ pub fn for_await(args: TokenStream, input: TokenStream) -> TokenStream {
 
 /// Creates streams via generators.
 #[proc_macro_attribute]
-pub fn async_stream(args: TokenStream, input: TokenStream) -> TokenStream {
+pub fn stream(args: TokenStream, input: TokenStream) -> TokenStream {
     stream::attribute(args.into(), input.into()).unwrap_or_else(|e| e.to_compile_error()).into()
 }
 
 /// Creates streams via generators.
 #[proc_macro]
-pub fn async_stream_block(input: TokenStream) -> TokenStream {
+pub fn stream_block(input: TokenStream) -> TokenStream {
     let input = TokenStream::from(TokenTree::Group(Group::new(Delimiter::Brace, input)));
     stream::block_macro(input.into()).unwrap_or_else(|e| e.to_compile_error()).into()
 }
 
 /// Creates streams via generators.
 #[proc_macro_attribute]
-pub fn async_try_stream(args: TokenStream, input: TokenStream) -> TokenStream {
+pub fn try_stream(args: TokenStream, input: TokenStream) -> TokenStream {
     try_stream::attribute(args.into(), input.into()).unwrap_or_else(|e| e.to_compile_error()).into()
 }
 
 /// Creates streams via generators.
 #[proc_macro]
-pub fn async_try_stream_block(input: TokenStream) -> TokenStream {
+pub fn try_stream_block(input: TokenStream) -> TokenStream {
     let input = TokenStream::from(TokenTree::Group(Group::new(Delimiter::Brace, input)));
     try_stream::block_macro(input.into()).unwrap_or_else(|e| e.to_compile_error()).into()
 }

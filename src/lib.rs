@@ -23,21 +23,21 @@
 //! }
 //! ```
 //!
-//! `value` has the `Item` type of the stream passed in. Note that async for loops can only be used inside of `async` functions, closures, blocks, `#[async_stream]` functions and `async_stream_block!` macros.
+//! `value` has the `Item` type of the stream passed in. Note that async for loops can only be used inside of `async` functions, closures, blocks, `#[stream]` functions and `stream_block!` macros.
 //!
-//! ## \#\[async_stream\]
+//! ## \#\[stream\]
 //!
 //! Creates streams via generators.
 //!
-//! This is a reimplement of [futures-await]'s `#[async_stream]` for futures 0.3 and is an experimental implementation of [the idea listed as the next step of async/await](https://github.com/rust-lang/rfcs/blob/master/text/2394-async_await.md#generators-and-streams).
+//! This is a reimplement of [futures-await]'s `#[stream]` for futures 0.3 and is an experimental implementation of [the idea listed as the next step of async/await](https://github.com/rust-lang/rfcs/blob/master/text/2394-async_await.md#generators-and-streams).
 //!
 //! ```rust
 //! #![feature(generators)]
 //! use futures::stream::Stream;
-//! use futures_async_stream::async_stream;
+//! use futures_async_stream::stream;
 //!
 //! // Returns a stream of i32
-//! #[async_stream(item = i32)]
+//! #[stream(item = i32)]
 //! async fn foo(stream: impl Stream<Item = String>) {
 //!     // `for_await` is built into `async_stream`. If you use `for_await` only in `async_stream`, there is no need to import `for_await`.
 //!     #[for_await]
@@ -47,19 +47,19 @@
 //! }
 //! ```
 //!
-//! `#[async_stream]` must have an item type specified via `item = some::Path` and the values output from the stream must be yielded via the `yield` expression.
+//! `#[stream]` must have an item type specified via `item = some::Path` and the values output from the stream must be yielded via the `yield` expression.
 //!
-//! ## async_stream_block!
+//! ## stream_block!
 //!
-//! You can create a stream directly as an expression using an `async_stream_block!` macro:
+//! You can create a stream directly as an expression using an `stream_block!` macro:
 //!
 //! ```rust
 //! #![feature(generators, proc_macro_hygiene)]
 //! use futures::stream::Stream;
-//! use futures_async_stream::async_stream_block;
+//! use futures_async_stream::stream_block;
 //!
 //! fn foo() -> impl Stream<Item = i32> {
-//!     async_stream_block! {
+//!     stream_block! {
 //!         for i in 0..10 {
 //!             yield i;
 //!         }
@@ -73,17 +73,17 @@
 //!
 //! ```rust
 //! #![feature(generators)]
-//! use futures_async_stream::async_stream;
+//! use futures_async_stream::stream;
 //!
 //! trait Foo {
-//!     #[async_stream(boxed, item = u32)]
+//!     #[stream(boxed, item = u32)]
 //!     async fn method(&mut self);
 //! }
 //!
 //! struct Bar(u32);
 //!
 //! impl Foo for Bar {
-//!     #[async_stream(boxed, item = u32)]
+//!     #[stream(boxed, item = u32)]
 //!     async fn method(&mut self) {
 //!         while self.0 < u32::max_value() {
 //!             self.0 += 1;
@@ -99,7 +99,7 @@
 //! ```rust
 //! #![feature(generators)]
 //! use futures::stream::Stream;
-//! use futures_async_stream::async_stream;
+//! use futures_async_stream::stream;
 //! use std::pin::Pin;
 //!
 //! // The trait itself can be defined without unstable features.
@@ -110,7 +110,7 @@
 //! struct Bar(u32);
 //!
 //! impl Foo for Bar {
-//!     #[async_stream(boxed, item = u32)]
+//!     #[stream(boxed, item = u32)]
 //!     async fn method(&mut self) {
 //!         while self.0 < u32::max_value() {
 //!             self.0 += 1;
@@ -120,16 +120,16 @@
 //! }
 //! ```
 //!
-//! ## \#\[async_try_stream\]
+//! ## \#\[try_stream\]
 //!
-//! `?` operator can be used with the `#[async_try_stream]`. The `Item` of the returned stream is `Result` with `Ok` being the value yielded and `Err` the error type returned by `?` operator or `return Err(...)`.
+//! `?` operator can be used with the `#[try_stream]`. The `Item` of the returned stream is `Result` with `Ok` being the value yielded and `Err` the error type returned by `?` operator or `return Err(...)`.
 //!
 //! ```rust
 //! #![feature(generators)]
 //! use futures::stream::Stream;
-//! use futures_async_stream::async_try_stream;
+//! use futures_async_stream::try_stream;
 //!
-//! #[async_try_stream(ok = i32, error = Box<dyn std::error::Error + Send + Sync>)]
+//! #[try_stream(ok = i32, error = Box<dyn std::error::Error + Send + Sync>)]
 //! async fn foo(stream: impl Stream<Item = String>) {
 //!     #[for_await]
 //!     for x in stream {
@@ -160,7 +160,7 @@
 //! }
 //! ```
 //!
-//! ### \#\[async_stream\]
+//! ### \#\[stream\]
 //!
 //! You can write this by manually implementing the combinator:
 //!
@@ -219,16 +219,16 @@
 pub use futures_async_stream_macro::for_await;
 
 #[doc(inline)]
-pub use futures_async_stream_macro::async_stream;
+pub use futures_async_stream_macro::stream;
 
 #[doc(inline)]
-pub use futures_async_stream_macro::async_stream_block;
+pub use futures_async_stream_macro::stream_block;
 
 #[doc(inline)]
-pub use futures_async_stream_macro::async_try_stream;
+pub use futures_async_stream_macro::try_stream;
 
 #[doc(inline)]
-pub use futures_async_stream_macro::async_try_stream_block;
+pub use futures_async_stream_macro::try_stream_block;
 
 // Not public API.
 #[doc(hidden)]

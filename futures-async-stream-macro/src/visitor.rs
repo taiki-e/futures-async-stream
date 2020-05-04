@@ -6,7 +6,7 @@ use syn::{
 };
 
 use crate::{
-    async_stream_block, async_try_stream_block,
+    stream_block, try_stream_block,
     utils::{expr_compile_error, parse_as_empty, replace_expr, unit},
 };
 
@@ -24,10 +24,10 @@ pub(crate) enum Scope {
     /// `async fn`, `async {}`, or `async ||`
     Future,
 
-    /// `#[async_stream]`
+    /// `#[stream]`
     Stream,
 
-    /// `#[async_try_stream]`
+    /// `#[try_stream]`
     TryStream,
 
     /// `||`, `move ||`, or `static move ||`.
@@ -166,7 +166,7 @@ impl Visitor {
         }
     }
 
-    /// Visits `async_stream_block!` macro.
+    /// Visits `stream_block!` macro.
     fn visit_macro(&self, expr: &mut Expr) {
         if !self.scope.is_stream() {
             return;
@@ -174,10 +174,10 @@ impl Visitor {
 
         replace_expr(expr, |expr| {
             if let Expr::Macro(mut expr) = expr {
-                let mut e: ExprCall = if expr.mac.path.is_ident("async_stream_block") {
-                    syn::parse(async_stream_block(expr.mac.tokens.into())).unwrap()
-                } else if expr.mac.path.is_ident("async_try_stream_block") {
-                    syn::parse(async_try_stream_block(expr.mac.tokens.into())).unwrap()
+                let mut e: ExprCall = if expr.mac.path.is_ident("stream_block") {
+                    syn::parse(stream_block(expr.mac.tokens.into())).unwrap()
+                } else if expr.mac.path.is_ident("try_stream_block") {
+                    syn::parse(try_stream_block(expr.mac.tokens.into())).unwrap()
                 } else {
                     return Expr::Macro(expr);
                 };
@@ -259,7 +259,7 @@ impl VisitMut for Visitor {
         match expr {
             Expr::Async(expr)
                 if expr.attrs.iter().any(|attr| {
-                    attr.path.is_ident("async_stream") || attr.path.is_ident("async_try_stream")
+                    attr.path.is_ident("stream") || attr.path.is_ident("try_stream")
                 }) =>
             {
                 self.scope = Skip
@@ -268,10 +268,8 @@ impl VisitMut for Visitor {
             Expr::Closure(expr) => {
                 self.scope = if expr.asyncness.is_some() { Future } else { Closure }
             }
-            Expr::Macro(expr) if expr.mac.path.is_ident("async_stream_block") => {
-                self.scope = Stream
-            }
-            Expr::Macro(expr) if expr.mac.path.is_ident("async_try_stream_block") => {
+            Expr::Macro(expr) if expr.mac.path.is_ident("stream_block") => self.scope = Stream,
+            Expr::Macro(expr) if expr.mac.path.is_ident("try_stream_block") => {
                 self.scope = TryStream
             }
             _ => {}

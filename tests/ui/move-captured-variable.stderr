@@ -4,7 +4,7 @@ error[E0507]: cannot move out of `a`, a captured variable in an `FnMut` closure
 8  |       let a = String::new();
    |           - captured outer variable
 9  |       foo(|| {
-10 | /         async_stream_block! { //~ ERROR cannot move out of `a`, a captured variable in an `FnMut` closure
+10 | /         stream_block! { //~ ERROR cannot move out of `a`, a captured variable in an `FnMut` closure
 11 | |             yield a
    | |                   -
    | |                   |

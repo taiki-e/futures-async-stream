@@ -1,8 +1,8 @@
 #![feature(generators)]
 
-use futures_async_stream::async_stream;
+use futures_async_stream::stream;
 
-#[async_stream(item = Option<i32>)]
+#[stream(item = Option<i32>)]
 async fn foobar() {
     let val = Some(42);
     if val.is_none() {
@@ -13,7 +13,7 @@ async fn foobar() {
     yield val; //~ ERROR mismatched types
 }
 
-#[async_stream(item = (i32, i32))]
+#[stream(item = (i32, i32))]
 async fn tuple() {
     if false {
         yield 3;

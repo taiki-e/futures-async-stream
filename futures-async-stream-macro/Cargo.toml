@@ -10,7 +10,7 @@ documentation = "https://docs.rs/futures-async-stream-macro"
 keywords = ["async", "future", "futures", "stream", "macros"]
 categories = ["asynchronous", "no-std"]
 description = """
-Definition of the `#[async_stream]` macro for the `futures-async-stream` crate as well as a few other assorted macros.
+Definition of the `#[stream]` macro for the `futures-async-stream` crate as well as a few other assorted macros.
 """
 
 [package.metadata.docs.rs]

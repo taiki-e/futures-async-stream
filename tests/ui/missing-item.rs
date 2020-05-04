@@ -1,8 +1,8 @@
 #![feature(generators)]
 
-use futures_async_stream::async_stream;
+use futures_async_stream::stream;
 
-#[async_stream] //~ ERROR unexpected end of input, expected `item`
+#[stream] //~ ERROR unexpected end of input, expected `item`
 async fn foo(a: String) {}
 
 fn main() {}
