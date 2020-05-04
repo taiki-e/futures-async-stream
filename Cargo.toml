@@ -23,7 +23,8 @@ members = ["futures-async-stream-macro", "tests/doc"]
 [dependencies]
 futures-async-stream-macro = { version = "=0.1.5", path = "futures-async-stream-macro", default-features = false }
 futures-core = { version = "0.3", default-features = false }
-pin-project = "0.4"
+futures-sink = { version = "0.3", default-features = false }
+pin-project = "0.4.10"
 
 [dev-dependencies]
 trybuild = "1.0"

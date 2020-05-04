@@ -219,7 +219,7 @@
 #![warn(missing_docs)]
 #![warn(rust_2018_idioms, single_use_lifetimes, unreachable_pub)]
 #![warn(clippy::all, clippy::default_trait_access)]
-#![feature(generator_trait)]
+#![feature(generator_trait, generators)]
 
 #[doc(inline)]
 pub use futures_async_stream_macro::for_await;
@@ -244,7 +244,8 @@ mod future {
         ptr::NonNull,
         task::{Context, Poll},
     };
-    use pin_project::pin_project;
+    use futures_core::ready;
+    use pin_project::{pin_project, project};
 
     // Refs: https://github.com/rust-lang/rust/blob/2454a68cfbb63aa7b8e09fe05114d5f98b2f9740/src/libcore/future/mod.rs
 
@@ -297,6 +298,62 @@ mod future {
     #[doc(hidden)]
     pub unsafe fn get_context<'a, 'b>(cx: ResumeTy) -> &'a mut Context<'b> {
         &mut *cx.0.as_ptr().cast()
+    }
+
+    /// A future that may have completed.
+    ///
+    /// This is created by the [`maybe_done()`] function.
+    #[doc(hidden)]
+    #[pin_project(Replace)]
+    pub enum MaybeDone<F: Future> {
+        /// A not-yet-completed future
+        Future(#[pin] F),
+        /// The output of the completed future
+        Done(F::Output),
+        /// The empty variant after the result of a [`MaybeDone`] has been
+        /// taken using the [`take_output`](MaybeDone::take_output) method.
+        Gone,
+    }
+
+    /// Wraps a future into a `MaybeDone`
+    #[doc(hidden)]
+    pub fn maybe_done<F: Future>(future: F) -> MaybeDone<F> {
+        MaybeDone::Future(future)
+    }
+
+    impl<F: Future> MaybeDone<F> {
+        /// Attempt to take the output of a `MaybeDone` without driving it
+        /// towards completion.
+        pub fn take_output(self: Pin<&mut Self>) -> Option<F::Output> {
+            match &*self {
+                MaybeDone::Done(_) => {}
+                MaybeDone::Future(_) | MaybeDone::Gone => return None,
+            }
+            if let __MaybeDoneProjectionOwned::Done(output) = self.project_replace(MaybeDone::Gone)
+            {
+                Some(output)
+            } else {
+                unreachable!()
+            }
+        }
+    }
+
+    impl<F: Future> Future for MaybeDone<F> {
+        type Output = ();
+
+        #[project]
+        fn poll(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
+            #[project]
+            match self.as_mut().project() {
+                MaybeDone::Future(f) => {
+                    let res = ready!(f.poll(cx));
+                    self.set(MaybeDone::Done(res));
+                }
+                MaybeDone::Done(_) => {}
+                MaybeDone::Gone => panic!("MaybeDone polled after value taken"),
+            }
+            Poll::Ready(())
+        }
     }
 }
 
@@ -429,6 +486,343 @@ mod try_stream {
 
         GenTryStream(Some(gen))
     }
+}
+
+// Not public API.
+#[doc(hidden)]
+pub mod sink {
+    use core::{
+        ops::{Generator, GeneratorState},
+        pin::Pin,
+        ptr::NonNull,
+        task::{Context, Poll},
+    };
+    use futures_sink::Sink;
+    use pin_project::pin_project;
+
+    use crate::future::ResumeTy;
+
+    #[doc(hidden)]
+    pub enum Arg<T> {
+        StartSend(T),
+        Flush(ResumeTy),
+        Close(ResumeTy),
+    }
+
+    #[doc(hidden)]
+    pub enum Res {
+        Idle,
+        Pending,
+        Accepted,
+    }
+
+    /// This `Sink` is complete and no longer accepting items
+    #[derive(Debug, PartialEq, Eq)]
+    pub struct Complete;
+
+    /// Wrap a generator in a sink.
+    ///
+    /// This function returns a `GenStream` underneath, but hides it in `impl Trait` to give
+    /// better error messages (`impl Stream` rather than `GenStream<[closure.....]>`).
+    #[doc(hidden)]
+    pub fn from_generator<G, T, E>(gen: G) -> impl Sink<T, Error = Complete>
+    where
+        G: Generator<Arg<T>, Yield = Res, Return = ()>,
+    {
+        GenSink { gen }
+    }
+
+    #[pin_project]
+    struct GenSink<G> {
+        #[pin]
+        gen: G,
+    }
+
+    impl<T, G> Sink<T> for GenSink<G>
+    where
+        G: Generator<Arg<T>, Yield = Res, Return = ()>,
+    {
+        type Error = Complete;
+
+        fn poll_ready(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
+            self.poll_flush(cx)
+        }
+
+        fn start_send(self: Pin<&mut Self>, item: T) -> Result<(), Self::Error> {
+            match self.project().gen.resume(Arg::StartSend(item)) {
+                GeneratorState::Yielded(Res::Idle) => panic!("sink idle after start send"),
+                GeneratorState::Yielded(Res::Pending) => panic!("sink rejected send"),
+                GeneratorState::Yielded(Res::Accepted) => Ok(()),
+                GeneratorState::Complete(()) => Err(Complete),
+            }
+        }
+
+        fn poll_flush(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
+            match self
+                .project()
+                .gen
+                .resume(Arg::Flush(ResumeTy(NonNull::from(cx).cast::<Context<'static>>())))
+            {
+                GeneratorState::Yielded(Res::Idle) => Poll::Ready(Ok(())),
+                GeneratorState::Yielded(Res::Pending) => Poll::Pending,
+                GeneratorState::Yielded(Res::Accepted) => panic!("sink accepted during flush"),
+                GeneratorState::Complete(()) => Poll::Ready(Err(Complete)),
+            }
+        }
+
+        fn poll_close(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
+            match self
+                .project()
+                .gen
+                .resume(Arg::Close(ResumeTy(NonNull::from(cx).cast::<Context<'static>>())))
+            {
+                GeneratorState::Yielded(Res::Idle) => panic!("should have returned"),
+                GeneratorState::Yielded(Res::Pending) => Poll::Pending,
+                GeneratorState::Yielded(Res::Accepted) => panic!("sink accepted during close"),
+                GeneratorState::Complete(()) => Poll::Ready(Err(Complete)),
+            }
+        }
+    }
+
+    macro_rules! await_in_sink {
+        ($arg:ident, $e:expr) => {{}};
+    }
+
+    macro_rules! await_item {
+        ($arg:ident) => {{}};
+    }
+
+    extern crate std;
+    use std::string::String;
+
+    async fn bar(s: String) -> Result<(), String> {
+        if s == "bang" { Err(s) } else { Ok(()) }
+    }
+
+    fn foo() -> impl Sink<String, Error = String> {
+        from_generator(static move |mut arg: Arg<String>| -> Result<(), String> {
+            while let Some(item) = {
+                let mut item = None;
+                loop {
+                    match item {
+                        Some(item) => break item,
+                        None => {
+                            arg = match arg {
+                                Arg::StartSend(i) => {
+                                    item = Some(Some(i));
+                                    yield Res::Accepted
+                                }
+                                Arg::Flush(cx) => yield Res::Idle,
+                                Arg::Close(cx) => {
+                                    item = Some(None);
+                                    Arg::Close(cx)
+                                }
+                            };
+                        }
+                    }
+                }
+            } {
+                // await_in_sink!(arg, bar(item))
+                let e = bar(item);
+                let _i = {
+                    use crate::future::MaybeDone;
+                    let mut future = MaybeDone::Future(e);
+                    let mut future = unsafe { Pin::new_unchecked(&mut future) };
+                    loop {
+                        if let Some(e) = future.as_mut().take_output() {
+                            break e;
+                        }
+                        arg = match arg {
+                            Arg::StartSend(item) => yield Res::Pending,
+                            Arg::Flush(cx) | Arg::Close(cx) => {
+                                if let Poll::Ready(()) = unsafe {
+                                    core::future::Future::poll(
+                                        future.as_mut(),
+                                        crate::future::get_context(cx),
+                                    )
+                                } {}
+                                yield Res::Pending
+                            }
+                        }
+                    }
+                };
+            }
+
+            Ok(())
+        })
+    }
+
+    // fn test() {
+    //     let sink = foo();
+    // }
+}
+
+// Not public API.
+#[doc(hidden)]
+pub mod try_sink {
+    use core::{
+        ops::{Generator, GeneratorState},
+        pin::Pin,
+        ptr::NonNull,
+        task::{Context, Poll},
+    };
+    use futures_sink::Sink;
+    use pin_project::pin_project;
+
+    use crate::future::ResumeTy;
+
+    #[doc(hidden)]
+    pub enum Arg<T> {
+        StartSend(T),
+        Flush(ResumeTy),
+        Close(ResumeTy),
+    }
+
+    #[doc(hidden)]
+    pub enum Res {
+        Idle,
+        Pending,
+        Accepted,
+    }
+
+    /// Wrap a generator in a sink.
+    ///
+    /// This function returns a `GenStream` underneath, but hides it in `impl Trait` to give
+    /// better error messages (`impl Stream` rather than `GenStream<[closure.....]>`).
+    #[doc(hidden)]
+    pub fn from_generator<G, T, E>(gen: G) -> impl Sink<T, Error = E>
+    where
+        G: Generator<Arg<T>, Yield = Res, Return = Result<(), E>>,
+    {
+        GenSink { gen }
+    }
+
+    #[pin_project]
+    struct GenSink<G> {
+        #[pin]
+        gen: G,
+    }
+
+    impl<T, E, G> Sink<T> for GenSink<G>
+    where
+        G: Generator<Arg<T>, Yield = Res, Return = Result<(), E>>,
+    {
+        type Error = E;
+
+        fn poll_ready(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
+            self.poll_flush(cx)
+        }
+
+        fn start_send(self: Pin<&mut Self>, item: T) -> Result<(), Self::Error> {
+            match self.project().gen.resume(Arg::StartSend(item)) {
+                GeneratorState::Yielded(Res::Idle) => panic!("sink idle after start send"),
+                GeneratorState::Yielded(Res::Pending) => panic!("sink rejected send"),
+                GeneratorState::Yielded(Res::Accepted) => Ok(()),
+                GeneratorState::Complete(Ok(())) => panic!("sink unexpectedly closed"),
+                GeneratorState::Complete(Err(e)) => Err(e),
+            }
+        }
+
+        fn poll_flush(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
+            match self
+                .project()
+                .gen
+                .resume(Arg::Flush(ResumeTy(NonNull::from(cx).cast::<Context<'static>>())))
+            {
+                GeneratorState::Yielded(Res::Idle) => Poll::Ready(Ok(())),
+                GeneratorState::Yielded(Res::Pending) => Poll::Pending,
+                GeneratorState::Yielded(Res::Accepted) => panic!("sink accepted during flush"),
+                GeneratorState::Complete(Ok(())) => Poll::Ready(Ok(())),
+                GeneratorState::Complete(Err(e)) => Poll::Ready(Err(e)),
+            }
+        }
+
+        fn poll_close(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
+            match self
+                .project()
+                .gen
+                .resume(Arg::Close(ResumeTy(NonNull::from(cx).cast::<Context<'static>>())))
+            {
+                GeneratorState::Yielded(Res::Idle) => panic!("should have returned"),
+                GeneratorState::Yielded(Res::Pending) => Poll::Pending,
+                GeneratorState::Yielded(Res::Accepted) => panic!("sink accepted during close"),
+                GeneratorState::Complete(Ok(())) => Poll::Ready(Ok(())),
+                GeneratorState::Complete(Err(e)) => Poll::Ready(Err(e)),
+            }
+        }
+    }
+
+    macro_rules! await_in_sink {
+        ($arg:ident, $e:expr) => {{}};
+    }
+
+    macro_rules! await_item {
+        ($arg:ident) => {{}};
+    }
+
+    extern crate std;
+    use std::string::String;
+
+    async fn bar(s: String) -> Result<(), String> {
+        if s == "bang" { Err(s) } else { Ok(()) }
+    }
+
+    fn foo() -> impl Sink<String, Error = String> {
+        from_generator(static move |mut arg: Arg<String>| -> Result<(), String> {
+            while let Some(item) = {
+                let mut item = None;
+                loop {
+                    match item {
+                        Some(item) => break item,
+                        None => {
+                            arg = match arg {
+                                Arg::StartSend(i) => {
+                                    item = Some(Some(i));
+                                    yield Res::Accepted
+                                }
+                                Arg::Flush(cx) => yield Res::Idle,
+                                Arg::Close(cx) => {
+                                    item = Some(None);
+                                    Arg::Close(cx)
+                                }
+                            };
+                        }
+                    }
+                }
+            } {
+                // await_in_sink!(arg, bar(item))
+                let e = bar(item);
+                let _i = {
+                    use crate::future::MaybeDone;
+                    let mut future = MaybeDone::Future(e);
+                    let mut future = unsafe { Pin::new_unchecked(&mut future) };
+                    loop {
+                        if let Some(e) = future.as_mut().take_output() {
+                            break e;
+                        }
+                        arg = match arg {
+                            Arg::StartSend(item) => yield Res::Pending,
+                            Arg::Flush(cx) | Arg::Close(cx) => {
+                                if let Poll::Ready(()) = unsafe {
+                                    core::future::Future::poll(
+                                        future.as_mut(),
+                                        crate::future::get_context(cx),
+                                    )
+                                } {}
+                                yield Res::Pending
+                            }
+                        }
+                    }
+                };
+            }
+
+            Ok(())
+        })
+    }
+
+    // fn test() {
+    //     let sink = foo();
+    // }
 }
 
 // Not public API.
