@@ -6,6 +6,12 @@ This project adheres to [Semantic Versioning](https://semver.org).
 
 ## [Unreleased]
 
+## [0.1.5] - 2020-05-04
+
+* [`#[async_stream]` and `#[async_try_stream]` attributes can now be used on async blocks.][44]
+
+[44]: https://github.com/taiki-e/futures-async-stream/pull/44
+
 ## [0.1.4] - 2020-04-22
 
 * [futures-async-stream now works on no-std environment.][34]
@@ -104,7 +110,8 @@ This project adheres to [Semantic Versioning](https://semver.org).
 
 Initial release
 
-[Unreleased]: https://github.com/taiki-e/futures-async-stream/compare/v0.1.4...HEAD
+[Unreleased]: https://github.com/taiki-e/futures-async-stream/compare/v0.1.5...HEAD
+[0.1.5]: https://github.com/taiki-e/futures-async-stream/compare/v0.1.4...v0.1.5
 [0.1.4]: https://github.com/taiki-e/futures-async-stream/compare/v0.1.3...v0.1.4
 [0.1.3]: https://github.com/taiki-e/futures-async-stream/compare/v0.1.2...v0.1.3
 [0.1.2]: https://github.com/taiki-e/futures-async-stream/compare/v0.1.1...v0.1.2
