@@ -101,7 +101,7 @@ impl Visitor {
             let match_next = match self.scope {
                 Future => {
                     quote! {
-                        match ::futures_async_stream::stream::next(&mut __pinned).await {
+                        match ::futures_async_stream::__reexport::stream::next(&mut __pinned).await {
                             ::futures_async_stream::__reexport::option::Option::Some(e) => e,
                             ::futures_async_stream::__reexport::option::Option::None => break,
                         }
@@ -109,9 +109,9 @@ impl Visitor {
                 }
                 Stream | TryStream => {
                     quote! {
-                        match unsafe { ::futures_async_stream::stream::Stream::poll_next(
+                        match unsafe { ::futures_async_stream::__reexport::stream::Stream::poll_next(
                             ::futures_async_stream::__reexport::pin::Pin::as_mut(&mut __pinned),
-                            ::futures_async_stream::future::get_context(__task_context),
+                            ::futures_async_stream::__reexport::future::get_context(__task_context),
                         ) } {
                             ::futures_async_stream::__reexport::task::Poll::Ready(
                                 ::futures_async_stream::__reexport::option::Option::Some(e),
@@ -238,9 +238,9 @@ impl Visitor {
                 let mut __pinned = #base;
                 loop {
                     if let ::futures_async_stream::__reexport::task::Poll::Ready(result) =
-                    unsafe { ::futures_async_stream::future::Future::poll(
+                    unsafe { ::futures_async_stream::__reexport::future::Future::poll(
                         ::futures_async_stream::__reexport::pin::Pin::new_unchecked(&mut __pinned),
-                        ::futures_async_stream::future::get_context(__task_context),
+                        ::futures_async_stream::__reexport::future::get_context(__task_context),
                     ) } {
                         break result;
                     }

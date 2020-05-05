@@ -1,7 +1,10 @@
 #![warn(rust_2018_idioms, single_use_lifetimes)]
 #![feature(generators, stmt_expr_attributes, proc_macro_hygiene)]
 
-use futures::{executor::block_on, stream::Stream};
+use futures::{
+    executor::block_on,
+    stream::{self, Stream},
+};
 use futures_async_stream::{for_await, stream, stream_block};
 
 #[stream(item = T)]
@@ -14,7 +17,7 @@ async fn iter<T>(iter: impl IntoIterator<Item = T>) {
 async fn in_async_fn() -> i32 {
     let mut cnt = 0;
     #[for_await]
-    for x in iter(vec![1, 2, 3, 4]) {
+    for x in stream::iter(vec![1, 2, 3, 4]) {
         cnt += x;
     }
     cnt

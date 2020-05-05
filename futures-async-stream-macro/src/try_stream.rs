@@ -126,7 +126,7 @@ fn expand_try_stream_fn(item: FnSig, args: &Args) -> TokenStream {
     // as currently errors related to it being a result are targeted here. Not
     // sure if more errors will highlight this function call...
     let output_span = first_last(ok);
-    let gen_function = quote!(::futures_async_stream::try_stream::from_generator);
+    let gen_function = quote!(::futures_async_stream::__reexport::try_stream::from_generator);
     let gen_function = respan(gen_function, output_span);
     let ret_ty = quote!(::futures_async_stream::__reexport::result::Result<(), #error>);
     statements.append(&mut block.stmts);
@@ -157,7 +157,7 @@ fn expand_try_stream_fn(item: FnSig, args: &Args) -> TokenStream {
             // Raw `impl` breaks syntax highlighting in some editors.
             let impl_token = token::Impl::default();
             quote! {
-                #impl_token ::futures_async_stream::stream::Stream<
+                #impl_token ::futures_async_stream::__reexport::stream::Stream<
                     Item = ::futures_async_stream::__reexport::result::Result<#ok, #error>
                 > + #(#lifetimes +)*
             }
@@ -170,7 +170,7 @@ fn expand_try_stream_fn(item: FnSig, args: &Args) -> TokenStream {
             };
             quote! {
                 ::futures_async_stream::__reexport::pin::Pin<
-                    Box<dyn ::futures_async_stream::stream::Stream<
+                    Box<dyn ::futures_async_stream::__reexport::stream::Stream<
                         Item = ::futures_async_stream::__reexport::result::Result<#ok, #error>
                     > #send + #(#lifetimes +)*>
                 >
@@ -199,7 +199,7 @@ pub(crate) fn block_macro(input: TokenStream) -> Result<TokenStream> {
 
     Visitor::new(TryStream).visit_expr_mut(&mut expr);
 
-    let gen_function = quote!(::futures_async_stream::try_stream::from_generator);
+    let gen_function = quote!(::futures_async_stream::__reexport::try_stream::from_generator);
     let ret_ty = quote!(::futures_async_stream::__reexport::result::Result<(), _>);
     Ok(make_gen_body(
         Some(token::Move::default()),
@@ -213,7 +213,7 @@ pub(crate) fn block_macro(input: TokenStream) -> Result<TokenStream> {
 fn expand_try_stream_block(expr: &mut ExprAsync) -> TokenStream {
     Visitor::new(TryStream).visit_expr_async_mut(expr);
 
-    let gen_function = quote!(::futures_async_stream::try_stream::from_generator);
+    let gen_function = quote!(::futures_async_stream::__reexport::try_stream::from_generator);
     let ret_ty = quote!(::futures_async_stream::__reexport::result::Result<(), _>);
     make_gen_body(expr.capture, &expr.block, &gen_function, &quote!(Ok(())), &ret_ty)
 }
