@@ -10,7 +10,7 @@ use syn::{
 
 use crate::{
     elision,
-    utils::{block, first_last, parse_as_empty, respan},
+    utils::{block, parse_as_empty},
     visitor::{Stream, Visitor},
 };
 
@@ -318,20 +318,14 @@ fn expand_stream_fn(item: FnSig, args: &Args) -> TokenStream {
 
     let item = &args.item;
 
-    // Give the invocation of the `from_generator` function the same span as the `item`
-    // as currently errors related to it being a result are targeted here. Not
-    // sure if more errors will highlight this function call...
-    let output_span = first_last(item);
     let gen_function = quote!(::futures_async_stream::__reexport::stream::from_generator);
-    let gen_function = respan(gen_function, output_span);
     statements.append(&mut block.stmts);
     block.stmts = statements;
     let mut body_inner =
         make_gen_body(Some(token::Move::default()), &block, &gen_function, &quote!(), &quote!(()));
 
     if let ReturnTypeKind::Boxed { .. } = args.boxed {
-        let body = quote! { Box::pin(#body_inner) };
-        body_inner = respan(body, output_span);
+        body_inner = quote! { Box::pin(#body_inner) };
     }
 
     let mut body = TokenStream::new();
@@ -363,7 +357,6 @@ fn expand_stream_fn(item: FnSig, args: &Args) -> TokenStream {
             }
         }
     };
-    let return_ty = respan(return_ty, output_span);
 
     let body = semi.map_or(body, ToTokens::into_token_stream);
     quote! {
