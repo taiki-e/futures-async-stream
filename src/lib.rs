@@ -10,6 +10,7 @@
 //!
 //! ```rust
 //! #![feature(stmt_expr_attributes, proc_macro_hygiene)]
+//!
 //! use futures::stream::Stream;
 //! use futures_async_stream::for_await;
 //!
@@ -33,6 +34,7 @@
 //!
 //! ```rust
 //! #![feature(generators)]
+//!
 //! use futures::stream::Stream;
 //! use futures_async_stream::stream;
 //!
@@ -55,6 +57,7 @@
 //!
 //! ```rust
 //! #![feature(generators, proc_macro_hygiene)]
+//!
 //! use futures::stream::Stream;
 //! use futures_async_stream::stream_block;
 //!
@@ -73,6 +76,7 @@
 //!
 //! ```rust
 //! #![feature(generators)]
+//!
 //! use futures_async_stream::stream;
 //!
 //! trait Foo {
@@ -98,6 +102,7 @@
 //!
 //! ```rust
 //! #![feature(generators)]
+//!
 //! use futures::stream::Stream;
 //! use futures_async_stream::stream;
 //! use std::pin::Pin;
@@ -126,6 +131,7 @@
 //!
 //! ```rust
 //! #![feature(generators)]
+//!
 //! use futures::stream::Stream;
 //! use futures_async_stream::try_stream;
 //!
@@ -244,10 +250,12 @@ pub mod future {
     #[doc(hidden)]
     pub use core::future::Future;
 
+    // Refs: https://github.com/rust-lang/rust/blob/2454a68cfbb63aa7b8e09fe05114d5f98b2f9740/src/libcore/future/mod.rs
+
     /// This type is needed because:
     ///
     /// a) Generators cannot implement `for<'a, 'b> Generator<&'a mut Context<'b>>`, so we need to pass
-    ///    a raw pointer.
+    ///    a raw pointer (see https://github.com/rust-lang/rust/issues/68923).
     /// b) Raw pointers and `NonNull` aren't `Send` or `Sync`, so that would make every single future
     ///    non-Send/Sync as well, and we don't want that.
     ///
@@ -269,29 +277,25 @@ pub mod future {
     where
         G: Generator<ResumeTy, Yield = ()>,
     {
-        GenFuture { gen }
-    }
+        #[pin_project]
+        struct GenFuture<G>(#[pin] G);
 
-    /// A wrapper around generators used to implement `Future` for `async`/`await` code.
-    #[pin_project]
-    struct GenFuture<G> {
-        #[pin]
-        gen: G,
-    }
+        impl<G> Future for GenFuture<G>
+        where
+            G: Generator<ResumeTy, Yield = ()>,
+        {
+            type Output = G::Return;
 
-    impl<G> Future for GenFuture<G>
-    where
-        G: Generator<ResumeTy, Yield = ()>,
-    {
-        type Output = G::Return;
-
-        fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
-            let this = self.project();
-            match this.gen.resume(ResumeTy(NonNull::from(cx).cast::<Context<'static>>())) {
-                GeneratorState::Yielded(()) => Poll::Pending,
-                GeneratorState::Complete(x) => Poll::Ready(x),
+            fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
+                let this = self.project();
+                match this.0.resume(ResumeTy(NonNull::from(cx).cast::<Context<'static>>())) {
+                    GeneratorState::Yielded(()) => Poll::Pending,
+                    GeneratorState::Complete(x) => Poll::Ready(x),
+                }
             }
         }
+
+        GenFuture(gen)
     }
 
     #[doc(hidden)]
@@ -305,7 +309,6 @@ pub mod future {
 pub mod stream {
     use core::{
         future::Future,
-        marker::PhantomData,
         ops::{Generator, GeneratorState},
         pin::Pin,
         ptr::NonNull,
@@ -313,7 +316,7 @@ pub mod stream {
     };
     use pin_project::pin_project;
 
-    use super::future::ResumeTy;
+    use crate::future::ResumeTy;
 
     #[doc(hidden)]
     pub use futures_core::stream::Stream;
@@ -327,30 +330,25 @@ pub mod stream {
     where
         G: Generator<ResumeTy, Yield = Poll<T>, Return = ()>,
     {
-        GenStream { gen, _phantom: PhantomData }
-    }
+        #[pin_project]
+        struct GenStream<G>(#[pin] G);
 
-    /// A wrapper around generators used to implement `Stream` for `async`/`await` code.
-    #[pin_project]
-    struct GenStream<G, T> {
-        #[pin]
-        gen: G,
-        _phantom: PhantomData<T>,
-    }
+        impl<G, T> Stream for GenStream<G>
+        where
+            G: Generator<ResumeTy, Yield = Poll<T>, Return = ()>,
+        {
+            type Item = T;
 
-    impl<G, T> Stream for GenStream<G, T>
-    where
-        G: Generator<ResumeTy, Yield = Poll<T>, Return = ()>,
-    {
-        type Item = T;
-
-        fn poll_next(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
-            let this = self.project();
-            match this.gen.resume(ResumeTy(NonNull::from(cx).cast::<Context<'static>>())) {
-                GeneratorState::Yielded(x) => x.map(Some),
-                GeneratorState::Complete(()) => Poll::Ready(None),
+            fn poll_next(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
+                let this = self.project();
+                match this.0.resume(ResumeTy(NonNull::from(cx).cast::<Context<'static>>())) {
+                    GeneratorState::Yielded(x) => x.map(Some),
+                    GeneratorState::Complete(()) => Poll::Ready(None),
+                }
             }
         }
+
+        GenStream(gen)
     }
 
     // This is equivalent to the `futures::stream::StreamExt::next` method.
@@ -360,22 +358,20 @@ pub mod stream {
     where
         S: Stream + Unpin,
     {
-        Next { stream }
-    }
+        struct Next<'a, S>(&'a mut S);
 
-    struct Next<'a, S> {
-        stream: &'a mut S,
-    }
+        impl<S> Future for Next<'_, S>
+        where
+            S: Stream + Unpin,
+        {
+            type Output = Option<S::Item>;
 
-    impl<S> Future for Next<'_, S>
-    where
-        S: Stream + Unpin,
-    {
-        type Output = Option<S::Item>;
-
-        fn poll(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
-            Pin::new(&mut self.stream).poll_next(cx)
+            fn poll(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
+                Pin::new(&mut self.0).poll_next(cx)
+            }
         }
+
+        Next(stream)
     }
 }
 
@@ -383,7 +379,6 @@ pub mod stream {
 #[doc(hidden)]
 pub mod try_stream {
     use core::{
-        marker::PhantomData,
         ops::{Generator, GeneratorState},
         pin::Pin,
         ptr::NonNull,
@@ -392,7 +387,7 @@ pub mod try_stream {
     use futures_core::stream::{FusedStream, Stream};
     use pin_project::pin_project;
 
-    use super::future::ResumeTy;
+    use crate::future::ResumeTy;
 
     /// Wrap a generator in a stream.
     ///
@@ -405,50 +400,44 @@ pub mod try_stream {
     where
         G: Generator<ResumeTy, Yield = Poll<T>, Return = Result<(), E>>,
     {
-        GenTryStream { gen, done: false, _phantom: PhantomData }
-    }
+        #[pin_project]
+        struct GenTryStream<G>(#[pin] Option<G>);
 
-    /// A wrapper around generators used to implement `Stream` for `async`/`await` code.
-    #[pin_project]
-    struct GenTryStream<G, T, E> {
-        #[pin]
-        gen: G,
-        done: bool,
-        _phantom: PhantomData<(T, E)>,
-    }
+        impl<G, T, E> Stream for GenTryStream<G>
+        where
+            G: Generator<ResumeTy, Yield = Poll<T>, Return = Result<(), E>>,
+        {
+            type Item = Result<T, E>;
 
-    impl<G, T, E> Stream for GenTryStream<G, T, E>
-    where
-        G: Generator<ResumeTy, Yield = Poll<T>, Return = Result<(), E>>,
-    {
-        type Item = Result<T, E>;
-
-        fn poll_next(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
-            if self.done {
-                return Poll::Ready(None);
+            fn poll_next(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
+                let mut this = self.project();
+                if let Some(gen) = this.0.as_mut().as_pin_mut() {
+                    let res =
+                        match gen.resume(ResumeTy(NonNull::from(cx).cast::<Context<'static>>())) {
+                            GeneratorState::Yielded(x) => x.map(|x| Some(Ok(x))),
+                            GeneratorState::Complete(Err(e)) => Poll::Ready(Some(Err(e))),
+                            GeneratorState::Complete(Ok(())) => Poll::Ready(None),
+                        };
+                    if let Poll::Ready(Some(Err(_))) | Poll::Ready(None) = &res {
+                        this.0.set(None);
+                    }
+                    res
+                } else {
+                    Poll::Ready(None)
+                }
             }
+        }
 
-            let this = self.project();
-            let res = match this.gen.resume(ResumeTy(NonNull::from(cx).cast::<Context<'static>>()))
-            {
-                GeneratorState::Yielded(x) => x.map(|x| Some(Ok(x))),
-                GeneratorState::Complete(Err(e)) => Poll::Ready(Some(Err(e))),
-                GeneratorState::Complete(Ok(())) => Poll::Ready(None),
-            };
-            if let Poll::Ready(Some(Err(_))) | Poll::Ready(None) = &res {
-                *this.done = true;
+        impl<G, T, E> FusedStream for GenTryStream<G>
+        where
+            G: Generator<ResumeTy, Yield = Poll<T>, Return = Result<(), E>>,
+        {
+            fn is_terminated(&self) -> bool {
+                self.0.is_none()
             }
-            res
         }
-    }
 
-    impl<G, T, E> FusedStream for GenTryStream<G, T, E>
-    where
-        G: Generator<ResumeTy, Yield = Poll<T>, Return = Result<(), E>>,
-    {
-        fn is_terminated(&self) -> bool {
-            self.done
-        }
+        GenTryStream(Some(gen))
     }
 }
 

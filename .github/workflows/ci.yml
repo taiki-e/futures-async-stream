@@ -44,13 +44,12 @@ jobs:
         run: |
           cargo install cargo-hack
       - name: cargo test
-        if: matrix.rust != 'nightly'
         run: |
-          cargo test --all
-      - name: cargo test
+          cargo test --all --all-features
+      - name: cargo test --test compiletest
         if: matrix.rust == 'nightly'
         run: |
-          cargo test --all --all-features -- -Zunstable-options --include-ignored
+          cargo test -p futures-async-stream --all-features --test compiletest -- --ignored
       - name: cargo check --target thumbv7m-none-eabi
         if: matrix.rust == 'nightly'
         run: |
