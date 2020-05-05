@@ -9,5 +9,5 @@ publish = false
 
 [dev-dependencies]
 futures-async-stream = { path = "../.." }
-futures = { version = "0.3", default-features = false, features = ["executor"] }
+futures = { version = "0.3", default-features = false }
 pin-project = "0.4"
