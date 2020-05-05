@@ -2,9 +2,25 @@
 // #![warn(single_use_lifetimes)] // FIXME
 #![feature(generators, stmt_expr_attributes, proc_macro_hygiene)]
 
-use futures::{executor::block_on, stream::Stream};
+use futures::{
+    future::Future,
+    pin_mut,
+    stream::Stream,
+    task::{noop_waker, Context, Poll},
+};
 use futures_async_stream::{for_await, stream, stream_block};
 use std::{pin::Pin, rc::Rc, sync::Arc};
+
+fn run<F: Future>(f: F) -> F::Output {
+    let w = noop_waker();
+    let cx = &mut Context::from_waker(&w);
+    pin_mut!(f);
+    loop {
+        if let Poll::Ready(x) = f.as_mut().poll(cx) {
+            return x;
+        }
+    }
+}
 
 #[stream(item = i32)]
 async fn stream(x: i32) {
@@ -236,7 +252,7 @@ fn test() {
         yield;
     }
 
-    block_on(async {
+    run(async {
         let mut v = 0..=1;
         #[for_await]
         for x in stream1() {

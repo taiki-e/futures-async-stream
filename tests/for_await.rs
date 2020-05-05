@@ -2,10 +2,23 @@
 #![feature(generators, stmt_expr_attributes, proc_macro_hygiene)]
 
 use futures::{
-    executor::block_on,
+    future::Future,
+    pin_mut,
     stream::{self, Stream},
+    task::{noop_waker, Context, Poll},
 };
 use futures_async_stream::{for_await, stream, stream_block};
+
+fn run<F: Future>(f: F) -> F::Output {
+    let w = noop_waker();
+    let cx = &mut Context::from_waker(&w);
+    pin_mut!(f);
+    loop {
+        if let Poll::Ready(x) = f.as_mut().poll(cx) {
+            return x;
+        }
+    }
+}
 
 #[stream(item = T)]
 async fn iter<T>(iter: impl IntoIterator<Item = T>) {
@@ -57,7 +70,7 @@ pub fn in_stream_block() -> impl Stream<Item = i32> {
 
 #[test]
 fn test() {
-    block_on(async {
+    run(async {
         assert_eq!(in_async_fn().await, 10);
         assert_eq!(nested().await, true);
     })

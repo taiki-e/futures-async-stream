@@ -3,8 +3,24 @@
 #![allow(clippy::try_err)]
 #![feature(generators, stmt_expr_attributes, proc_macro_hygiene, impl_trait_in_bindings)]
 
-use futures::{executor::block_on, stream::Stream};
+use futures::{
+    future::Future,
+    pin_mut,
+    stream::Stream,
+    task::{noop_waker, Context, Poll},
+};
 use futures_async_stream::{for_await, stream, try_stream, try_stream_block};
+
+fn run<F: Future>(f: F) -> F::Output {
+    let w = noop_waker();
+    let cx = &mut Context::from_waker(&w);
+    pin_mut!(f);
+    loop {
+        if let Poll::Ready(x) = f.as_mut().poll(cx) {
+            return x;
+        }
+    }
+}
 
 #[stream(item = T)]
 async fn iter<T>(iter: impl IntoIterator<Item = T>) {
@@ -114,7 +130,7 @@ pub async fn dyn_trait(stream: impl Stream<Item = String>) {
 
 #[test]
 fn test() {
-    block_on(async {
+    run(async {
         let mut v = [Ok(0), Err(1)].iter();
         #[for_await]
         for x in stream1() {
