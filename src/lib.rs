@@ -210,7 +210,7 @@
 //!
 //! [futures-await]: https://github.com/alexcrichton/futures-await
 
-#![no_std]
+// #![no_std]
 #![doc(html_root_url = "https://docs.rs/futures-async-stream/0.1.5")]
 #![doc(test(
     no_crate_inject,
@@ -509,10 +509,12 @@ pub mod sink {
         Close(ResumeTy),
     }
 
+    #[derive(Debug)]
     #[doc(hidden)]
     pub enum Res {
         Idle,
         Pending,
+        Ready,
         Accepted,
     }
 
@@ -521,7 +523,7 @@ pub mod sink {
     /// This function returns a `GenSink` underneath, but hides it in `impl Trait` to give
     /// better error messages (`impl Stream` rather than `GenSink<[closure.....]>`).
     #[doc(hidden)]
-    pub fn from_generator<G, T, E>(gen: G) -> impl Sink<T, Error = E>
+    pub fn from_generator<G, T, E: core::fmt::Debug>(gen: G) -> impl Sink<T, Error = E>
     where
         G: Generator<Arg<T>, Yield = Res, Return = Result<(), E>>,
     {
@@ -534,20 +536,23 @@ pub mod sink {
         gen: G,
     }
 
-    impl<T, E, G> Sink<T> for GenSink<G>
+    impl<T, E: core::fmt::Debug, G> Sink<T> for GenSink<G>
     where
         G: Generator<Arg<T>, Yield = Res, Return = Result<(), E>>,
     {
         type Error = E;
 
         fn poll_ready(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
+            eprintln!("poll_ready");
             self.poll_flush(cx)
         }
 
         fn start_send(self: Pin<&mut Self>, item: T) -> Result<(), Self::Error> {
-            match self.project().gen.resume(Arg::StartSend(item)) {
+            eprintln!("start_send");
+            match dbg!(self.project().gen.resume(Arg::StartSend(item))) {
                 GeneratorState::Yielded(Res::Idle) => panic!("sink idle after start send"),
                 GeneratorState::Yielded(Res::Pending) => panic!("sink rejected send"),
+                GeneratorState::Yielded(Res::Ready) => panic!("sink ready"),
                 GeneratorState::Yielded(Res::Accepted) => Ok(()),
                 GeneratorState::Complete(Ok(())) => panic!("sink unexpectedly closed"),
                 GeneratorState::Complete(Err(e)) => Err(e),
@@ -555,13 +560,15 @@ pub mod sink {
         }
 
         fn poll_flush(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
-            match self
-                .project()
-                .gen
-                .resume(Arg::Flush(ResumeTy(NonNull::from(cx).cast::<Context<'static>>())))
-            {
+            eprintln!("poll_flush");
+            match dbg!(
+                self.project()
+                    .gen
+                    .resume(Arg::Flush(ResumeTy(NonNull::from(cx).cast::<Context<'static>>())))
+            ) {
                 GeneratorState::Yielded(Res::Idle) => Poll::Ready(Ok(())),
                 GeneratorState::Yielded(Res::Pending) => Poll::Pending,
+                GeneratorState::Yielded(Res::Ready) => Poll::Ready(Ok(())),
                 GeneratorState::Yielded(Res::Accepted) => panic!("sink accepted during flush"),
                 GeneratorState::Complete(Ok(())) => Poll::Ready(Ok(())),
                 GeneratorState::Complete(Err(e)) => Poll::Ready(Err(e)),
@@ -569,13 +576,15 @@ pub mod sink {
         }
 
         fn poll_close(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
-            match self
-                .project()
-                .gen
-                .resume(Arg::Close(ResumeTy(NonNull::from(cx).cast::<Context<'static>>())))
-            {
+            eprintln!("poll_close");
+            match dbg!(
+                self.project()
+                    .gen
+                    .resume(Arg::Close(ResumeTy(NonNull::from(cx).cast::<Context<'static>>())))
+            ) {
                 GeneratorState::Yielded(Res::Idle) => panic!("should have returned"),
                 GeneratorState::Yielded(Res::Pending) => Poll::Pending,
+                GeneratorState::Yielded(Res::Ready) => Poll::Ready(Ok(())),
                 GeneratorState::Yielded(Res::Accepted) => panic!("sink accepted during close"),
                 GeneratorState::Complete(Ok(())) => Poll::Ready(Ok(())),
                 GeneratorState::Complete(Err(e)) => Poll::Ready(Err(e)),
@@ -612,5 +621,14 @@ pub mod __reexport {
     pub mod try_stream {
         #[doc(hidden)]
         pub use crate::try_stream::*;
+    }
+
+    #[doc(hidden)]
+    pub mod sink {
+        #[doc(hidden)]
+        pub use futures_sink::Sink;
+
+        #[doc(hidden)]
+        pub use crate::sink::*;
     }
 }
