@@ -17,13 +17,13 @@ use crate::{
 // =================================================================================================
 // try_stream
 
-pub(super) fn attribute(args: TokenStream, input: TokenStream) -> Result<TokenStream> {
+pub(crate) fn attribute(args: TokenStream, input: TokenStream) -> Result<TokenStream> {
     let stmt = syn::parse2(input.clone());
     match stmt {
         Ok(Stmt::Item(Item::Fn(item))) => parse_try_stream_fn(args, item.into()),
         Ok(Stmt::Expr(Expr::Async(mut expr))) | Ok(Stmt::Semi(Expr::Async(mut expr), _)) => {
             parse_as_empty(&args)?;
-            Ok(expand_try_stream_block2(&mut expr))
+            Ok(expand_try_stream_block(&mut expr))
         }
         _ => {
             if let Ok(item) = syn::parse2::<TraitItemMethod>(input.clone()) {
@@ -194,25 +194,23 @@ fn expand_try_stream_fn(item: FnSig, args: &Args) -> TokenStream {
 // =================================================================================================
 // try_stream_block
 
-pub(super) fn block_macro(input: TokenStream) -> Result<TokenStream> {
-    syn::parse2(input).map(expand_try_stream_block)
-}
+pub(crate) fn block_macro(input: TokenStream) -> Result<TokenStream> {
+    let mut expr = syn::parse2(input)?;
 
-fn expand_try_stream_block(mut expr: Expr) -> TokenStream {
     Visitor::new(TryStream).visit_expr_mut(&mut expr);
 
     let gen_function = quote!(::futures_async_stream::try_stream::from_generator);
     let ret_ty = quote!(::futures_async_stream::__reexport::result::Result<(), _>);
-    make_gen_body(
+    Ok(make_gen_body(
         Some(token::Move::default()),
         &block(vec![Stmt::Expr(expr)]),
         &gen_function,
         &quote!(Ok(())),
         &ret_ty,
-    )
+    ))
 }
 
-pub(super) fn expand_try_stream_block2(expr: &mut ExprAsync) -> TokenStream {
+fn expand_try_stream_block(expr: &mut ExprAsync) -> TokenStream {
     Visitor::new(TryStream).visit_expr_async_mut(expr);
 
     let gen_function = quote!(::futures_async_stream::try_stream::from_generator);

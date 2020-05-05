@@ -17,13 +17,13 @@ use crate::{
 // =================================================================================================
 // async_stream
 
-pub(super) fn attribute(args: TokenStream, input: TokenStream) -> Result<TokenStream> {
+pub(crate) fn attribute(args: TokenStream, input: TokenStream) -> Result<TokenStream> {
     let stmt = syn::parse2(input.clone());
     match stmt {
         Ok(Stmt::Item(Item::Fn(item))) => parse_stream_fn(args, item.into()),
         Ok(Stmt::Expr(Expr::Async(mut expr))) | Ok(Stmt::Semi(Expr::Async(mut expr), _)) => {
             parse_as_empty(&args)?;
-            Ok(expand_stream_block2(&mut expr))
+            Ok(expand_stream_block(&mut expr))
         }
         _ => {
             if let Ok(item) = syn::parse2::<TraitItemMethod>(input.clone()) {
@@ -365,8 +365,7 @@ fn expand_stream_fn(item: FnSig, args: &Args) -> TokenStream {
     };
     let return_ty = respan(return_ty, output_span);
 
-    // FIXME
-    let body = semi.map_or_else(|| body, ToTokens::into_token_stream);
+    let body = semi.map_or(body, ToTokens::into_token_stream);
     quote! {
         #(#attrs)*
         #vis #unsafety #abi
@@ -380,24 +379,22 @@ fn expand_stream_fn(item: FnSig, args: &Args) -> TokenStream {
 // =================================================================================================
 // stream_block
 
-pub(super) fn block_macro(input: TokenStream) -> Result<TokenStream> {
-    syn::parse2(input).map(expand_stream_block)
-}
+pub(crate) fn block_macro(input: TokenStream) -> Result<TokenStream> {
+    let mut expr = syn::parse2(input)?;
 
-fn expand_stream_block(mut expr: Expr) -> TokenStream {
     Visitor::new(Stream).visit_expr_mut(&mut expr);
 
     let gen_function = quote!(::futures_async_stream::stream::from_generator);
-    make_gen_body(
+    Ok(make_gen_body(
         Some(token::Move::default()),
         &block(vec![Stmt::Expr(expr)]),
         &gen_function,
         &quote!(),
         &quote!(()),
-    )
+    ))
 }
 
-pub(super) fn expand_stream_block2(expr: &mut ExprAsync) -> TokenStream {
+fn expand_stream_block(expr: &mut ExprAsync) -> TokenStream {
     Visitor::new(Stream).visit_expr_async_mut(expr);
 
     let gen_function = quote!(::futures_async_stream::stream::from_generator);
