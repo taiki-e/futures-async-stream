@@ -37,6 +37,7 @@ This is a reimplement of [futures-await]'s `#[async]` for loops for futures 0.3 
 
 ```rust
 #![feature(stmt_expr_attributes, proc_macro_hygiene)]
+
 use futures::stream::Stream;
 use futures_async_stream::for_await;
 
@@ -60,13 +61,14 @@ This is a reimplement of [futures-await]'s `#[stream]` for futures 0.3 and is an
 
 ```rust
 #![feature(generators)]
+
 use futures::stream::Stream;
 use futures_async_stream::stream;
 
 // Returns a stream of i32
 #[stream(item = i32)]
 async fn foo(stream: impl Stream<Item = String>) {
-    // `for_await` is built into `async_stream`. If you use `for_await` only in `async_stream`, there is no need to import `for_await`.
+    // `for_await` is built into `stream`. If you use `for_await` only in `stream`, there is no need to import `for_await`.
     #[for_await]
     for x in stream {
         yield x.parse().unwrap();
@@ -82,6 +84,7 @@ You can create a stream directly as an expression using an `stream_block!` macro
 
 ```rust
 #![feature(generators, proc_macro_hygiene)]
+
 use futures::stream::Stream;
 use futures_async_stream::stream_block;
 
@@ -125,6 +128,7 @@ If you passed `boxed_local` instead of `boxed`, async stream function returns a 
 
 ```rust
 #![feature(generators)]
+
 use futures::stream::Stream;
 use futures_async_stream::stream;
 use std::pin::Pin;
@@ -153,6 +157,7 @@ impl Foo for Bar {
 
 ```rust
 #![feature(generators)]
+
 use futures::stream::Stream;
 use futures_async_stream::try_stream;
 

@@ -96,7 +96,7 @@ impl Visitor {
             }
 
             // It needs to adjust the type yielded by the macro because generators used internally by
-            // async fn yield `()` type, but generators used internally by `async_stream` yield
+            // async fn yield `()` type, but generators used internally by `stream` yield
             // `Poll<U>` type.
             let match_next = match self.scope {
                 Future => {
@@ -212,7 +212,7 @@ impl Visitor {
     /// Visits `<base>.await` in `stream` scope.
     ///
     /// It needs to adjust the type yielded by the macro because generators used internally by
-    /// async fn yield `()` type, but generators used internally by `async_stream` yield
+    /// async fn yield `()` type, but generators used internally by `stream` yield
     /// `Poll<U>` type.
     fn visit_await(&self, expr: &mut Expr) {
         if !self.scope.is_stream() {

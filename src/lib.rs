@@ -41,7 +41,7 @@
 //! // Returns a stream of i32
 //! #[stream(item = i32)]
 //! async fn foo(stream: impl Stream<Item = String>) {
-//!     // `for_await` is built into `async_stream`. If you use `for_await` only in `async_stream`, there is no need to import `for_await`.
+//!     // `for_await` is built into `stream`. If you use `for_await` only in `stream`, there is no need to import `for_await`.
 //!     #[for_await]
 //!     for x in stream {
 //!         yield x.parse().unwrap();

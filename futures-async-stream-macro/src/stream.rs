@@ -15,7 +15,7 @@ use crate::{
 };
 
 // =================================================================================================
-// async_stream
+// stream
 
 pub(crate) fn attribute(args: TokenStream, input: TokenStream) -> Result<TokenStream> {
     let stmt = syn::parse2(input.clone());
