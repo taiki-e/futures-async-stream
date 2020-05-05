@@ -300,7 +300,7 @@ pub(super) fn make_gen_body(
 
     quote! {
         #gen_function(
-            static #capture |mut __task_context: ::futures_async_stream::future::ResumeTy| -> #ret_ty
+            static #capture |mut __task_context: ::futures_async_stream::__reexport::future::ResumeTy| -> #ret_ty
             #gen_body
         )
     }
@@ -322,7 +322,7 @@ fn expand_stream_fn(item: FnSig, args: &Args) -> TokenStream {
     // as currently errors related to it being a result are targeted here. Not
     // sure if more errors will highlight this function call...
     let output_span = first_last(item);
-    let gen_function = quote!(::futures_async_stream::stream::from_generator);
+    let gen_function = quote!(::futures_async_stream::__reexport::stream::from_generator);
     let gen_function = respan(gen_function, output_span);
     statements.append(&mut block.stmts);
     block.stmts = statements;
@@ -347,7 +347,7 @@ fn expand_stream_fn(item: FnSig, args: &Args) -> TokenStream {
             // Raw `impl` breaks syntax highlighting in some editors.
             let impl_token = token::Impl::default();
             quote! {
-                #impl_token ::futures_async_stream::stream::Stream<Item = #item> + #(#lifetimes +)*
+                #impl_token ::futures_async_stream::__reexport::stream::Stream<Item = #item> + #(#lifetimes +)*
             }
         }
         ReturnTypeKind::Boxed { send } => {
@@ -358,7 +358,7 @@ fn expand_stream_fn(item: FnSig, args: &Args) -> TokenStream {
             };
             quote! {
                 ::futures_async_stream::__reexport::pin::Pin<
-                    Box<dyn ::futures_async_stream::stream::Stream<Item = #item> #send + #(#lifetimes +)*>
+                    Box<dyn ::futures_async_stream::__reexport::stream::Stream<Item = #item> #send + #(#lifetimes +)*>
                 >
             }
         }
@@ -384,7 +384,7 @@ pub(crate) fn block_macro(input: TokenStream) -> Result<TokenStream> {
 
     Visitor::new(Stream).visit_expr_mut(&mut expr);
 
-    let gen_function = quote!(::futures_async_stream::stream::from_generator);
+    let gen_function = quote!(::futures_async_stream::__reexport::stream::from_generator);
     Ok(make_gen_body(
         Some(token::Move::default()),
         &block(vec![Stmt::Expr(expr)]),
@@ -397,6 +397,6 @@ pub(crate) fn block_macro(input: TokenStream) -> Result<TokenStream> {
 fn expand_stream_block(expr: &mut ExprAsync) -> TokenStream {
     Visitor::new(Stream).visit_expr_async_mut(expr);
 
-    let gen_function = quote!(::futures_async_stream::stream::from_generator);
+    let gen_function = quote!(::futures_async_stream::__reexport::stream::from_generator);
     make_gen_body(expr.capture, &expr.block, &gen_function, &quote!(), &quote!(()))
 }

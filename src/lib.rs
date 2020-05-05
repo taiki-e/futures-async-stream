@@ -236,19 +236,15 @@ pub use futures_async_stream_macro::try_stream;
 #[doc(inline)]
 pub use futures_async_stream_macro::try_stream_block;
 
-// Not public API.
-#[doc(hidden)]
-pub mod future {
+mod future {
     use core::{
+        future::Future,
         ops::{Generator, GeneratorState},
         pin::Pin,
         ptr::NonNull,
         task::{Context, Poll},
     };
     use pin_project::pin_project;
-
-    #[doc(hidden)]
-    pub use core::future::Future;
 
     // Refs: https://github.com/rust-lang/rust/blob/2454a68cfbb63aa7b8e09fe05114d5f98b2f9740/src/libcore/future/mod.rs
 
@@ -259,7 +255,7 @@ pub mod future {
     /// b) Raw pointers and `NonNull` aren't `Send` or `Sync`, so that would make every single future
     ///    non-Send/Sync as well, and we don't want that.
     ///
-    /// It also simplifies the HIR lowering of `.await`.
+    /// It also simplifies the lowering of `.await`.
     #[doc(hidden)]
     #[derive(Debug, Copy, Clone)]
     pub struct ResumeTy(pub(crate) NonNull<Context<'static>>);
@@ -304,9 +300,7 @@ pub mod future {
     }
 }
 
-// Not public API.
-#[doc(hidden)]
-pub mod stream {
+mod stream {
     use core::{
         future::Future,
         ops::{Generator, GeneratorState},
@@ -314,12 +308,10 @@ pub mod stream {
         ptr::NonNull,
         task::{Context, Poll},
     };
+    use futures_core::stream::Stream;
     use pin_project::pin_project;
 
     use crate::future::ResumeTy;
-
-    #[doc(hidden)]
-    pub use futures_core::stream::Stream;
 
     /// Wrap a generator in a stream.
     ///
@@ -375,9 +367,7 @@ pub mod stream {
     }
 }
 
-// Not public API.
-#[doc(hidden)]
-pub mod try_stream {
+mod try_stream {
     use core::{
         ops::{Generator, GeneratorState},
         pin::Pin,
@@ -446,4 +436,28 @@ pub mod try_stream {
 pub mod __reexport {
     #[doc(hidden)]
     pub use core::{marker, option, pin, result, task};
+
+    #[doc(hidden)]
+    pub mod future {
+        #[doc(hidden)]
+        pub use core::future::Future;
+
+        #[doc(hidden)]
+        pub use crate::future::*;
+    }
+
+    #[doc(hidden)]
+    pub mod stream {
+        #[doc(hidden)]
+        pub use futures_core::stream::Stream;
+
+        #[doc(hidden)]
+        pub use crate::stream::*;
+    }
+
+    #[doc(hidden)]
+    pub mod try_stream {
+        #[doc(hidden)]
+        pub use crate::try_stream::*;
+    }
 }
