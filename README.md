@@ -36,7 +36,7 @@ Processes streams using a for loop.
 This is a reimplement of [futures-await]'s `#[async]` for loops for futures 0.3 and is an experimental implementation of [the idea listed as the next step of async/await](https://github.com/rust-lang/rfcs/blob/master/text/2394-async_await.md#for-await-and-processing-streams).
 
 ```rust
-#![feature(stmt_expr_attributes, proc_macro_hygiene)]
+#![feature(proc_macro_hygiene, stmt_expr_attributes)]
 
 use futures::stream::Stream;
 use futures_async_stream::for_await;

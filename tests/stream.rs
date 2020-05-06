@@ -1,5 +1,5 @@
 #![warn(rust_2018_idioms, single_use_lifetimes)]
-#![feature(generators, stmt_expr_attributes, proc_macro_hygiene)]
+#![feature(generators, proc_macro_hygiene, stmt_expr_attributes)]
 
 use futures::{
     future::Future,
@@ -95,6 +95,16 @@ pub async fn async_block3() {
     for _i in s {}
 }
 
+pub async fn async_block_weird_fmt() {
+    let _s = #[stream]
+    async move {
+        #[for_await]
+        for i in stream(2) {
+            yield async { i * i }.await;
+        }
+    };
+}
+
 #[stream(item = u64)]
 async fn stream1() {
     yield 0;
@@ -160,9 +170,29 @@ pub async fn array() {
     yield [1, 2, 3, 4];
 }
 
-pub struct A(i32);
+#[allow(clippy::toplevel_ref_arg)]
+pub mod arguments {
+    use super::*;
 
-impl A {
+    #[stream(item = ())]
+    pub async fn arg_ref(ref x: u8) {
+        let _x = x;
+    }
+
+    #[stream(item = ())]
+    pub async fn arg_mut(mut x: u8) {
+        let _x = &mut x;
+    }
+
+    #[stream(item = ())]
+    pub async fn arg_ref_mut(ref mut x: u8) {
+        let _x = x;
+    }
+}
+
+pub struct Receiver(i32);
+
+impl Receiver {
     #[stream(item = i32)]
     pub async fn take_self(self) {
         yield self.0
@@ -221,6 +251,8 @@ pub trait Trait {
     async fn stream4(&self);
 }
 
+pub struct A(i32);
+
 impl Trait for A {
     #[stream(boxed, item = i32)]
     async fn stream1() {
@@ -265,7 +297,7 @@ fn test() {
         }
 
         #[for_await]
-        for x in A(11).take_self() {
+        for x in Receiver(11).take_self() {
             assert_eq!(x, 11);
         }
     })

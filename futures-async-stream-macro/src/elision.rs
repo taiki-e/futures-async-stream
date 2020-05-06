@@ -1,13 +1,13 @@
 use proc_macro2::Span;
 use syn::{
     punctuated::Punctuated,
-    token::Comma,
+    token,
     visit_mut::{self, VisitMut},
     FnArg, GenericArgument, GenericParam, Lifetime, LifetimeDef, Receiver, TypeReference,
 };
 
 pub(super) fn unelide_lifetimes(
-    generics: &mut Punctuated<GenericParam, Comma>,
+    generics: &mut Punctuated<GenericParam, token::Comma>,
     args: &mut Vec<FnArg>,
 ) {
     let mut visitor = UnelideLifetimes::new(generics);
@@ -15,14 +15,14 @@ pub(super) fn unelide_lifetimes(
 }
 
 struct UnelideLifetimes<'a> {
-    generics: &'a mut Punctuated<GenericParam, Comma>,
+    generics: &'a mut Punctuated<GenericParam, token::Comma>,
     lifetime_index: usize,
     lifetime_name: String,
     count: u32,
 }
 
 impl<'a> UnelideLifetimes<'a> {
-    fn new(generics: &'a mut Punctuated<GenericParam, Comma>) -> Self {
+    fn new(generics: &'a mut Punctuated<GenericParam, token::Comma>) -> Self {
         let lifetime_index = lifetime_index(generics);
         let lifetime_name = lifetime_name(generics);
         Self { generics, lifetime_index, lifetime_name, count: 0 }
@@ -73,7 +73,7 @@ impl VisitMut for UnelideLifetimes<'_> {
     }
 }
 
-fn lifetime_index(generics: &Punctuated<GenericParam, Comma>) -> usize {
+fn lifetime_index(generics: &Punctuated<GenericParam, token::Comma>) -> usize {
     generics
         .iter()
         .take_while(|param| if let GenericParam::Lifetime(_) = param { true } else { false })
@@ -82,7 +82,7 @@ fn lifetime_index(generics: &Punctuated<GenericParam, Comma>) -> usize {
 
 // Determine the prefix for all lifetime names. Ensure it doesn't
 // overlap with any existing lifetime names.
-fn lifetime_name(generics: &Punctuated<GenericParam, Comma>) -> String {
+fn lifetime_name(generics: &Punctuated<GenericParam, token::Comma>) -> String {
     let mut lifetime_name = String::from("'_async");
     let existing_lifetimes: Vec<String> = generics
         .iter()

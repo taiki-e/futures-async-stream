@@ -1,5 +1,5 @@
 #![warn(rust_2018_idioms, single_use_lifetimes)]
-#![feature(generators, stmt_expr_attributes, proc_macro_hygiene)]
+#![feature(generators, proc_macro_hygiene, stmt_expr_attributes)]
 
 use futures::{
     future::Future,
@@ -52,7 +52,7 @@ async fn nested() -> bool {
 }
 
 #[stream(item = i32)]
-pub async fn in_async_stream_fn() {
+pub async fn in_stream_fn() {
     #[for_await]
     for i in iter(1..10) {
         yield i * i;
@@ -62,7 +62,7 @@ pub async fn in_async_stream_fn() {
 pub fn in_stream_block() -> impl Stream<Item = i32> {
     stream_block! {
         #[for_await]
-        for item in in_async_stream_fn() {
+        for item in in_stream_fn() {
             yield item
         }
     }

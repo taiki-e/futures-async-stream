@@ -1,4 +1,4 @@
-#![feature(generators, stmt_expr_attributes, proc_macro_hygiene)]
+#![feature(generators, proc_macro_hygiene, stmt_expr_attributes)]
 
 use futures_async_stream::{for_await, stream};
 
@@ -22,7 +22,8 @@ async fn async_stream_fn() {
     }
 }
 
-// FIXME: this is a compiler bug and probably the fix will require https://github.com/rust-lang/rust/issues/43081
+// span is lost.
+// Refs: https://github.com/rust-lang/rust/issues/43081
 async fn async_fn_and_for_await() {
     #[for_await]
     //~^ ERROR the `?` operator can only be applied to values that implement `std::ops::Try`
@@ -31,7 +32,8 @@ async fn async_fn_and_for_await() {
     }
 }
 
-// FIXME: this is a compiler bug and probably the fix will require https://github.com/rust-lang/rust/issues/43081
+// span is lost.
+// Refs: https://github.com/rust-lang/rust/issues/43081
 #[stream(item = i32)]
 async fn async_stream_fn_and_for_await() {
     #[for_await]

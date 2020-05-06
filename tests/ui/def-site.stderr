@@ -1,0 +1,35 @@
+error[E0425]: cannot find value `__arg0` in this scope
+ --> $DIR/def-site.rs:7:5
+  |
+7 |     __arg0; //~ ERROR E0425
+  |     ^^^^^^ not found in this scope
+
+error[E0425]: cannot find value `__arg0` in this scope
+  --> $DIR/def-site.rs:12:5
+   |
+12 |     __arg0; //~ ERROR E0425
+   |     ^^^^^^ not found in this scope
+
+error[E0425]: cannot find value `__task_context` in this scope
+  --> $DIR/def-site.rs:17:5
+   |
+17 |     __task_context; //~ ERROR E0425
+   |     ^^^^^^^^^^^^^^ not found in this scope
+
+error[E0425]: cannot find value `__task_context` in this scope
+  --> $DIR/def-site.rs:23:5
+   |
+23 |     __task_context; //~ ERROR E0425
+   |     ^^^^^^^^^^^^^^ not found in this scope
+
+error[E0425]: cannot find value `__pinned` in this scope
+  --> $DIR/def-site.rs:33:10
+   |
+33 |         &__pinned; //~ ERROR E0425
+   |          ^^^^^^^^ not found in this scope
+
+error[E0425]: cannot find value `__pinned` in this scope
+  --> $DIR/def-site.rs:40:5
+   |
+40 |     #[for_await] //~ ERROR E0425
+   |     ^^^^^^^^^^^^ not found in this scope

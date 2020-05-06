@@ -1,7 +1,9 @@
 use std::mem;
 
 use proc_macro2::TokenStream;
-use syn::{punctuated::Punctuated, token, Block, Expr, ExprTuple, Result, Stmt};
+use syn::{punctuated::Punctuated, token, Attribute, Error, Expr, ExprTuple, Result};
+
+pub(crate) const TASK_CONTEXT: &str = "__task_context";
 
 macro_rules! error {
     ($span:expr, $msg:expr) => {
@@ -12,11 +14,16 @@ macro_rules! error {
     };
 }
 
-pub(crate) fn block(stmts: Vec<Stmt>) -> Block {
-    Block { brace_token: token::Brace::default(), stmts }
+macro_rules! def_site_ident {
+    ($s:expr) => {
+        syn::Ident::new($s, proc_macro::Span::def_site().into())
+    };
+    ($($tt:tt)*) => {
+        quote::format_ident!($($tt)*, span = proc_macro::Span::def_site().into())
+    };
 }
 
-pub(crate) fn expr_compile_error(e: &syn::Error) -> syn::Expr {
+pub(crate) fn expr_compile_error(e: &Error) -> Expr {
     syn::parse2(e.to_compile_error()).unwrap()
 }
 
@@ -40,4 +47,33 @@ where
 /// but produces a better error message and does not require ownership of `tokens`.
 pub(crate) fn parse_as_empty(tokens: &TokenStream) -> Result<()> {
     if tokens.is_empty() { Ok(()) } else { Err(error!(tokens, "unexpected token: {}", tokens)) }
+}
+
+// =================================================================================================
+// extension traits
+
+pub(crate) trait SliceExt {
+    fn position_exact(&self, ident: &str) -> Result<Option<usize>>;
+    fn find(&self, ident: &str) -> Option<&Attribute>;
+}
+
+impl SliceExt for [Attribute] {
+    fn position_exact(&self, ident: &str) -> Result<Option<usize>> {
+        self.iter()
+            .try_fold((0, None), |(i, mut prev), attr| {
+                if attr.path.is_ident(ident) {
+                    if prev.is_some() {
+                        return Err(error!(attr, "duplicate #[{}] attribute", ident));
+                    }
+                    parse_as_empty(&attr.tokens)?;
+                    prev = Some(i);
+                }
+                Ok((i + 1, prev))
+            })
+            .map(|(_, pos)| pos)
+    }
+
+    fn find(&self, ident: &str) -> Option<&Attribute> {
+        self.iter().position(|attr| attr.path.is_ident(ident)).and_then(|i| self.get(i))
+    }
 }

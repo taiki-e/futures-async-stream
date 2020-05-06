@@ -1,51 +1,85 @@
 use proc_macro2::TokenStream;
-use quote::{format_ident, quote, ToTokens};
+use quote::{quote, ToTokens};
 use syn::{
     parse::{Parse, ParseStream},
     punctuated::Punctuated,
-    token::{self, Comma},
+    token,
     visit_mut::VisitMut,
-    Result, *,
+    Attribute, Block, Expr, ExprAsync, FnArg, Item, ItemFn, Pat, PatIdent, PatType, Result,
+    ReturnType, Signature, Stmt, TraitItemMethod, Type, Visibility,
 };
 
 use crate::{
     elision,
-    utils::{block, parse_as_empty},
-    visitor::{Stream, Visitor},
+    utils::{parse_as_empty, SliceExt, TASK_CONTEXT},
+    visitor::{Scope, Visitor},
 };
 
-// =================================================================================================
-// stream
+mod kw {
+    syn::custom_keyword!(item);
+    syn::custom_keyword!(ok);
+    syn::custom_keyword!(error);
+    syn::custom_keyword!(boxed);
+    syn::custom_keyword!(boxed_local);
+}
 
-pub(crate) fn attribute(args: TokenStream, input: TokenStream) -> Result<TokenStream> {
-    let stmt = syn::parse2(input.clone());
-    match stmt {
-        Ok(Stmt::Item(Item::Fn(item))) => parse_stream_fn(args, item.into()),
+pub(crate) fn attribute(args: TokenStream, input: TokenStream, cx: Context) -> Result<TokenStream> {
+    match syn::parse2(input.clone()) {
+        Ok(Stmt::Item(Item::Fn(item))) => parse_fn(args, item.into(), cx),
         Ok(Stmt::Expr(Expr::Async(mut expr))) | Ok(Stmt::Semi(Expr::Async(mut expr), _)) => {
             parse_as_empty(&args)?;
-            Ok(expand_stream_block(&mut expr))
+            parse_async(&mut expr, cx)
         }
         _ => {
             if let Ok(item) = syn::parse2::<TraitItemMethod>(input.clone()) {
-                parse_stream_fn(args, item.into())
+                parse_fn(args, item.into(), cx)
+            } else if let Ok(mut expr) = syn::parse2::<ExprAsync>(input.clone()) {
+                parse_as_empty(&args)?;
+                parse_async(&mut expr, cx)
             } else {
                 Err(error!(
                     input,
-                    "#[stream] attribute may not be used on async functions or async blocks"
+                    "#[{}] attribute may not be used on async functions or async blocks",
+                    cx.as_str()
                 ))
             }
         }
     }
 }
 
-mod kw {
-    syn::custom_keyword!(item);
-    syn::custom_keyword!(boxed);
-    syn::custom_keyword!(boxed_local);
+pub(crate) fn parse_async(expr: &mut ExprAsync, cx: Context) -> Result<TokenStream> {
+    validate_sig(None, &expr.attrs, cx)?;
+
+    Visitor::new(cx.into()).visit_expr_async_mut(expr);
+    Ok(make_gen_body(expr.capture, &expr.block, cx, None, false))
+}
+
+#[derive(Copy, Clone)]
+pub(crate) enum Context {
+    Stream,
+    TryStream,
+}
+
+impl Context {
+    fn as_str(self) -> &'static str {
+        match self {
+            Self::Stream => "stream",
+            Self::TryStream => "try_stream",
+        }
+    }
+}
+
+impl From<Context> for Scope {
+    fn from(other: Context) -> Self {
+        match other {
+            Context::Stream => Self::Stream,
+            Context::TryStream => Self::TryStream,
+        }
+    }
 }
 
 #[derive(Clone, Copy)]
-pub(super) enum ReturnTypeKind {
+enum ReturnTypeKind {
     // impl Stream<Item = ..> $(+ $lifetime)?
     Default,
     // Pin<Box<dyn Stream<Item = ..> (+ Send)? $(+ $lifetime)?>>
@@ -53,7 +87,7 @@ pub(super) enum ReturnTypeKind {
 }
 
 impl ReturnTypeKind {
-    pub(super) fn parse_or_else<F>(&mut self, input: ParseStream<'_>, mut f: F) -> Result<()>
+    fn parse_or_else<F>(&mut self, input: ParseStream<'_>, mut f: F) -> Result<()>
     where
         F: FnMut(ParseStream<'_>) -> Result<()>,
     {
@@ -68,7 +102,7 @@ impl ReturnTypeKind {
                     ReturnTypeKind::Boxed { send: false } => {
                         return Err(error!(
                             i,
-                            "`boxed` and `boxed_local` cannot be used at the same time."
+                            "`boxed` and `boxed_local` may not be used at the same time"
                         ));
                     }
                 }
@@ -82,7 +116,7 @@ impl ReturnTypeKind {
                     ReturnTypeKind::Boxed { send: true } => {
                         return Err(error!(
                             i,
-                            "`boxed` and `boxed_local` cannot be used at the same time."
+                            "`boxed` and `boxed_local` may not be used at the same time"
                         ));
                     }
                 }
@@ -91,58 +125,24 @@ impl ReturnTypeKind {
             }
 
             if !input.is_empty() {
-                let _: Comma = input.parse()?;
+                let _: token::Comma = input.parse()?;
             }
         }
 
         Ok(())
     }
-}
 
-struct Args {
-    item: Type,
-    boxed: ReturnTypeKind,
-}
-
-impl Parse for Args {
-    fn parse(input: ParseStream<'_>) -> Result<Self> {
-        // item = <Type>
-        struct ItemTy(Type);
-        impl Parse for ItemTy {
-            fn parse(input: ParseStream<'_>) -> Result<Self> {
-                let _: kw::item = input.parse()?;
-                let _: Token![=] = input.parse()?;
-                input.parse().map(Self)
-            }
-        }
-
-        let mut item = None;
-        let mut boxed = ReturnTypeKind::Default;
-        boxed.parse_or_else(input, |input| {
-            let i: ItemTy = input.parse()?;
-            if item.is_some() {
-                Err(error!(i.0, "duplicate `item` argument"))
-            } else {
-                item = Some(i.0);
-                Ok(())
-            }
-        })?;
-
-        if let Some(item) = item {
-            Ok(Self { item, boxed })
-        } else {
-            let _: kw::item = input.parse()?;
-            unreachable!()
-        }
+    fn is_boxed(self) -> bool {
+        if let Self::Boxed { .. } = self { true } else { false }
     }
 }
 
-pub(super) struct FnSig {
-    pub(super) attrs: Vec<Attribute>,
-    pub(super) vis: Visibility,
-    pub(super) sig: Signature,
-    pub(super) block: Block,
-    pub(super) semi: Option<Token![;]>,
+struct FnSig {
+    attrs: Vec<Attribute>,
+    vis: Visibility,
+    sig: Signature,
+    block: Block,
+    semi: Option<token::Semi>,
 }
 
 impl From<ItemFn> for FnSig {
@@ -168,40 +168,219 @@ impl From<TraitItemMethod> for FnSig {
     }
 }
 
-fn parse_stream_fn(args: TokenStream, item: FnSig) -> Result<TokenStream> {
-    let args: Args = syn::parse2(args)?;
-
-    validate_stream_fn(&item)?;
-    Ok(expand_stream_fn(item, &args))
+struct StreamArg {
+    item_ty: Type,
+    boxed: ReturnTypeKind,
 }
 
-pub(super) fn validate_stream_fn(item: &FnSig) -> Result<()> {
-    if item.sig.asyncness.is_none() {
-        return Err(error!(item.sig.fn_token, "async stream must be declared as async"));
-    }
+impl Parse for StreamArg {
+    fn parse(input: ParseStream<'_>) -> Result<Self> {
+        let mut item_ty = None;
+        let mut boxed = ReturnTypeKind::Default;
+        boxed.parse_or_else(input, |input| {
+            // item = <Type>
+            let i: kw::item = input.parse()?;
+            let _: token::Eq = input.parse()?;
+            let ty: Type = input.parse()?;
 
-    if let Some(constness) = item.sig.constness {
-        // This line is currently unreachable.
-        // `async const fn` and `const async fn` is rejected by syn.
-        // `const fn` is rejected by the previous statements.
-        return Err(error!(constness, "async stream may not be const"));
-    }
+            if item_ty.replace(ty).is_some() {
+                Err(error!(i, "duplicate `item` argument"))
+            } else {
+                Ok(())
+            }
+        })?;
 
-    if let Some(variadic) = &item.sig.variadic {
-        return Err(error!(variadic, "async stream may not be variadic"));
+        if let Some(item_ty) = item_ty {
+            Ok(Self { item_ty, boxed })
+        } else {
+            let _: kw::item = input.parse()?;
+            unreachable!()
+        }
     }
+}
 
-    if let ReturnType::Type(_, ty) = &item.sig.output {
-        match &**ty {
-            Type::Tuple(TypeTuple { elems, .. }) if elems.is_empty() => {}
-            _ => return Err(error!(ty, "async stream must return the unit type")),
+struct TryStreamArg {
+    ok: Type,
+    error: Type,
+    boxed: ReturnTypeKind,
+}
+
+impl Parse for TryStreamArg {
+    fn parse(input: ParseStream<'_>) -> Result<Self> {
+        let mut ok = None;
+        let mut error = None;
+        let mut boxed = ReturnTypeKind::Default;
+        boxed.parse_or_else(input, |input| {
+            if input.peek(kw::ok) {
+                // ok = <Type>
+                let i: kw::ok = input.parse()?;
+                let _: token::Eq = input.parse()?;
+                let ty: Type = input.parse()?;
+
+                if ok.replace(ty).is_some() {
+                    Err(error!(i, "duplicate `ok` argument"))
+                } else {
+                    Ok(())
+                }
+            } else {
+                // error = <Type>
+                let i: kw::error = input.parse()?;
+                let _: token::Eq = input.parse()?;
+                let ty: Type = input.parse()?;
+
+                if error.replace(ty).is_some() {
+                    Err(error!(i, "duplicate `error` argument"))
+                } else {
+                    Ok(())
+                }
+            }
+        })?;
+
+        match (ok, error) {
+            (Some(ok), Some(error)) => Ok(Self { ok, error, boxed }),
+            (Some(_), None) => input.parse::<kw::error>().map(|_| unreachable!()),
+            (None, _) => input.parse::<kw::ok>().map(|_| unreachable!()),
+        }
+    }
+}
+
+fn parse_fn(args: TokenStream, sig: FnSig, cx: Context) -> Result<TokenStream> {
+    match cx {
+        Context::Stream => {
+            let StreamArg { item_ty, boxed } = syn::parse2(args)?;
+
+            parse_fn_inner(sig, cx, None, boxed.is_boxed(), |lifetimes| match boxed {
+                ReturnTypeKind::Default => {
+                    // Raw `impl` breaks syntax highlighting in some editors.
+                    let impl_token = token::Impl::default();
+                    quote! {
+                        #impl_token ::futures_async_stream::__reexport::stream::Stream<Item = #item_ty> + #lifetimes
+                    }
+                }
+                ReturnTypeKind::Boxed { send } => {
+                    let send = if send {
+                        quote!(+ ::futures_async_stream::__reexport::marker::Send)
+                    } else {
+                        TokenStream::new()
+                    };
+                    quote! {
+                        ::futures_async_stream::__reexport::pin::Pin<Box<
+                            dyn ::futures_async_stream::__reexport::stream::Stream<Item = #item_ty> #send + #lifetimes
+                        >>
+                    }
+                }
+            })
+        }
+        Context::TryStream => {
+            let TryStreamArg { ok, error, boxed } = syn::parse2(args)?;
+
+            parse_fn_inner(sig, cx, Some(&error), boxed.is_boxed(), |lifetimes| {
+                match boxed {
+                    ReturnTypeKind::Default => {
+                        // Raw `impl` breaks syntax highlighting in some editors.
+                        let impl_token = token::Impl::default();
+                        quote! {
+                            #impl_token ::futures_async_stream::__reexport::stream::Stream<
+                                Item = ::futures_async_stream::__reexport::result::Result<#ok, #error>
+                            > + #lifetimes
+                        }
+                    }
+                    ReturnTypeKind::Boxed { send } => {
+                        let send = if send {
+                            quote!(+ ::futures_async_stream::__reexport::marker::Send)
+                        } else {
+                            TokenStream::new()
+                        };
+                        quote! {
+                            ::futures_async_stream::__reexport::pin::Pin<Box<
+                                dyn ::futures_async_stream::__reexport::stream::Stream<
+                                    Item = ::futures_async_stream::__reexport::result::Result<#ok, #error>
+                                > #send + #lifetimes
+                            >>
+                        }
+                    }
+                }
+            })
+        }
+    }
+}
+
+fn parse_fn_inner(
+    sig: FnSig,
+    cx: Context,
+    error: Option<&Type>,
+    boxed: bool,
+    return_ty: impl FnOnce(TokenStream) -> TokenStream,
+) -> Result<TokenStream> {
+    validate_sig(Some(&sig), &sig.attrs, cx)?;
+
+    let FnSig { attrs, vis, sig, mut block, semi } = sig;
+    let Signature { unsafety, abi, fn_token, ident, mut generics, inputs, .. } = sig;
+    let where_clause = &generics.where_clause;
+
+    // Visit `#[for_await]`, `.await`, and `yield`.
+    Visitor::new(cx.into()).visit_block_mut(&mut block);
+
+    let (mut arguments, mut statements) = expand_async_body(inputs);
+    statements.append(&mut block.stmts);
+    block.stmts = statements;
+
+    let body_inner = make_gen_body(Some(token::Move::default()), &block, cx, error, boxed);
+    let mut body = TokenStream::new();
+    block.brace_token.surround(&mut body, |tokens| {
+        body_inner.to_tokens(tokens);
+    });
+
+    elision::unelide_lifetimes(&mut generics.params, &mut arguments);
+    let lifetimes = generics.lifetimes().map(|l| &l.lifetime);
+    let return_ty = return_ty(quote!(#(#lifetimes +)*));
+
+    let body = semi.map_or(body, ToTokens::into_token_stream);
+    Ok(quote! {
+        #(#attrs)*
+        #vis #unsafety #abi #fn_token #ident #generics (#(#arguments),*) -> #return_ty
+        #where_clause
+        #body
+    })
+}
+
+fn validate_sig(item: Option<&FnSig>, attrs: &[Attribute], cx: Context) -> Result<()> {
+    if let Some(item) = item {
+        if item.sig.asyncness.is_none() {
+            return Err(error!(item.sig.fn_token, "async stream must be declared as async"));
+        }
+        if let Some(constness) = item.sig.constness {
+            // This line is currently unreachable.
+            // `async const fn` and `const async fn` is rejected by syn.
+            // `const fn` is rejected by the previous statements.
+            return Err(error!(constness, "async stream may not be const"));
+        }
+        if let Some(variadic) = &item.sig.variadic {
+            return Err(error!(variadic, "async stream may not be variadic"));
+        }
+
+        if let ReturnType::Type(_, ty) = &item.sig.output {
+            match &**ty {
+                Type::Tuple(ty) if ty.elems.is_empty() => {}
+                _ => return Err(error!(ty, "async stream must return the unit type")),
+            }
         }
     }
 
-    Ok(())
+    let (duplicate, another) = match cx {
+        Context::Stream => ("stream", "try_stream"),
+        Context::TryStream => ("try_stream", "stream"),
+    };
+    if let Some(attr) = attrs.find(duplicate) {
+        Err(error!(attr, "duplicate #[{}] attribute", duplicate))
+    } else if let Some(attr) = attrs.find(another) {
+        Err(error!(attr, "#[stream] and #[try_stream] may not be used at the same time"))
+    } else {
+        Ok(())
+    }
 }
 
-pub(super) fn expand_async_body(inputs: Punctuated<FnArg, Comma>) -> (Vec<FnArg>, Vec<Stmt>) {
+fn expand_async_body(inputs: Punctuated<FnArg, token::Comma>) -> (Vec<FnArg>, Vec<Stmt>) {
     let mut arguments: Vec<FnArg> = Vec::new();
     let mut statements: Vec<Stmt> = Vec::new();
 
@@ -209,15 +388,15 @@ pub(super) fn expand_async_body(inputs: Punctuated<FnArg, Comma>) -> (Vec<FnArg>
     // from:
     //
     //      #[stream(item = u32)]
-    //      async fn foo(ref a: u32) {
+    //      async fn foo(self: <ty>, ref <ident>: <ty>) {
     //          // ...
     //      }
     //
     // into:
     //
-    //      fn foo(__arg0: u32) -> impl Stream<Item = u32> {
+    //      fn foo(self: <ty>, mut __arg1: <ty>) -> impl Stream<Item = u32> {
     //          from_generator(static move || {
-    //              let ref a = __arg0;
+    //              let ref <ident> = __arg1;
     //
     //              // ...
     //          })
@@ -240,28 +419,15 @@ pub(super) fn expand_async_body(inputs: Punctuated<FnArg, Comma>) -> (Vec<FnArg>
                 continue;
             }
 
-            let ident = format_ident!("__arg{}", i);
+            let ident = def_site_ident!("__arg{}", i);
 
-            let local = Local {
-                attrs: Vec::new(),
-                let_token: token::Let::default(),
-                pat: *pat,
-                init: Some((
-                    token::Eq::default(),
-                    Box::new(Expr::Path(ExprPath {
-                        attrs: Vec::new(),
-                        qself: None,
-                        path: ident.clone().into(),
-                    })),
-                )),
-                semi_token: token::Semi::default(),
-            };
-            statements.push(Stmt::Local(local));
+            // Construct the `let <pat> = __argN;` statement.
+            statements.push(syn::parse_quote!(let #pat = #ident;));
 
             let pat = Box::new(Pat::Ident(PatIdent {
                 attrs: Vec::new(),
                 by_ref: None,
-                mutability: None,
+                mutability: Some(token::Mut::default()),
                 ident,
                 subpat: None,
             }));
@@ -274,122 +440,45 @@ pub(super) fn expand_async_body(inputs: Punctuated<FnArg, Comma>) -> (Vec<FnArg>
     (arguments, statements)
 }
 
-pub(super) fn make_gen_body(
+fn make_gen_body(
     capture: Option<token::Move>,
     block: &Block,
-    gen_function: &TokenStream,
-    ret_value: &TokenStream,
-    ret_ty: &TokenStream,
+    cx: Context,
+    error: Option<&Type>,
+    boxed: bool,
 ) -> TokenStream {
-    let semi = token::Semi([block.brace_token.span]);
-    let gen_body_inner = quote! {
-        let (): () = #block #semi
-
-        // Ensure that this closure is a generator, even if it doesn't
-        // have any `yield` statements.
-        #[allow(unreachable_code)]
-        {
-            return #ret_value;
-            loop { __task_context = yield ::futures_async_stream::__reexport::task::Poll::Pending }
+    let (gen_function, ret_value, ret_ty) = match cx {
+        Context::Stream => (
+            quote!(::futures_async_stream::__reexport::stream::from_generator),
+            TokenStream::new(),
+            quote!(()),
+        ),
+        Context::TryStream => {
+            let error = error.map_or_else(|| quote!(_), ToTokens::to_token_stream);
+            (
+                quote!(::futures_async_stream::__reexport::try_stream::from_generator),
+                quote!(::futures_async_stream::__reexport::result::Result::Ok(())),
+                quote!(::futures_async_stream::__reexport::result::Result<(), #error>),
+            )
         }
     };
-    let mut gen_body = TokenStream::new();
-    block.brace_token.surround(&mut gen_body, |tokens| {
-        gen_body_inner.to_tokens(tokens);
-    });
 
-    quote! {
+    let task_context = def_site_ident!(TASK_CONTEXT);
+    let body = quote! {
         #gen_function(
-            static #capture |mut __task_context: ::futures_async_stream::__reexport::future::ResumeTy| -> #ret_ty
-            #gen_body
+            static #capture |mut #task_context: ::futures_async_stream::__reexport::future::ResumeTy| -> #ret_ty {
+                let (): () = #block;
+
+                // Ensure that this closure is a generator, even if it doesn't
+                // have any `yield` statements.
+                #[allow(unreachable_code)]
+                {
+                    return #ret_value;
+                    loop { #task_context = yield ::futures_async_stream::__reexport::task::Poll::Pending }
+                }
+            }
         )
-    }
-}
-
-fn expand_stream_fn(item: FnSig, args: &Args) -> TokenStream {
-    let FnSig { attrs, vis, sig, mut block, semi } = item;
-    let Signature { unsafety, abi, fn_token, ident, mut generics, inputs, .. } = sig;
-    let where_clause = &generics.where_clause;
-
-    let (mut arguments, mut statements) = expand_async_body(inputs);
-
-    // Visit `#[for_await]` and `.await`.
-    Visitor::new(Stream).visit_block_mut(&mut block);
-
-    let item = &args.item;
-
-    let gen_function = quote!(::futures_async_stream::__reexport::stream::from_generator);
-    statements.append(&mut block.stmts);
-    block.stmts = statements;
-    let mut body_inner =
-        make_gen_body(Some(token::Move::default()), &block, &gen_function, &quote!(), &quote!(()));
-
-    if let ReturnTypeKind::Boxed { .. } = args.boxed {
-        body_inner = quote! { Box::pin(#body_inner) };
-    }
-
-    let mut body = TokenStream::new();
-    block.brace_token.surround(&mut body, |tokens| {
-        body_inner.to_tokens(tokens);
-    });
-
-    elision::unelide_lifetimes(&mut generics.params, &mut arguments);
-    let lifetimes = generics.lifetimes().map(|l| &l.lifetime);
-
-    let return_ty = match args.boxed {
-        ReturnTypeKind::Default => {
-            // Raw `impl` breaks syntax highlighting in some editors.
-            let impl_token = token::Impl::default();
-            quote! {
-                #impl_token ::futures_async_stream::__reexport::stream::Stream<Item = #item> + #(#lifetimes +)*
-            }
-        }
-        ReturnTypeKind::Boxed { send } => {
-            let send = if send {
-                quote!(+ ::futures_async_stream::__reexport::marker::Send)
-            } else {
-                TokenStream::new()
-            };
-            quote! {
-                ::futures_async_stream::__reexport::pin::Pin<
-                    Box<dyn ::futures_async_stream::__reexport::stream::Stream<Item = #item> #send + #(#lifetimes +)*>
-                >
-            }
-        }
     };
 
-    let body = semi.map_or(body, ToTokens::into_token_stream);
-    quote! {
-        #(#attrs)*
-        #vis #unsafety #abi
-        #fn_token #ident #generics (#(#arguments),*)
-            -> #return_ty
-            #where_clause
-        #body
-    }
-}
-
-// =================================================================================================
-// stream_block
-
-pub(crate) fn block_macro(input: TokenStream) -> Result<TokenStream> {
-    let mut expr = syn::parse2(input)?;
-
-    Visitor::new(Stream).visit_expr_mut(&mut expr);
-
-    let gen_function = quote!(::futures_async_stream::__reexport::stream::from_generator);
-    Ok(make_gen_body(
-        Some(token::Move::default()),
-        &block(vec![Stmt::Expr(expr)]),
-        &gen_function,
-        &quote!(),
-        &quote!(()),
-    ))
-}
-
-fn expand_stream_block(expr: &mut ExprAsync) -> TokenStream {
-    Visitor::new(Stream).visit_expr_async_mut(expr);
-
-    let gen_function = quote!(::futures_async_stream::__reexport::stream::from_generator);
-    make_gen_body(expr.capture, &expr.block, &gen_function, &quote!(), &quote!(()))
+    if boxed { quote!(Box::pin(#body)) } else { body }
 }

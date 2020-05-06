@@ -1,5 +1,4 @@
 #![warn(rust_2018_idioms, single_use_lifetimes)]
-#![allow(clippy::trivially_copy_pass_by_ref)]
 #![feature(generators)]
 
 use futures_async_stream::stream;
