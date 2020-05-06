@@ -279,6 +279,7 @@ fn parse_fn_inner(
     })
 }
 
+// https://github.com/rust-lang/rust/pull/61413/
 fn expand_async_body(inputs: Punctuated<FnArg, token::Comma>) -> (Vec<FnArg>, Vec<Stmt>) {
     let mut arguments = Vec::new();
     let mut statements = Vec::new();
@@ -287,38 +288,71 @@ fn expand_async_body(inputs: Punctuated<FnArg, token::Comma>) -> (Vec<FnArg>, Ve
     // from:
     //
     //      #[stream(item = u32)]
-    //      async fn foo(self: <ty>, ref <ident>: <ty>) {
+    //      async fn foo(<pattern>: <ty>, <pattern>: <ty>, <pattern>: <ty>) {
     //          // ...
     //      }
     //
     // into:
     //
-    //      fn foo(self: <ty>, mut __arg1: <ty>) -> impl Stream<Item = u32> {
+    //      fn foo(__arg0: <ty>, __arg1: <ty>, __arg2: <ty>) -> impl Stream<Item = u32> {
     //          from_generator(static move || {
-    //              let ref <ident> = __arg1;
-    //
+    //              let mut __arg2 = __arg2;
+    //              let <pattern> = __arg2;
+    //              let mut __arg1 = __arg1;
+    //              let <pattern> = __arg1;
+    //              let mut __arg0 = __arg0;
+    //              let <pattern> = __arg0;
     //              // ...
     //          })
     //      }
     //
-    // We notably skip everything related to `self` which typically doesn't have
-    // many patterns with it and just gets captured naturally.
+    // If `<pattern>` is a simple ident, then it is lowered to a single
+    // `let <pattern> = <pattern>;` statement as an optimization.
     for (i, argument) in inputs.into_iter().enumerate() {
         if let FnArg::Typed(PatType { attrs, pat, ty, colon_token }) = argument {
-            let captured_naturally = match &*pat {
-                // `self: Box<Self>` will get captured naturally
-                Pat::Ident(PatIdent { ident, .. }) if ident == "self" => true,
-                // `ref a: B` (or some similar pattern)
-                Pat::Ident(PatIdent { by_ref: Some(_), .. }) => false,
-                // Other arguments get captured naturally
-                _ => true,
-            };
-            if captured_naturally {
+            if let Type::Reference(_) = &*ty {
                 arguments.push(FnArg::Typed(PatType { attrs, pat, ty, colon_token }));
                 continue;
             }
 
+            let is_simple_argument = match &*pat {
+                // We notably skip everything related to `self` which typically doesn't have
+                // many patterns with it and just gets captured naturally.
+                Pat::Ident(PatIdent { ident, .. }) if ident == "self" => {
+                    arguments.push(FnArg::Typed(PatType { attrs, pat, ty, colon_token }));
+                    continue;
+                }
+                Pat::Ident(PatIdent { by_ref: None, mutability: None, .. }) => true,
+                _ => false,
+            };
+
+            if is_simple_argument {
+                // If this is the simple case, then we only insert one statement that is
+                // `let <pat> = <pat>;`.
+                statements.push(syn::parse_quote!(let #pat = #pat;));
+
+                arguments.push(FnArg::Typed(PatType { attrs, pat, ty, colon_token }));
+                continue;
+            }
+
+            // If this is not the simple case, then we construct two statements:
+            //
+            // ```
+            // let mut __argN = __argN;
+            // let <pat> = __argN;
+            // ```
+            //
+            // The first statement moves the argument into the closure and thus ensures
+            // that the drop order is correct.
+            //
+            // The second statement creates the bindings that the user wrote.
+
             let ident = def_site_ident!("__arg{}", i);
+
+            // Construct the `let mut __argN = __argN;` statement. It must be a mut binding
+            // because the user may have specified a `ref mut` binding in the next
+            // statement.
+            statements.push(syn::parse_quote!(let mut #ident = #ident;));
 
             // Construct the `let <pat> = __argN;` statement.
             statements.push(syn::parse_quote!(let #pat = #ident;));
@@ -326,7 +360,7 @@ fn expand_async_body(inputs: Punctuated<FnArg, token::Comma>) -> (Vec<FnArg>, Ve
             let pat = Box::new(Pat::Ident(PatIdent {
                 attrs: Vec::new(),
                 by_ref: None,
-                mutability: Some(token::Mut::default()),
+                mutability: None,
                 ident,
                 subpat: None,
             }));

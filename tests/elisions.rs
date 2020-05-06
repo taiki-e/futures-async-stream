@@ -1,5 +1,6 @@
 #![warn(rust_2018_idioms, single_use_lifetimes)]
 #![feature(generators)]
+#![feature(generator_trait)]
 
 use futures_async_stream::stream;
 
@@ -38,6 +39,19 @@ pub async fn multi_ref<T>(_x: &T, _y: &i32) {
 pub async fn pat_ref<T>(_x: &T, _y: (&i32, &i8)) {
     yield
 }
+
+// fn f<'_async0, '_async1, '_async2, T>(
+//     __arg1: &'_async0 T,
+//     __arg2: (&'_async1 i32, &'_async2 i32),
+// ) -> impl core::ops::Generator<Yield = (), Return = ()> + '_async0 + '_async1 + '_async2 {
+//     static move || {
+//         // let mut __arg1 = __arg1;
+//         // let _x = __arg1;
+//         let mut __arg2 = __arg2;
+//         let _y = __arg2;
+//         yield
+//     }
+// }
 
 #[allow(single_use_lifetimes)]
 #[stream(item = ())]
