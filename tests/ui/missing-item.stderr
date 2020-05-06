@@ -1,7 +1,0 @@
-error: unexpected end of input, expected `item`
- --> $DIR/missing-item.rs:5:1
-  |
-5 | #[stream] //~ ERROR unexpected end of input, expected `item`
-  | ^^^^^^^^^
-  |
-  = note: this error originates in an attribute macro (in Nightly builds, run with -Z macro-backtrace for more info)

@@ -1,7 +1,7 @@
 #![warn(rust_2018_idioms, single_use_lifetimes)]
 #![allow(incomplete_features)]
 #![allow(clippy::try_err)]
-#![feature(generators, stmt_expr_attributes, proc_macro_hygiene, impl_trait_in_bindings)]
+#![feature(generators, proc_macro_hygiene, stmt_expr_attributes, impl_trait_in_bindings)]
 
 use futures::{
     future::Future,
@@ -98,6 +98,16 @@ pub async fn async_block3() {
     };
     #[for_await]
     for _i in s {}
+}
+
+pub async fn async_block_weird_fmt() {
+    let _s: impl Stream<Item = Result<i32, i32>> = #[try_stream]
+    async move {
+        #[for_await]
+        for i in iter(vec![Ok(1), Err(2)]) {
+            yield async { i }.await?;
+        }
+    };
 }
 
 #[try_stream(ok = u64, error = i32)]
