@@ -309,7 +309,7 @@ fn parse_fn(args: TokenStream, sig: FnSig, cx: Context) -> Result<TokenStream> {
 }
 
 fn parse_fn_inner(
-    sig: FnSig,
+    mut sig: FnSig,
     cx: Context,
     error: Option<&Type>,
     boxed: bool,
@@ -317,14 +317,16 @@ fn parse_fn_inner(
 ) -> Result<TokenStream> {
     validate_sig(Some(&sig), &sig.attrs, cx)?;
 
-    let FnSig { attrs, vis, sig, mut block, semi } = sig;
-    let Signature { unsafety, abi, fn_token, ident, mut generics, inputs, .. } = sig;
+    let FnSig { attrs, vis, sig, block, semi } = &mut sig;
+    let has_self = sig.receiver().is_some();
+    transform_sig(cx, sig, has_self, true);
+    let Signature { unsafety, abi, fn_token, ident, generics, inputs, .. } = sig;
     let where_clause = &generics.where_clause;
 
     // Visit `#[for_await]`, `.await`, and `yield`.
-    Visitor::new(cx.into()).visit_block_mut(&mut block);
+    Visitor::new(cx.into()).visit_block_mut(block);
 
-    let (mut arguments, mut statements) = expand_async_body(inputs);
+    let (mut arguments, mut statements) = expand_async_body(&inputs);
     statements.append(&mut block.stmts);
     block.stmts = statements;
 
@@ -383,7 +385,7 @@ fn validate_sig(item: Option<&FnSig>, attrs: &[Attribute], cx: Context) -> Resul
     }
 }
 
-fn expand_async_body(inputs: Punctuated<FnArg, token::Comma>) -> (Vec<FnArg>, Vec<Stmt>) {
+fn expand_async_body(inputs: &Punctuated<FnArg, token::Comma>) -> (Vec<FnArg>, Vec<Stmt>) {
     let mut arguments: Vec<FnArg> = Vec::new();
     let mut statements: Vec<Stmt> = Vec::new();
 
@@ -407,7 +409,7 @@ fn expand_async_body(inputs: Punctuated<FnArg, token::Comma>) -> (Vec<FnArg>, Ve
     //
     // We notably skip everything related to `self` which typically doesn't have
     // many patterns with it and just gets captured naturally.
-    for (i, argument) in inputs.into_iter().enumerate() {
+    for (i, argument) in inputs.iter().cloned().enumerate() {
         if let FnArg::Typed(PatType { attrs, pat, ty, colon_token }) = argument {
             let captured_naturally = match &*pat {
                 // `self: Box<Self>` will get captured naturally
@@ -484,4 +486,124 @@ fn make_gen_body(
     };
 
     if boxed { quote!(Box::pin(#body)) } else { body }
+}
+
+// Input:
+//     async fn f<T>(&self, x: &T) -> Ret;
+//
+// Output:
+//     fn f<'life0, 'life1, 'async_stream, T>(
+//         &'life0 self,
+//         x: &'life1 T,
+//     ) -> Pin<Box<dyn Future<Output = Ret> + Send + 'async_stream>>
+//     where
+//         'life0: 'async_stream,
+//         'life1: 'async_stream,
+//         T: 'async_stream,
+//         Self: Sync + 'async_stream;
+fn transform_sig(_: Context, sig: &mut Signature, has_self: bool, is_local: bool) {
+    use crate::lifetime::CollectLifetimes;
+    use quote::{format_ident, quote, quote_spanned, ToTokens};
+    use syn::{
+        parse_quote, punctuated::Punctuated, visit_mut::VisitMut, Block, FnArg, GenericParam,
+        Generics, Ident, ImplItem, Lifetime, Pat, PatIdent, Path, Receiver, ReturnType, Signature,
+        Stmt, Token, TraitItem, Type, TypeParam, TypeParamBound, WhereClause,
+    };
+
+    sig.fn_token.span = sig.asyncness.take().unwrap().span;
+
+    let ret = match &sig.output {
+        ReturnType::Default => quote!(()),
+        ReturnType::Type(_, ret) => quote!(#ret),
+    };
+
+    let mut lifetimes = CollectLifetimes::new();
+    for arg in sig.inputs.iter_mut() {
+        match arg {
+            FnArg::Receiver(arg) => lifetimes.visit_receiver_mut(arg),
+            FnArg::Typed(arg) => lifetimes.visit_type_mut(&mut arg.ty),
+        }
+    }
+
+    let where_clause = sig.generics.where_clause.get_or_insert_with(|| WhereClause {
+        where_token: token::Where::default(),
+        predicates: Punctuated::new(),
+    });
+    for param in sig.generics.params.iter()
+    //.chain(context.lifetimes(&lifetimes.explicit))
+    {
+        match param {
+            GenericParam::Type(param) => {
+                let param = &param.ident;
+                where_clause.predicates.push(parse_quote!(#param: 'async_stream));
+            }
+            GenericParam::Lifetime(param) => {
+                let param = &param.lifetime;
+                where_clause.predicates.push(parse_quote!(#param: 'async_stream));
+            }
+            GenericParam::Const(_) => {}
+        }
+    }
+    for elided in lifetimes.elided {
+        sig.generics.params.push(parse_quote!(#elided));
+        where_clause.predicates.push(parse_quote!(#elided: 'async_stream));
+    }
+    sig.generics.params.push(parse_quote!('async_stream));
+    if has_self {
+        // let bound: Ident = match sig.inputs.iter().next() {
+        //     Some(FnArg::Receiver(Receiver { reference: Some(_), mutability: None, .. })) => {
+        //         parse_quote!(Sync)
+        //     }
+        //     Some(FnArg::Typed(arg))
+        //         if match (arg.pat.as_ref(), arg.ty.as_ref()) {
+        //             (Pat::Ident(pat), Type::Reference(ty)) => {
+        //                 pat.ident == "self" && ty.mutability.is_none()
+        //             }
+        //             _ => false,
+        //         } =>
+        //     {
+        //         parse_quote!(Sync)
+        //     }
+        //     _ => parse_quote!(Send),
+        // };
+        // let assume_bound = match context {
+        //     Context::Trait { supertraits, .. } => !has_default || has_bound(supertraits, &bound),
+        //     Context::Impl { .. } => true,
+        // };
+        // where_clause.predicates.push(if assume_bound || is_local {
+        //     parse_quote!(Self: 'async_stream)
+        // } else {
+        //     parse_quote!(Self: ::core::marker::#bound + 'async_stream)
+        // });
+        where_clause.predicates.push(parse_quote!(Self: 'async_stream));
+    }
+
+    for (i, arg) in sig.inputs.iter_mut().enumerate() {
+        match arg {
+            FnArg::Receiver(Receiver { reference: Some(_), .. }) => {}
+            FnArg::Receiver(arg) => arg.mutability = None,
+            FnArg::Typed(arg) => {
+                if let Pat::Ident(ident) = &mut *arg.pat {
+                    ident.by_ref = None;
+                    ident.mutability = None;
+                } else {
+                    let positional = positional_arg(i);
+                    *arg.pat = parse_quote!(#positional);
+                }
+            }
+        }
+    }
+
+    fn positional_arg(i: usize) -> Ident {
+        format_ident!("__arg{}", i)
+    }
+
+    let bounds =
+        if is_local { quote!('async_stream) } else { quote!(::core::marker::Send + 'async_stream) };
+
+    sig.output = parse_quote! {
+        -> ::core::pin::Pin<Box<
+            dyn ::core::future::Future<Output = #ret> + #bounds
+        >>
+    };
 }

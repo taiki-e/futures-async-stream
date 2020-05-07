@@ -10,11 +10,12 @@
 #![warn(rust_2018_idioms, single_use_lifetimes, unreachable_pub)]
 #![warn(clippy::all, clippy::default_trait_access)]
 #![feature(proc_macro_def_site)]
-
+#![allow(unused)]
 #[macro_use]
 mod utils;
 
 mod elision;
+mod lifetime;
 mod stream;
 mod visitor;
 
