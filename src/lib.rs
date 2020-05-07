@@ -432,6 +432,7 @@ mod try_stream {
 }
 
 // Not public API.
+// See tests/overwriting_core_crate.rs for more.
 #[doc(hidden)]
 pub mod __reexport {
     #[doc(hidden)]
