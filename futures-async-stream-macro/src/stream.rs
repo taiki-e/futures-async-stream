@@ -168,6 +168,15 @@ impl From<TraitItemMethod> for FnSig {
     }
 }
 
+// Replace `prev` with `new`. Returns `Err` if `prev` is `Some`.
+fn replace<T>(prev: &mut Option<T>, new: T, token: &impl ToTokens) -> Result<()> {
+    if prev.replace(new).is_some() {
+        Err(error!(token, "duplicate `{}` argument", token.to_token_stream()))
+    } else {
+        Ok(())
+    }
+}
+
 struct StreamArg {
     item_ty: Type,
     boxed: ReturnTypeKind,
@@ -178,23 +187,23 @@ impl Parse for StreamArg {
         let mut item_ty = None;
         let mut boxed = ReturnTypeKind::Default;
         boxed.parse_or_else(input, |input| {
-            // item = <Type>
-            let i: kw::item = input.parse()?;
-            let _: token::Eq = input.parse()?;
-            let ty: Type = input.parse()?;
-
-            if item_ty.replace(ty).is_some() {
-                Err(error!(i, "duplicate `item` argument"))
+            if input.peek(kw::item) {
+                // item = <Type>
+                let i: kw::item = input.parse()?;
+                let _: token::Eq = input.parse()?;
+                replace(&mut item_ty, input.parse()?, &i)
+            } else if item_ty.is_none() {
+                input.parse::<kw::item>().map(|_| unreachable!())
             } else {
-                Ok(())
+                let token = input.parse::<TokenStream>()?;
+                Err(error!(token, "unexpected argument: {}", token))
             }
         })?;
 
         if let Some(item_ty) = item_ty {
             Ok(Self { item_ty, boxed })
         } else {
-            let _: kw::item = input.parse()?;
-            unreachable!()
+            input.parse::<kw::item>().map(|_| unreachable!())
         }
     }
 }
@@ -215,24 +224,19 @@ impl Parse for TryStreamArg {
                 // ok = <Type>
                 let i: kw::ok = input.parse()?;
                 let _: token::Eq = input.parse()?;
-                let ty: Type = input.parse()?;
-
-                if ok.replace(ty).is_some() {
-                    Err(error!(i, "duplicate `ok` argument"))
-                } else {
-                    Ok(())
-                }
-            } else {
+                replace(&mut ok, input.parse()?, &i)
+            } else if input.peek(kw::error) {
                 // error = <Type>
                 let i: kw::error = input.parse()?;
                 let _: token::Eq = input.parse()?;
-                let ty: Type = input.parse()?;
-
-                if error.replace(ty).is_some() {
-                    Err(error!(i, "duplicate `error` argument"))
-                } else {
-                    Ok(())
-                }
+                replace(&mut error, input.parse()?, &i)
+            } else if ok.is_none() {
+                input.parse::<kw::ok>().map(|_| unreachable!())
+            } else if error.is_none() {
+                input.parse::<kw::error>().map(|_| unreachable!())
+            } else {
+                let token = input.parse::<TokenStream>()?;
+                Err(error!(token, "unexpected argument: {}", token))
             }
         })?;
 
@@ -248,7 +252,6 @@ fn parse_fn(args: TokenStream, sig: FnSig, cx: Context) -> Result<TokenStream> {
     match cx {
         Context::Stream => {
             let StreamArg { item_ty, boxed } = syn::parse2(args)?;
-
             parse_fn_inner(sig, cx, None, boxed.is_boxed(), |lifetimes| match boxed {
                 ReturnTypeKind::Default => {
                     // Raw `impl` breaks syntax highlighting in some editors.
@@ -273,7 +276,6 @@ fn parse_fn(args: TokenStream, sig: FnSig, cx: Context) -> Result<TokenStream> {
         }
         Context::TryStream => {
             let TryStreamArg { ok, error, boxed } = syn::parse2(args)?;
-
             parse_fn_inner(sig, cx, Some(&error), boxed.is_boxed(), |lifetimes| {
                 match boxed {
                     ReturnTypeKind::Default => {

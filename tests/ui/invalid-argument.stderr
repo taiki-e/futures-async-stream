@@ -46,10 +46,10 @@ error: expected `item`
 44 |     #[stream(baz, item = i32)] //~ ERROR expected `item`
    |              ^^^
 
-error: expected `item`
+error: unexpected argument: baz
   --> $DIR/invalid-argument.rs:47:26
    |
-47 |     #[stream(item = i32, baz)] //~ ERROR expected `item`
+47 |     #[stream(item = i32, baz)] //~ ERROR unexpected argument
    |                          ^^^
 
 error: expected `item`
@@ -144,10 +144,10 @@ error: unexpected end of input, expected one of: `for`, parentheses, `fn`, `unsa
    |
    = note: this error originates in an attribute macro (in Nightly builds, run with -Z macro-backtrace for more info)
 
-error: expected `error`
+error: expected `ok`
   --> $DIR/invalid-argument.rs:96:18
    |
-96 |     #[try_stream(baz, ok = (), error = ())] //~ ERROR expected `error`
+96 |     #[try_stream(baz, ok = (), error = ())] //~ ERROR expected `ok`
    |                  ^^^
 
 error: expected `error`
@@ -156,16 +156,16 @@ error: expected `error`
 99 |     #[try_stream(ok = (), baz, error = ())] //~ ERROR expected `error`
    |                           ^^^
 
-error: expected `error`
+error: unexpected argument: baz
    --> $DIR/invalid-argument.rs:102:39
     |
-102 |     #[try_stream(ok = (), error = (), baz)] //~ ERROR expected `error`
+102 |     #[try_stream(ok = (), error = (), baz)] //~ ERROR unexpected argument
     |                                       ^^^
 
-error: expected `error`
+error: expected `ok`
    --> $DIR/invalid-argument.rs:108:18
     |
-108 |     #[try_stream(,ok = () error = ())] //~ ERROR expected `error`
+108 |     #[try_stream(,ok = () error = ())] //~ ERROR expected `ok`
     |                  ^
 
 error: expected `,`

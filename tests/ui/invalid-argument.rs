@@ -44,7 +44,7 @@ mod stream {
     #[stream(baz, item = i32)] //~ ERROR expected `item`
     async fn unexpected_first() {}
 
-    #[stream(item = i32, baz)] //~ ERROR expected `item`
+    #[stream(item = i32, baz)] //~ ERROR unexpected argument
     async fn unexpected_secont() {}
 
     #[stream(boxed, item = i32)] // Ok
@@ -93,19 +93,19 @@ mod try_stream {
     #[try_stream(error = )] //~ ERROR unexpected end of input, expected one of
     async fn expected_error_ty() {}
 
-    #[try_stream(baz, ok = (), error = ())] //~ ERROR expected `error`
+    #[try_stream(baz, ok = (), error = ())] //~ ERROR expected `ok`
     async fn unexpected_first() {}
 
     #[try_stream(ok = (), baz, error = ())] //~ ERROR expected `error`
     async fn unexpected_secont() {}
 
-    #[try_stream(ok = (), error = (), baz)] //~ ERROR expected `error`
+    #[try_stream(ok = (), error = (), baz)] //~ ERROR unexpected argument
     async fn unexpected_third() {}
 
     #[try_stream(boxed, ok = (), error = ())] // Ok
     async fn boxed_first() {}
 
-    #[try_stream(,ok = () error = ())] //~ ERROR expected `error`
+    #[try_stream(,ok = () error = ())] //~ ERROR expected `ok`
     async fn unexpected_comma() {}
 
     #[try_stream(ok = () error = ())] //~ ERROR expected `,`

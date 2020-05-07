@@ -6,7 +6,7 @@ use syn::{
     FnArg, GenericArgument, GenericParam, Lifetime, LifetimeDef, Receiver, TypeReference,
 };
 
-pub(super) fn unelide_lifetimes(
+pub(crate) fn unelide_lifetimes(
     generics: &mut Punctuated<GenericParam, token::Comma>,
     args: &mut Vec<FnArg>,
 ) {
