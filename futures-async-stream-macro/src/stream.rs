@@ -78,6 +78,7 @@ impl From<Context> for Scope {
     }
 }
 
+#[allow(dead_code)] // fixed in latest nightly
 #[derive(Clone, Copy)]
 enum ReturnTypeKind {
     // impl Stream<Item = ..> $(+ $lifetime)?
