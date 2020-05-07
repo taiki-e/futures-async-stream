@@ -95,11 +95,11 @@ impl ReturnTypeKind {
             if input.peek(kw::boxed) {
                 let i: kw::boxed = input.parse()?;
                 match self {
-                    ReturnTypeKind::Default => *self = ReturnTypeKind::Boxed { send: true },
-                    ReturnTypeKind::Boxed { send: true } => {
+                    Self::Default => *self = Self::Boxed { send: true },
+                    Self::Boxed { send: true } => {
                         return Err(error!(i, "duplicate `boxed` argument"));
                     }
-                    ReturnTypeKind::Boxed { send: false } => {
+                    Self::Boxed { send: false } => {
                         return Err(error!(
                             i,
                             "`boxed` and `boxed_local` may not be used at the same time"
@@ -109,11 +109,11 @@ impl ReturnTypeKind {
             } else if input.peek(kw::boxed_local) {
                 let i: kw::boxed_local = input.parse()?;
                 match self {
-                    ReturnTypeKind::Default => *self = ReturnTypeKind::Boxed { send: false },
-                    ReturnTypeKind::Boxed { send: false } => {
+                    Self::Default => *self = Self::Boxed { send: false },
+                    Self::Boxed { send: false } => {
                         return Err(error!(i, "duplicate `boxed_local` argument"));
                     }
-                    ReturnTypeKind::Boxed { send: true } => {
+                    Self::Boxed { send: true } => {
                         return Err(error!(
                             i,
                             "`boxed` and `boxed_local` may not be used at the same time"
