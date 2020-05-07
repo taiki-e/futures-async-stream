@@ -22,7 +22,7 @@ use proc_macro::{Delimiter, Group, TokenStream, TokenTree};
 use quote::ToTokens;
 use syn::{token, Expr, ExprAsync};
 
-use utils::parse_as_empty;
+use crate::utils::parse_as_empty;
 
 /// Processes streams using a for loop.
 #[proc_macro_attribute]

@@ -1,13 +1,12 @@
-use std::mem;
-
 use proc_macro2::TokenStream;
+use std::mem;
 use syn::{punctuated::Punctuated, token, Attribute, Error, Expr, ExprTuple, Result};
 
 pub(crate) const TASK_CONTEXT: &str = "__task_context";
 
 macro_rules! error {
     ($span:expr, $msg:expr) => {
-        syn::Error::new_spanned($span, $msg)
+        syn::Error::new_spanned(&$span, $msg)
     };
     ($span:expr, $($tt:tt)*) => {
         error!($span, format!($($tt)*))
