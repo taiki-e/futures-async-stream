@@ -220,6 +220,11 @@
 #![warn(rust_2018_idioms, single_use_lifetimes, unreachable_pub)]
 #![warn(clippy::all, clippy::default_trait_access)]
 #![feature(generator_trait)]
+#![cfg_attr(doctest, feature(external_doc))]
+
+#[cfg(doctest)]
+#[doc(include = "../README.md")]
+const _README: () = ();
 
 #[doc(inline)]
 pub use futures_async_stream_macro::for_await;
