@@ -2,7 +2,7 @@
 //!
 //! This crate provides useful features for streams, using `async_await` and unstable `generators`.
 //!
-//! ## \#\[for_await\]
+//! ## `#[for_await]`
 //!
 //! Processes streams using a for loop.
 //!
@@ -26,7 +26,7 @@
 //!
 //! `value` has the `Item` type of the stream passed in. Note that async for loops can only be used inside of `async` functions, closures, blocks, `#[stream]` functions and `stream_block!` macros.
 //!
-//! ## \#\[stream\]
+//! ## `#[stream]`
 //!
 //! Creates streams via generators.
 //!
@@ -49,26 +49,27 @@
 //! }
 //! ```
 //!
-//! `#[stream]` must have an item type specified via `item = some::Path` and the values output from the stream must be yielded via the `yield` expression.
+//! `#[stream]` on async fn must have an item type specified via `item = some::Path` and the values output from the stream must be yielded via the `yield` expression.
 //!
-//! ## stream_block!
-//!
-//! You can create a stream directly as an expression using an `stream_block!` macro:
+//! `#[stream]` can also be used on async blocks:
 //!
 //! ```rust
-//! #![feature(generators, proc_macro_hygiene)]
+//! #![feature(generators, proc_macro_hygiene, stmt_expr_attributes)]
 //!
 //! use futures::stream::Stream;
-//! use futures_async_stream::stream_block;
+//! use futures_async_stream::stream;
 //!
 //! fn foo() -> impl Stream<Item = i32> {
-//!     stream_block! {
+//!     #[stream]
+//!     async move {
 //!         for i in 0..10 {
 //!             yield i;
 //!         }
 //!     }
 //! }
 //! ```
+//!
+//! Note that `#[stream]` on async block does not require the `item` argument, but it may require additional type annotations.
 //!
 //! ## Using async stream functions in traits
 //!
@@ -125,7 +126,7 @@
 //! }
 //! ```
 //!
-//! ## \#\[try_stream\]
+//! ## `#[try_stream]`
 //!
 //! `?` operator can be used with the `#[try_stream]`. The `Item` of the returned stream is `Result` with `Ok` being the value yielded and `Err` the error type returned by `?` operator or `return Err(...)`.
 //!
@@ -146,7 +147,7 @@
 //!
 //! ## How to write the equivalent code without this API?
 //!
-//! ### \#\[for_await\]
+//! ### `#[for_await]`
 //!
 //! You can write this by combining `while let` loop, `.await`, `pin_mut` macro, and `StreamExt::next()` method:
 //!
@@ -166,7 +167,7 @@
 //! }
 //! ```
 //!
-//! ### \#\[stream\]
+//! ### `#[stream]`
 //!
 //! You can write this by manually implementing the combinator:
 //!

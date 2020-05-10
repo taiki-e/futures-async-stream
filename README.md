@@ -29,7 +29,7 @@ futures = "0.3"
 
 The current futures-async-stream requires Rust nightly 2020-02-14 or later.
 
-## \#\[for_await\]
+## `#[for_await]`
 
 Processes streams using a for loop.
 
@@ -53,7 +53,7 @@ async fn collect(stream: impl Stream<Item = i32>) -> Vec<i32> {
 
 `value` has the `Item` type of the stream passed in. Note that async for loops can only be used inside of `async` functions, closures, blocks, `#[stream]` functions and `stream_block!` macros.
 
-## \#\[stream\]
+## `#[stream]`
 
 Creates streams via generators.
 
@@ -76,26 +76,27 @@ async fn foo(stream: impl Stream<Item = String>) {
 }
 ```
 
-`#[stream]` must have an item type specified via `item = some::Path` and the values output from the stream must be yielded via the `yield` expression.
+`#[stream]` on async fn must have an item type specified via `item = some::Path` and the values output from the stream must be yielded via the `yield` expression.
 
-## stream_block!
-
-You can create a stream directly as an expression using an `stream_block!` macro:
+`#[stream]` can also be used on async blocks:
 
 ```rust
-#![feature(generators, proc_macro_hygiene)]
+#![feature(generators, proc_macro_hygiene, stmt_expr_attributes)]
 
 use futures::stream::Stream;
-use futures_async_stream::stream_block;
+use futures_async_stream::stream;
 
 fn foo() -> impl Stream<Item = i32> {
-    stream_block! {
+    #[stream]
+    async move {
         for i in 0..10 {
             yield i;
         }
     }
 }
 ```
+
+Note that `#[stream]` on async block does not require the `item` argument, but it may require additional type annotations.
 
 ## Using async stream functions in traits
 
@@ -151,9 +152,9 @@ impl Foo for Bar {
 }
 ```
 
-## \#\[try_stream\] and try_stream_block!
+## `#[try_stream]`
 
-`?` operator can be used with the `#[try_stream]` and `try_stream_block!`. The `Item` of the returned stream is `Result` with `Ok` being the value yielded and `Err` the error type returned by `?` operator or `return Err(...)`.
+`?` operator can be used with the `#[try_stream]`. The `Item` of the returned stream is `Result` with `Ok` being the value yielded and `Err` the error type returned by `?` operator or `return Err(...)`.
 
 ```rust
 #![feature(generators)]
@@ -170,6 +171,8 @@ async fn foo(stream: impl Stream<Item = String>) {
 }
 ```
 
+`#[try_stream]` can be used wherever `#[stream]` can be used.
+
 <!--
 ## List of features that may be added in the future as an extension of this feature:
 
@@ -180,7 +183,7 @@ async fn foo(stream: impl Stream<Item = String>) {
 
 ## How to write the equivalent code without this API?
 
-### \#\[for_await\]
+### `#[for_await]`
 
 You can write this by combining `while let` loop, `.await`, `pin_mut` macro, and `StreamExt::next()` method:
 
@@ -200,7 +203,7 @@ async fn collect(stream: impl Stream<Item = i32>) -> Vec<i32> {
 }
 ```
 
-### \#\[stream\]
+### `#[stream]`
 
 You can write this by manually implementing the combinator:
 
