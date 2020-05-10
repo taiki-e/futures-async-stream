@@ -57,7 +57,7 @@ pub fn stream(args: TokenStream, input: TokenStream) -> TokenStream {
         .into()
 }
 
-/// Creates streams via generators.
+/// Creates streams via generators. This is equivalent to `#[stream]` on async blocks.
 #[proc_macro]
 pub fn stream_block(input: TokenStream) -> TokenStream {
     let input = TokenStream::from(TokenTree::Group(Group::new(Delimiter::Brace, input)));
@@ -82,7 +82,7 @@ pub fn try_stream(args: TokenStream, input: TokenStream) -> TokenStream {
         .into()
 }
 
-/// Creates streams via generators.
+/// Creates streams via generators. This is equivalent to `#[try_stream]` on async blocks.
 #[proc_macro]
 pub fn try_stream_block(input: TokenStream) -> TokenStream {
     let input = TokenStream::from(TokenTree::Group(Group::new(Delimiter::Brace, input)));
