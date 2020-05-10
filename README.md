@@ -23,7 +23,7 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-futures-async-stream = "0.1"
+futures-async-stream = "0.2"
 futures = "0.3"
 ```
 

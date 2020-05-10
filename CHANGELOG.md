@@ -6,6 +6,20 @@ This project adheres to [Semantic Versioning](https://semver.org).
 
 ## [Unreleased]
 
+## [0.2.0] - 2020-05-10
+
+* [Renamed `#[async_stream]` to `#[stream]`.][45]
+
+* [Renamed `#[async_try_stream]` to `#[stream]`.][45]
+
+* [Renamed `async_stream_block!` to `stream_block!`.][45]
+
+* [Renamed `async_try_stream_block!` to `try_stream_block!`.][45]
+
+* Some bug fixes and diagnostic improvements.
+
+[45]: https://github.com/taiki-e/futures-async-stream/pull/45
+
 ## [0.1.5] - 2020-05-04
 
 * [`#[async_stream]` and `#[async_try_stream]` attributes can now be used on async blocks.][44]
