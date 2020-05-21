@@ -9,3 +9,4 @@ publish = false
 
 [dependencies]
 futures-async-stream = { path = "../.." }
+futures-core = { version = "0.3", default-features = false }
