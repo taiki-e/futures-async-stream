@@ -15,12 +15,13 @@
 mod utils;
 
 mod elision;
+mod parse;
 mod stream;
 mod visitor;
 
 use proc_macro::{Delimiter, Group, TokenStream, TokenTree};
 use quote::ToTokens;
-use syn::{token, Expr, ExprAsync};
+use syn::{token, Expr, ExprAsync, ExprForLoop};
 
 use crate::utils::parse_as_empty;
 
@@ -31,28 +32,21 @@ pub fn for_await(args: TokenStream, input: TokenStream) -> TokenStream {
         return e.to_compile_error().into();
     }
 
-    let mut expr = match syn::parse_macro_input!(input) {
-        Expr::ForLoop(mut expr) => {
-            // FIXME: once https://github.com/rust-lang/rust/issues/43081 fixed,
-            //        use `.insert(0, ..) instead.
-            expr.attrs.push(syn::parse_quote!(#[for_await]));
-            Expr::ForLoop(expr)
-        }
-        expr => {
-            return error!(expr, "#[for_await] attribute may only be used on for loops")
-                .to_compile_error()
-                .into();
-        }
-    };
+    let mut expr: ExprForLoop = syn::parse_macro_input!(input);
+    // FIXME: once https://github.com/rust-lang/rust/issues/43081 fixed,
+    //        use `.insert(0, ..) instead.
+    expr.attrs.push(syn::parse_quote!(#[for_await]));
 
+    let mut expr = Expr::ForLoop(expr);
     visitor::Visitor::default().visit_for_loop(&mut expr);
+
     expr.into_token_stream().into()
 }
 
 /// Creates streams via generators.
 #[proc_macro_attribute]
 pub fn stream(args: TokenStream, input: TokenStream) -> TokenStream {
-    stream::attribute(args.into(), input.into(), stream::Context::Stream)
+    stream::attribute(args.into(), input.into(), parse::Context::Stream)
         .unwrap_or_else(|e| e.to_compile_error())
         .into()
 }
@@ -69,7 +63,7 @@ pub fn stream_block(input: TokenStream) -> TokenStream {
         block,
     };
 
-    stream::parse_async(&mut expr, stream::Context::Stream)
+    stream::parse_async(&mut expr, parse::Context::Stream)
         .unwrap_or_else(|e| e.to_compile_error())
         .into()
 }
@@ -77,7 +71,7 @@ pub fn stream_block(input: TokenStream) -> TokenStream {
 /// Creates streams via generators.
 #[proc_macro_attribute]
 pub fn try_stream(args: TokenStream, input: TokenStream) -> TokenStream {
-    stream::attribute(args.into(), input.into(), stream::Context::TryStream)
+    stream::attribute(args.into(), input.into(), parse::Context::TryStream)
         .unwrap_or_else(|e| e.to_compile_error())
         .into()
 }
@@ -94,7 +88,7 @@ pub fn try_stream_block(input: TokenStream) -> TokenStream {
         block,
     };
 
-    stream::parse_async(&mut expr, stream::Context::TryStream)
+    stream::parse_async(&mut expr, parse::Context::TryStream)
         .unwrap_or_else(|e| e.to_compile_error())
         .into()
 }

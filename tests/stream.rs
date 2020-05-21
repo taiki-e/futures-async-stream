@@ -275,6 +275,29 @@ impl Trait for A {
     }
 }
 
+#[allow(unused_must_use)]
+#[stream(item = u64)]
+pub async fn semi1() {
+    #[stream]
+    async move {
+        #[for_await]
+        for i in stream(2) {
+            yield async { i * i }.await;
+        }
+    };
+}
+
+#[allow(unused_must_use)]
+pub async fn semi2() {
+    #[stream]
+    async move {
+        #[for_await]
+        for i in stream(2) {
+            yield async { i * i }.await;
+        }
+    };
+}
+
 #[test]
 fn test() {
     // https://github.com/alexcrichton/futures-await/issues/45
