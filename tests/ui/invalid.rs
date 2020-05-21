@@ -17,6 +17,9 @@ mod signature {
 
     #[stream(item = ())]
     async fn unit() -> () {} // OK
+
+    #[stream(item = ())]
+    const async unsafe extern "C" fn f() {} //~ ERROR async stream may not be const
 }
 
 mod attribute {
@@ -109,6 +112,19 @@ mod attribute {
             async move {}
         };
     }
+}
+
+mod item {
+    use futures_async_stream::stream;
+
+    #[stream(item = ())] //~ ERROR #[stream] attribute may only be used on async functions or async blocks
+    mod m {}
+
+    #[stream(item = ())] //~ ERROR #[stream] attribute may only be used on async functions or async blocks
+    trait A {}
+
+    #[stream(item = ())] //~ ERROR #[stream] attribute may only be used on async functions or async blocks
+    impl A {}
 }
 
 fn main() {}

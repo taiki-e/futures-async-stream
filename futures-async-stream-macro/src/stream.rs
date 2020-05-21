@@ -5,14 +5,14 @@ use syn::{
     punctuated::Punctuated,
     token,
     visit_mut::VisitMut,
-    Attribute, Block, Expr, ExprAsync, FnArg, Item, ItemFn, Pat, PatIdent, PatType, Result,
-    ReturnType, Signature, Stmt, TraitItemMethod, Type, Visibility,
+    Block, ExprAsync, FnArg, Pat, PatIdent, PatType, Result, Signature, Stmt, Type,
 };
 
 use crate::{
     elision,
-    utils::{parse_as_empty, SliceExt, TASK_CONTEXT},
-    visitor::{Scope, Visitor},
+    parse::{self, Context, FnOrAsync, FnSig},
+    utils::{parse_as_empty, TASK_CONTEXT},
+    visitor::Visitor,
 };
 
 mod kw {
@@ -24,58 +24,23 @@ mod kw {
 }
 
 pub(crate) fn attribute(args: TokenStream, input: TokenStream, cx: Context) -> Result<TokenStream> {
-    match syn::parse2(input.clone()) {
-        Ok(Stmt::Item(Item::Fn(item))) => parse_fn(args, item.into(), cx),
-        Ok(Stmt::Expr(Expr::Async(mut expr))) | Ok(Stmt::Semi(Expr::Async(mut expr), _)) => {
+    match parse::parse(input, cx)? {
+        FnOrAsync::Fn(sig) => parse_fn(args, sig, cx),
+        FnOrAsync::Async(mut expr, semi) => {
             parse_as_empty(&args)?;
-            parse_async(&mut expr, cx)
-        }
-        _ => {
-            if let Ok(item) = syn::parse2::<TraitItemMethod>(input.clone()) {
-                parse_fn(args, item.into(), cx)
-            } else if let Ok(mut expr) = syn::parse2::<ExprAsync>(input.clone()) {
-                parse_as_empty(&args)?;
-                parse_async(&mut expr, cx)
-            } else {
-                Err(error!(
-                    input,
-                    "#[{}] attribute may not be used on async functions or async blocks",
-                    cx.as_str()
-                ))
+            let mut tokens = parse_async(&mut expr, cx)?;
+            if let Some(semi) = semi {
+                semi.to_tokens(&mut tokens);
             }
+            Ok(tokens)
         }
+        FnOrAsync::NotAsync => unreachable!(),
     }
 }
 
 pub(crate) fn parse_async(expr: &mut ExprAsync, cx: Context) -> Result<TokenStream> {
-    validate_sig(None, &expr.attrs, cx)?;
-
     Visitor::new(cx.into()).visit_expr_async_mut(expr);
     Ok(make_gen_body(expr.capture, &expr.block, cx, None, false))
-}
-
-#[derive(Copy, Clone)]
-pub(crate) enum Context {
-    Stream,
-    TryStream,
-}
-
-impl Context {
-    fn as_str(self) -> &'static str {
-        match self {
-            Self::Stream => "stream",
-            Self::TryStream => "try_stream",
-        }
-    }
-}
-
-impl From<Context> for Scope {
-    fn from(other: Context) -> Self {
-        match other {
-            Context::Stream => Self::Stream,
-            Context::TryStream => Self::TryStream,
-        }
-    }
 }
 
 #[allow(dead_code)] // fixed in latest nightly
@@ -135,37 +100,6 @@ impl ReturnTypeKind {
 
     fn is_boxed(self) -> bool {
         if let Self::Boxed { .. } = self { true } else { false }
-    }
-}
-
-struct FnSig {
-    attrs: Vec<Attribute>,
-    vis: Visibility,
-    sig: Signature,
-    block: Block,
-    semi: Option<token::Semi>,
-}
-
-impl From<ItemFn> for FnSig {
-    fn from(item: ItemFn) -> Self {
-        Self { attrs: item.attrs, vis: item.vis, sig: item.sig, block: *item.block, semi: None }
-    }
-}
-
-impl From<TraitItemMethod> for FnSig {
-    fn from(item: TraitItemMethod) -> Self {
-        if let Some(block) = item.default {
-            Self { attrs: item.attrs, vis: Visibility::Inherited, sig: item.sig, block, semi: None }
-        } else {
-            assert!(item.semi_token.is_some());
-            Self {
-                attrs: item.attrs,
-                vis: Visibility::Inherited,
-                sig: item.sig,
-                block: Block { brace_token: token::Brace::default(), stmts: Vec::new() },
-                semi: item.semi_token,
-            }
-        }
     }
 }
 
@@ -315,8 +249,6 @@ fn parse_fn_inner(
     boxed: bool,
     return_ty: impl FnOnce(TokenStream) -> TokenStream,
 ) -> Result<TokenStream> {
-    validate_sig(Some(&sig), &sig.attrs, cx)?;
-
     let FnSig { attrs, vis, sig, mut block, semi } = sig;
     let Signature { unsafety, abi, fn_token, ident, mut generics, inputs, .. } = sig;
     let where_clause = &generics.where_clause;
@@ -347,45 +279,9 @@ fn parse_fn_inner(
     })
 }
 
-fn validate_sig(item: Option<&FnSig>, attrs: &[Attribute], cx: Context) -> Result<()> {
-    if let Some(item) = item {
-        if item.sig.asyncness.is_none() {
-            return Err(error!(item.sig.fn_token, "async stream must be declared as async"));
-        }
-        if let Some(constness) = item.sig.constness {
-            // This line is currently unreachable.
-            // `async const fn` and `const async fn` is rejected by syn.
-            // `const fn` is rejected by the previous statements.
-            return Err(error!(constness, "async stream may not be const"));
-        }
-        if let Some(variadic) = &item.sig.variadic {
-            return Err(error!(variadic, "async stream may not be variadic"));
-        }
-
-        if let ReturnType::Type(_, ty) = &item.sig.output {
-            match &**ty {
-                Type::Tuple(ty) if ty.elems.is_empty() => {}
-                _ => return Err(error!(ty, "async stream must return the unit type")),
-            }
-        }
-    }
-
-    let (duplicate, another) = match cx {
-        Context::Stream => ("stream", "try_stream"),
-        Context::TryStream => ("try_stream", "stream"),
-    };
-    if let Some(attr) = attrs.find(duplicate) {
-        Err(error!(attr, "duplicate #[{}] attribute", duplicate))
-    } else if let Some(attr) = attrs.find(another) {
-        Err(error!(attr, "#[stream] and #[try_stream] may not be used at the same time"))
-    } else {
-        Ok(())
-    }
-}
-
 fn expand_async_body(inputs: Punctuated<FnArg, token::Comma>) -> (Vec<FnArg>, Vec<Stmt>) {
-    let mut arguments: Vec<FnArg> = Vec::new();
-    let mut statements: Vec<Stmt> = Vec::new();
+    let mut arguments = Vec::new();
+    let mut statements = Vec::new();
 
     // Desugar `async fn`
     // from:

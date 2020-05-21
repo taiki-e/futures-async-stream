@@ -22,22 +22,28 @@ error: async stream must return the unit type
 16 |     async fn output() -> i32 {} //~ ERROR async stream must return the unit type
    |                          ^^^
 
-error: duplicate #[stream] attribute
-  --> $DIR/invalid.rs:29:5
+error: async stream may not be const
+  --> $DIR/invalid.rs:22:5
    |
-29 |     #[stream(item = ())] //~ ERROR duplicate #[stream] attribute
+22 |     const async unsafe extern "C" fn f() {} //~ ERROR async stream may not be const
+   |     ^^^^^
+
+error: duplicate #[stream] attribute
+  --> $DIR/invalid.rs:32:5
+   |
+32 |     #[stream(item = ())] //~ ERROR duplicate #[stream] attribute
    |     ^^^^^^^^^^^^^^^^^^^^
 
 error: duplicate #[try_stream] attribute
-  --> $DIR/invalid.rs:33:5
+  --> $DIR/invalid.rs:36:5
    |
-33 |     #[try_stream(ok = (), error = ())] //~ ERROR duplicate #[try_stream] attribute
+36 |     #[try_stream(ok = (), error = ())] //~ ERROR duplicate #[try_stream] attribute
    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 error: #[stream] and #[try_stream] may not be used at the same time
-  --> $DIR/invalid.rs:37:5
+  --> $DIR/invalid.rs:40:5
    |
-37 |     #[try_stream(ok = (), error = ())] //~ ERROR may not be used at the same time
+40 |     #[try_stream(ok = (), error = ())] //~ ERROR may not be used at the same time
    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 error: duplicate #[stream] attribute
@@ -45,9 +51,9 @@ error: duplicate #[stream] attribute
 error: duplicate #[try_stream] attribute
 
 error: duplicate #[for_await] attribute
-  --> $DIR/invalid.rs:63:9
+  --> $DIR/invalid.rs:66:9
    |
-63 |         #[for_await] //~ ERROR duplicate #[for_await] attribute
+66 |         #[for_await] //~ ERROR duplicate #[for_await] attribute
    |         ^^^^^^^^^^^^
    |
    = note: this error originates in an attribute macro (in Nightly builds, run with -Z macro-backtrace for more info)
@@ -55,25 +61,49 @@ error: duplicate #[for_await] attribute
 error: #[stream] and #[try_stream] may not be used at the same time
 
 error: duplicate #[stream] attribute
-  --> $DIR/invalid.rs:83:13
+  --> $DIR/invalid.rs:86:13
    |
-83 |             #[stream] //~ ERROR duplicate #[stream] attribute
+86 |             #[stream] //~ ERROR duplicate #[stream] attribute
    |             ^^^^^^^^^
 
 error: duplicate #[try_stream] attribute
-  --> $DIR/invalid.rs:92:13
+  --> $DIR/invalid.rs:95:13
    |
-92 |             #[try_stream] //~ ERROR duplicate #[try_stream] attribute
+95 |             #[try_stream] //~ ERROR duplicate #[try_stream] attribute
    |             ^^^^^^^^^^^^^
 
 error: duplicate #[for_await] attribute
-   --> $DIR/invalid.rs:100:9
+   --> $DIR/invalid.rs:103:9
     |
-100 |         #[for_await] //~ ERROR duplicate #[for_await] attribute
+103 |         #[for_await] //~ ERROR duplicate #[for_await] attribute
     |         ^^^^^^^^^^^^
 
 error: #[stream] and #[try_stream] may not be used at the same time
-   --> $DIR/invalid.rs:108:13
+   --> $DIR/invalid.rs:111:13
     |
-108 |             #[try_stream] //~ ERROR may not be used at the same time
+111 |             #[try_stream] //~ ERROR may not be used at the same time
     |             ^^^^^^^^^^^^^
+
+error: #[stream] attribute may only be used on async functions or async blocks
+   --> $DIR/invalid.rs:120:5
+    |
+120 |     #[stream(item = ())] //~ ERROR #[stream] attribute may only be used on async functions or async blocks
+    |     ^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: this error originates in an attribute macro (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error: #[stream] attribute may only be used on async functions or async blocks
+   --> $DIR/invalid.rs:123:5
+    |
+123 |     #[stream(item = ())] //~ ERROR #[stream] attribute may only be used on async functions or async blocks
+    |     ^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: this error originates in an attribute macro (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error: #[stream] attribute may only be used on async functions or async blocks
+   --> $DIR/invalid.rs:126:5
+    |
+126 |     #[stream(item = ())] //~ ERROR #[stream] attribute may only be used on async functions or async blocks
+    |     ^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: this error originates in an attribute macro (in Nightly builds, run with -Z macro-backtrace for more info)

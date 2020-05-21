@@ -6,7 +6,7 @@ use syn::{
 };
 
 use crate::{
-    stream, stream_block, try_stream_block,
+    parse, stream, stream_block, try_stream_block,
     utils::{expr_compile_error, replace_expr, unit, SliceExt, TASK_CONTEXT},
 };
 
@@ -210,14 +210,14 @@ impl Visitor {
                 }
                 (Ok(Some(i)), _) => {
                     e.attrs.remove(i);
-                    *expr = match stream::parse_async(e, stream::Context::Stream) {
+                    *expr = match stream::parse_async(e, parse::Context::Stream) {
                         Ok(tokens) => syn::parse2(tokens).unwrap(),
                         Err(e) => expr_compile_error(&e),
                     }
                 }
                 (_, Ok(Some(i))) => {
                     e.attrs.remove(i);
-                    *expr = match stream::parse_async(e, stream::Context::TryStream) {
+                    *expr = match stream::parse_async(e, parse::Context::TryStream) {
                         Ok(tokens) => syn::parse2(tokens).unwrap(),
                         Err(e) => expr_compile_error(&e),
                     }
