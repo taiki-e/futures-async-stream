@@ -1,4 +1,4 @@
-#![feature(generators, proc_macro_hygiene)]
+#![feature(generators)]
 
 use futures_async_stream::stream_block;
 
