@@ -6,6 +6,10 @@ This project adheres to [Semantic Versioning](https://semver.org).
 
 ## [Unreleased]
 
+## [0.2.1] - 2020-05-21
+
+* Improved diagnostics.
+
 ## [0.2.0] - 2020-05-10
 
 * [Renamed `#[async_stream]` to `#[stream]`.][45]
@@ -124,7 +128,9 @@ This project adheres to [Semantic Versioning](https://semver.org).
 
 Initial release
 
-[Unreleased]: https://github.com/taiki-e/futures-async-stream/compare/v0.1.5...HEAD
+[Unreleased]: https://github.com/taiki-e/futures-async-stream/compare/v0.2.1...HEAD
+[0.2.1]: https://github.com/taiki-e/futures-async-stream/compare/v0.2.0...v0.2.1
+[0.2.0]: https://github.com/taiki-e/futures-async-stream/compare/v0.1.5...v0.2.0
 [0.1.5]: https://github.com/taiki-e/futures-async-stream/compare/v0.1.4...v0.1.5
 [0.1.4]: https://github.com/taiki-e/futures-async-stream/compare/v0.1.3...v0.1.4
 [0.1.3]: https://github.com/taiki-e/futures-async-stream/compare/v0.1.2...v0.1.3
