@@ -47,63 +47,73 @@ error: #[stream] and #[try_stream] may not be used at the same time
    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 error: duplicate #[stream] attribute
-
-error: duplicate #[try_stream] attribute
-
-error: duplicate #[for_await] attribute
-  --> $DIR/invalid.rs:66:9
+  --> $DIR/invalid.rs:46:13
    |
-66 |         #[for_await] //~ ERROR duplicate #[for_await] attribute
-   |         ^^^^^^^^^^^^
-   |
-   = note: this error originates in an attribute macro (in Nightly builds, run with -Z macro-backtrace for more info)
-
-error: #[stream] and #[try_stream] may not be used at the same time
-
-error: duplicate #[stream] attribute
-  --> $DIR/invalid.rs:86:13
-   |
-86 |             #[stream] //~ ERROR duplicate #[stream] attribute
+46 |             #[stream] //~ ERROR duplicate #[stream] attribute
    |             ^^^^^^^^^
 
 error: duplicate #[try_stream] attribute
-  --> $DIR/invalid.rs:95:13
+  --> $DIR/invalid.rs:54:13
    |
-95 |             #[try_stream] //~ ERROR duplicate #[try_stream] attribute
+54 |             #[try_stream] //~ ERROR duplicate #[try_stream] attribute
    |             ^^^^^^^^^^^^^
 
 error: duplicate #[for_await] attribute
-   --> $DIR/invalid.rs:103:9
-    |
-103 |         #[for_await] //~ ERROR duplicate #[for_await] attribute
-    |         ^^^^^^^^^^^^
+  --> $DIR/invalid.rs:61:9
+   |
+61 |         #[for_await] //~ ERROR duplicate #[for_await] attribute
+   |         ^^^^^^^^^^^^
 
 error: #[stream] and #[try_stream] may not be used at the same time
-   --> $DIR/invalid.rs:111:13
+  --> $DIR/invalid.rs:68:13
+   |
+68 |             #[try_stream] //~ ERROR may not be used at the same time
+   |             ^^^^^^^^^^^^^
+
+error: duplicate #[stream] attribute
+  --> $DIR/invalid.rs:77:13
+   |
+77 |             #[stream] //~ ERROR duplicate #[stream] attribute
+   |             ^^^^^^^^^
+
+error: duplicate #[try_stream] attribute
+  --> $DIR/invalid.rs:86:13
+   |
+86 |             #[try_stream] //~ ERROR duplicate #[try_stream] attribute
+   |             ^^^^^^^^^^^^^
+
+error: duplicate #[for_await] attribute
+  --> $DIR/invalid.rs:94:9
+   |
+94 |         #[for_await] //~ ERROR duplicate #[for_await] attribute
+   |         ^^^^^^^^^^^^
+
+error: #[stream] and #[try_stream] may not be used at the same time
+   --> $DIR/invalid.rs:102:13
     |
-111 |             #[try_stream] //~ ERROR may not be used at the same time
+102 |             #[try_stream] //~ ERROR may not be used at the same time
     |             ^^^^^^^^^^^^^
 
 error: #[stream] attribute may only be used on async functions or async blocks
-   --> $DIR/invalid.rs:120:5
+   --> $DIR/invalid.rs:111:5
     |
-120 |     #[stream(item = ())] //~ ERROR #[stream] attribute may only be used on async functions or async blocks
+111 |     #[stream(item = ())] //~ ERROR #[stream] attribute may only be used on async functions or async blocks
     |     ^^^^^^^^^^^^^^^^^^^^
     |
     = note: this error originates in an attribute macro (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: #[stream] attribute may only be used on async functions or async blocks
-   --> $DIR/invalid.rs:123:5
+   --> $DIR/invalid.rs:114:5
     |
-123 |     #[stream(item = ())] //~ ERROR #[stream] attribute may only be used on async functions or async blocks
+114 |     #[stream(item = ())] //~ ERROR #[stream] attribute may only be used on async functions or async blocks
     |     ^^^^^^^^^^^^^^^^^^^^
     |
     = note: this error originates in an attribute macro (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: #[stream] attribute may only be used on async functions or async blocks
-   --> $DIR/invalid.rs:126:5
+   --> $DIR/invalid.rs:117:5
     |
-126 |     #[stream(item = ())] //~ ERROR #[stream] attribute may only be used on async functions or async blocks
+117 |     #[stream(item = ())] //~ ERROR #[stream] attribute may only be used on async functions or async blocks
     |     ^^^^^^^^^^^^^^^^^^^^
     |
     = note: this error originates in an attribute macro (in Nightly builds, run with -Z macro-backtrace for more info)

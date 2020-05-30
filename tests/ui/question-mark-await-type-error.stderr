@@ -56,10 +56,10 @@ note: the type is part of the `async fn` body because of this `await`
    |         ^^^^^^^^^^^^^^
 
 error[E0277]: the `?` operator can only be applied to values that implement `std::ops::Try`
-  --> $DIR/question-mark-await-type-error.rs:28:5
+  --> $DIR/question-mark-await-type-error.rs:28:9
    |
-28 |     #[for_await]
-   |     ^^^^^^^^^^^^ the `?` operator cannot be applied to type `()`
+28 |         async {}.await?; //~ ERROR the `?` operator can only be applied to values that implement `std::ops::Try`
+   |         ^^^^^^^^^^^^^^^ the `?` operator cannot be applied to type `()`
    |
    = help: the trait `std::ops::Try` is not implemented for `()`
    = note: required by `std::ops::Try::into_result`
@@ -122,9 +122,9 @@ note: the type is part of the generator because of this `yield`
    |                  ^^^^^
 
 error[E0277]: the `?` operator can only be applied to values that implement `std::ops::Try`
-  --> $DIR/question-mark-await-type-error.rs:42:18
+  --> $DIR/question-mark-await-type-error.rs:36:18
    |
-42 |         async {}.await?;
+36 |         async {}.await?; //~ ERROR the `?` operator can only be applied to values that implement `std::ops::Try`
    |                  ^^^^^^ the `?` operator cannot be applied to type `()`
    |
    = help: the trait `std::ops::Try` is not implemented for `()`
