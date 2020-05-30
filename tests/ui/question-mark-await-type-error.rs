@@ -22,24 +22,18 @@ async fn async_stream_fn() {
     }
 }
 
-// span is lost.
-// Refs: https://github.com/rust-lang/rust/issues/43081
 async fn async_fn_and_for_await() {
     #[for_await]
-    //~^ ERROR the `?` operator can only be applied to values that implement `std::ops::Try`
     for _i in stream(2) {
-        async {}.await?;
+        async {}.await?; //~ ERROR the `?` operator can only be applied to values that implement `std::ops::Try`
     }
 }
 
-// span is lost.
-// Refs: https://github.com/rust-lang/rust/issues/43081
 #[stream(item = i32)]
 async fn async_stream_fn_and_for_await() {
     #[for_await]
-    //~^ ERROR the `?` operator can only be applied to values that implement `std::ops::Try`
     for _i in stream(2) {
-        async {}.await?;
+        async {}.await?; //~ ERROR the `?` operator can only be applied to values that implement `std::ops::Try`
     }
 }
 

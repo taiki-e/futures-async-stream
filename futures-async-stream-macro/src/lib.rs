@@ -33,9 +33,7 @@ pub fn for_await(args: TokenStream, input: TokenStream) -> TokenStream {
     }
 
     let mut expr: ExprForLoop = syn::parse_macro_input!(input);
-    // FIXME: once https://github.com/rust-lang/rust/issues/43081 fixed,
-    //        use `.insert(0, ..) instead.
-    expr.attrs.push(syn::parse_quote!(#[for_await]));
+    expr.attrs.insert(0, syn::parse_quote!(#[for_await]));
 
     let mut expr = Expr::ForLoop(expr);
     visitor::Visitor::default().visit_for_loop(&mut expr);

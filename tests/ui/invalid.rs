@@ -40,41 +40,32 @@ mod attribute {
     #[try_stream(ok = (), error = ())] //~ ERROR may not be used at the same time
     async fn combine_fn() {}
 
-    // span is lost.
-    // Refs: https://github.com/rust-lang/rust/issues/43081
-    //~ ERROR duplicate #[stream] attribute
     async fn duplicate_stream_async() {
         let _ = {
             #[stream]
-            #[stream]
+            #[stream] //~ ERROR duplicate #[stream] attribute
             async move {}
         };
     }
 
-    // span is lost.
-    // Refs: https://github.com/rust-lang/rust/issues/43081
-    //~ ERROR duplicate #[try_stream] attribute
     async fn duplicate_try_stream_async() {
         let _ = {
             #[try_stream]
-            #[try_stream]
+            #[try_stream] //~ ERROR duplicate #[try_stream] attribute
             async move {}
         };
     }
 
     async fn duplicate_for_await() {
-        #[for_await] //~ ERROR duplicate #[for_await] attribute
         #[for_await]
+        #[for_await] //~ ERROR duplicate #[for_await] attribute
         for () in stream() {}
     }
 
-    // span is lost.
-    // Refs: https://github.com/rust-lang/rust/issues/43081
-    //~ ERROR may not be used at the same time
     async fn combine_async() {
         let _ = {
             #[stream]
-            #[try_stream]
+            #[try_stream] //~ ERROR may not be used at the same time
             async move {}
         };
     }

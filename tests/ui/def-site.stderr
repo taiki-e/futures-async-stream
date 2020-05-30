@@ -29,7 +29,7 @@ error[E0425]: cannot find value `__pinned` in this scope
    |          ^^^^^^^^ not found in this scope
 
 error[E0425]: cannot find value `__pinned` in this scope
-  --> $DIR/def-site.rs:40:5
+  --> $DIR/def-site.rs:40:10
    |
-40 |     #[for_await] //~ ERROR E0425
-   |     ^^^^^^^^^^^^ not found in this scope
+40 |         &__pinned; //~ ERROR E0425
+   |          ^^^^^^^^ not found in this scope

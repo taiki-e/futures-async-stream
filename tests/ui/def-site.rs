@@ -34,12 +34,10 @@ async fn def_site_for_await1() {
     }
 }
 
-// span is lost.
-// Refs: https://github.com/rust-lang/rust/issues/43081
 async fn def_site_for_await2() {
-    #[for_await] //~ ERROR E0425
+    #[for_await]
     for _ in stream() {
-        &__pinned;
+        &__pinned; //~ ERROR E0425
     }
 }
 
