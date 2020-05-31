@@ -157,9 +157,7 @@ impl Visitor {
 
         // Desugar `yield <e>` into `task_context = yield Poll::Ready(<e>)`.
         if let Expr::Yield(ExprYield { yield_token, expr: e, .. }) = expr {
-            if e.is_none() {
-                e.replace(Box::new(unit()));
-            }
+            e.get_or_insert_with(|| Box::new(unit()));
 
             let task_context = def_site_ident!(TASK_CONTEXT);
             *expr = syn::parse_quote! {
