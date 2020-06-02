@@ -90,9 +90,10 @@ impl ReturnTypeKind {
                 f(input)?;
             }
 
-            if !input.is_empty() {
-                let _: token::Comma = input.parse()?;
+            if input.is_empty() {
+                break;
             }
+            let _: token::Comma = input.parse()?;
         }
 
         Ok(())
@@ -187,23 +188,26 @@ fn parse_fn(args: TokenStream, sig: FnSig, cx: Context) -> Result<TokenStream> {
     match cx {
         Context::Stream => {
             let StreamArg { item_ty, boxed } = syn::parse2(args)?;
+            let trait_ = quote! {
+                ::futures_async_stream::__private::stream::Stream<Item = #item_ty>
+            };
             parse_fn_inner(sig, cx, None, boxed.is_boxed(), |lifetimes| match boxed {
                 ReturnTypeKind::Default => {
                     // Raw `impl` breaks syntax highlighting in some editors.
                     let impl_token = token::Impl::default();
                     quote! {
-                        #impl_token ::futures_async_stream::__reexport::stream::Stream<Item = #item_ty> + #lifetimes
+                        #impl_token #trait_ + #lifetimes
                     }
                 }
                 ReturnTypeKind::Boxed { send } => {
                     let send = if send {
-                        quote!(+ ::futures_async_stream::__reexport::marker::Send)
+                        Some(quote!(+ ::futures_async_stream::__private::Send))
                     } else {
-                        TokenStream::new()
+                        None
                     };
                     quote! {
-                        ::futures_async_stream::__reexport::pin::Pin<Box<
-                            dyn ::futures_async_stream::__reexport::stream::Stream<Item = #item_ty> #send + #lifetimes
+                        ::futures_async_stream::__private::Pin<Box<
+                            dyn #trait_ #send + #lifetimes
                         >>
                     }
                 }
@@ -212,27 +216,28 @@ fn parse_fn(args: TokenStream, sig: FnSig, cx: Context) -> Result<TokenStream> {
         Context::TryStream => {
             let TryStreamArg { ok, error, boxed } = syn::parse2(args)?;
             parse_fn_inner(sig, cx, Some(&error), boxed.is_boxed(), |lifetimes| {
+                let trait_ = quote! {
+                    ::futures_async_stream::__private::stream::Stream<
+                        Item = ::futures_async_stream::__private::Result<#ok, #error>
+                    >
+                };
                 match boxed {
                     ReturnTypeKind::Default => {
                         // Raw `impl` breaks syntax highlighting in some editors.
                         let impl_token = token::Impl::default();
                         quote! {
-                            #impl_token ::futures_async_stream::__reexport::stream::Stream<
-                                Item = ::futures_async_stream::__reexport::result::Result<#ok, #error>
-                            > + #lifetimes
+                            #impl_token #trait_ + #lifetimes
                         }
                     }
                     ReturnTypeKind::Boxed { send } => {
                         let send = if send {
-                            quote!(+ ::futures_async_stream::__reexport::marker::Send)
+                            Some(quote!(+ ::futures_async_stream::__private::Send))
                         } else {
-                            TokenStream::new()
+                            None
                         };
                         quote! {
-                            ::futures_async_stream::__reexport::pin::Pin<Box<
-                                dyn ::futures_async_stream::__reexport::stream::Stream<
-                                    Item = ::futures_async_stream::__reexport::result::Result<#ok, #error>
-                                > #send + #lifetimes
+                            ::futures_async_stream::__private::Pin<Box<
+                                dyn #trait_ #send + #lifetimes
                             >>
                         }
                     }
@@ -267,7 +272,7 @@ fn parse_fn_inner(
     });
 
     elision::unelide_lifetimes(&mut generics.params, &mut arguments);
-    let lifetimes = generics.lifetimes().map(|l| &l.lifetime);
+    let lifetimes = generics.lifetimes().map(|def| &def.lifetime);
     let return_ty = return_ty(quote!(#(#lifetimes +)*));
 
     let body = semi.map_or(body, ToTokens::into_token_stream);
@@ -348,16 +353,16 @@ fn make_gen_body(
 ) -> TokenStream {
     let (gen_function, ret_value, ret_ty) = match cx {
         Context::Stream => (
-            quote!(::futures_async_stream::__reexport::stream::from_generator),
+            quote!(::futures_async_stream::__private::stream::from_generator),
             TokenStream::new(),
             quote!(()),
         ),
         Context::TryStream => {
             let error = error.map_or_else(|| quote!(_), ToTokens::to_token_stream);
             (
-                quote!(::futures_async_stream::__reexport::try_stream::from_generator),
-                quote!(::futures_async_stream::__reexport::result::Result::Ok(())),
-                quote!(::futures_async_stream::__reexport::result::Result<(), #error>),
+                quote!(::futures_async_stream::__private::try_stream::from_generator),
+                quote!(::futures_async_stream::__private::Ok(())),
+                quote!(::futures_async_stream::__private::Result<(), #error>),
             )
         }
     };
@@ -365,7 +370,9 @@ fn make_gen_body(
     let task_context = def_site_ident!(TASK_CONTEXT);
     let body = quote! {
         #gen_function(
-            static #capture |mut #task_context: ::futures_async_stream::__reexport::future::ResumeTy| -> #ret_ty {
+            static #capture |
+                mut #task_context: ::futures_async_stream::__private::future::ResumeTy,
+            | -> #ret_ty {
                 let (): () = #block;
 
                 // Ensure that this closure is a generator, even if it doesn't
@@ -373,7 +380,9 @@ fn make_gen_body(
                 #[allow(unreachable_code)]
                 {
                     return #ret_value;
-                    loop { #task_context = yield ::futures_async_stream::__reexport::task::Poll::Pending }
+                    loop {
+                        #task_context = yield ::futures_async_stream::__private::Poll::Pending;
+                    }
                 }
             }
         )

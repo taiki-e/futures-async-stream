@@ -87,8 +87,8 @@ fn lifetime_name(generics: &Punctuated<GenericParam, token::Comma>) -> String {
     let existing_lifetimes: Vec<String> = generics
         .iter()
         .filter_map(|param| {
-            if let GenericParam::Lifetime(LifetimeDef { lifetime, .. }) = param {
-                Some(lifetime.to_string())
+            if let GenericParam::Lifetime(def) = param {
+                Some(def.lifetime.to_string())
             } else {
                 None
             }

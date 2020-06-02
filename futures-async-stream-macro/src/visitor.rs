@@ -99,9 +99,9 @@ impl Visitor {
             let match_next = match self.scope {
                 Scope::Future => {
                     quote! {
-                        match ::futures_async_stream::__reexport::stream::next(&mut #pinned).await {
-                            ::futures_async_stream::__reexport::option::Option::Some(e) => e,
-                            ::futures_async_stream::__reexport::option::Option::None => break,
+                        match ::futures_async_stream::__private::stream::next(&mut #pinned).await {
+                            ::futures_async_stream::__private::Some(e) => e,
+                            ::futures_async_stream::__private::None => break,
                         }
                     }
                 }
@@ -109,19 +109,22 @@ impl Visitor {
                     let task_context = def_site_ident!(TASK_CONTEXT);
                     quote! {
                         match unsafe {
-                            ::futures_async_stream::__reexport::stream::Stream::poll_next(
-                                ::futures_async_stream::__reexport::pin::Pin::as_mut(&mut #pinned),
-                                ::futures_async_stream::__reexport::future::get_context(#task_context),
+                            ::futures_async_stream::__private::stream::Stream::poll_next(
+                                ::futures_async_stream::__private::Pin::as_mut(&mut #pinned),
+                                ::futures_async_stream::__private::future::get_context(
+                                    #task_context,
+                                ),
                             )
                         } {
-                            ::futures_async_stream::__reexport::task::Poll::Ready(
-                                ::futures_async_stream::__reexport::option::Option::Some(e),
+                            ::futures_async_stream::__private::Poll::Ready(
+                                ::futures_async_stream::__private::Some(e),
                             ) => e,
-                            ::futures_async_stream::__reexport::task::Poll::Ready(
-                                ::futures_async_stream::__reexport::option::Option::None,
+                            ::futures_async_stream::__private::Poll::Ready(
+                                ::futures_async_stream::__private::None,
                             ) => break,
-                            ::futures_async_stream::__reexport::task::Poll::Pending => {
-                                #task_context = yield ::futures_async_stream::__reexport::task::Poll::Pending;
+                            ::futures_async_stream::__private::Poll::Pending => {
+                                #task_context =
+                                    yield ::futures_async_stream::__private::Poll::Pending;
                                 continue;
                             }
                         }
@@ -142,7 +145,7 @@ impl Visitor {
             *expr = syn::parse_quote! {{
                 let mut #pinned = #e;
                 let mut #pinned = unsafe {
-                    ::futures_async_stream::__reexport::pin::Pin::new_unchecked(&mut #pinned)
+                    ::futures_async_stream::__private::Pin::new_unchecked(&mut #pinned)
                 };
                 #label loop #body
             }}
@@ -161,7 +164,7 @@ impl Visitor {
 
             let task_context = def_site_ident!(TASK_CONTEXT);
             *expr = syn::parse_quote! {
-                #task_context = #yield_token ::futures_async_stream::__reexport::task::Poll::Ready(#e)
+                #task_context = #yield_token ::futures_async_stream::__private::Poll::Ready(#e)
             };
         }
     }
@@ -253,17 +256,19 @@ impl Visitor {
             let task_context = def_site_ident!(TASK_CONTEXT);
             *expr = syn::parse2(quote_spanned! { await_token.span() => {
                 let mut __pinned = #base;
-                let mut __pinned = unsafe { ::futures_async_stream::__reexport::pin::Pin::new_unchecked(&mut __pinned) };
+                let mut __pinned = unsafe {
+                    ::futures_async_stream::__private::Pin::new_unchecked(&mut __pinned)
+                };
                 loop {
-                    if let ::futures_async_stream::__reexport::task::Poll::Ready(result) = unsafe {
-                        ::futures_async_stream::__reexport::future::Future::poll(
-                            ::futures_async_stream::__reexport::pin::Pin::as_mut(&mut __pinned),
-                            ::futures_async_stream::__reexport::future::get_context(#task_context),
+                    if let ::futures_async_stream::__private::Poll::Ready(result) = unsafe {
+                        ::futures_async_stream::__private::future::Future::poll(
+                            ::futures_async_stream::__private::Pin::as_mut(&mut __pinned),
+                            ::futures_async_stream::__private::future::get_context(#task_context),
                         )
                     } {
                         break result;
                     }
-                    #task_context = yield ::futures_async_stream::__reexport::task::Poll::Pending;
+                    #task_context = yield ::futures_async_stream::__private::Poll::Pending;
                 }
             }})
             .unwrap();

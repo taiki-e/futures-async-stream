@@ -438,11 +438,16 @@ mod try_stream {
 }
 
 // Not public API.
-// See tests/overwriting_core_crate.rs for more.
 #[doc(hidden)]
-pub mod __reexport {
+pub mod __private {
     #[doc(hidden)]
-    pub use core::{marker, option, pin, result, task};
+    pub use core::{
+        marker::Send,
+        option::Option::{None, Some},
+        pin::Pin,
+        result::Result::{self, Ok},
+        task::Poll,
+    };
 
     #[doc(hidden)]
     pub mod future {
