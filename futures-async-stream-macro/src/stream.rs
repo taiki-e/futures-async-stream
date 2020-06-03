@@ -43,7 +43,7 @@ pub(crate) fn parse_async(expr: &mut ExprAsync, cx: Context) -> Result<TokenStre
     Ok(make_gen_body(expr.capture, &expr.block, cx, None, false))
 }
 
-#[allow(dead_code)] // fixed in latest nightly
+#[allow(dead_code)] // FIXME: fixed in latest nightly
 #[derive(Clone, Copy)]
 enum ReturnTypeKind {
     // impl Stream<Item = ..> $(+ $lifetime)?

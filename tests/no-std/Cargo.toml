@@ -5,7 +5,8 @@ authors = ["Taiki Endo <te316e89@gmail.com>"]
 edition = "2018"
 publish = false
 
-[workspace]
+[lib]
+path = "lib.rs"
 
 [dependencies]
 futures-async-stream = { path = "../.." }

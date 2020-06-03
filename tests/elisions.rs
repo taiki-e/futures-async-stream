@@ -44,6 +44,3 @@ pub async fn pat_ref<T>(_x: &T, _y: (&i32, &i8)) {
 pub async fn check_for_name_collision<'_async0, T>(_x: &T, _y: &'_async0 i32) {
     yield
 }
-
-#[test]
-fn test() {}

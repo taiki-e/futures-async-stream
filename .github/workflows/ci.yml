@@ -26,7 +26,7 @@ jobs:
         rust:
           # This is the minimum supported Rust version of this crate.
           # When updating this, the reminder to update the minimum supported Rust version in README.md.
-          - nightly-2020-02-14
+          - nightly-2020-03-22
           - nightly
     runs-on: ubuntu-latest
     steps:
@@ -35,22 +35,21 @@ jobs:
         run: |
           . ./ci/install-rust.sh ${{ matrix.rust }}
       - name: Add targets
-        if: matrix.rust == 'nightly'
         run: |
           rustup target add thumbv7m-none-eabi
       - name: Install cargo-hack
         if: matrix.rust == 'nightly'
         run: |
           cargo install cargo-hack
+      - name: cargo test --no-run
+        if: matrix.rust != 'nightly'
+        run: |
+          cargo test --all --all-features --no-run
       - name: cargo test
+        if: matrix.rust == 'nightly'
         run: |
           cargo test --all --all-features
-      - name: cargo test (compiletest)
-        if: matrix.rust == 'nightly'
-        run: |
-          cargo test -p futures-async-stream --all-features --test compiletest -- --ignored
       - name: cargo check (no-std)
-        if: matrix.rust == 'nightly'
         run: |
           cargo check --target thumbv7m-none-eabi --manifest-path tests/no-std/Cargo.toml
       - name: cargo check (minimal versions)
