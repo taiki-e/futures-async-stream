@@ -18,7 +18,7 @@ Async stream for Rust and the futures crate.
 targets = ["x86_64-unknown-linux-gnu"]
 
 [workspace]
-members = ["futures-async-stream-macro"]
+members = ["futures-async-stream-macro", "tests/no-std"]
 
 [dependencies]
 futures-async-stream-macro = { version = "=0.2.1", path = "futures-async-stream-macro", default-features = false }

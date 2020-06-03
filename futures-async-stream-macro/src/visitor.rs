@@ -1,6 +1,7 @@
 use quote::{quote, quote_spanned};
 use syn::{
     spanned::Spanned,
+    token,
     visit_mut::{self, VisitMut},
     Expr, ExprAwait, ExprCall, ExprForLoop, ExprYield, Item,
 };
@@ -254,13 +255,15 @@ impl Visitor {
         // }
         if let Expr::Await(ExprAwait { base, await_token, .. }) = expr {
             let task_context = def_site_ident!(TASK_CONTEXT);
+            // For interoperability with `forbid(unsafe_code)`, `unsafe` token should be call-site span.
+            let unsafety = token::Unsafe::default();
             *expr = syn::parse2(quote_spanned! { await_token.span() => {
                 let mut __pinned = #base;
-                let mut __pinned = unsafe {
+                let mut __pinned = #unsafety {
                     ::futures_async_stream::__private::Pin::new_unchecked(&mut __pinned)
                 };
                 loop {
-                    if let ::futures_async_stream::__private::Poll::Ready(result) = unsafe {
+                    if let ::futures_async_stream::__private::Poll::Ready(result) = #unsafety {
                         ::futures_async_stream::__private::future::Future::poll(
                             ::futures_async_stream::__private::Pin::as_mut(&mut __pinned),
                             ::futures_async_stream::__private::future::get_context(#task_context),

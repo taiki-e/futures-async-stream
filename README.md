@@ -9,7 +9,7 @@
 [crates-url]: https://crates.io/crates/futures-async-stream
 [docs-badge]: https://docs.rs/futures-async-stream/badge.svg
 [docs-url]: https://docs.rs/futures-async-stream
-[license-badge]: https://img.shields.io/crates/l/futures-async-stream.svg
+[license-badge]: https://img.shields.io/badge/license-Apache--2.0%20OR%20MIT-blue.svg
 [license]: #license
 [rustc-badge]: https://img.shields.io/badge/rustc-nightly-lightgray.svg
 
@@ -27,7 +27,7 @@ futures-async-stream = "0.2"
 futures = "0.3"
 ```
 
-The current futures-async-stream requires Rust nightly 2020-02-14 or later.
+The current futures-async-stream requires Rust nightly-2020-03-22 or later.
 
 ## `#[for_await]`
 
