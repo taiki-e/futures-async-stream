@@ -1,6 +1,5 @@
 //! The futures-async-stream procedural macro implementations - **do not use directly**
 
-#![recursion_limit = "256"]
 #![doc(html_root_url = "https://docs.rs/futures-async-stream-macro/0.2.1")]
 #![doc(test(
     no_crate_inject,
