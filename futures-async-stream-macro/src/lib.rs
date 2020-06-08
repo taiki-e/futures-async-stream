@@ -20,11 +20,15 @@ mod visitor;
 
 use proc_macro::{Delimiter, Group, TokenStream, TokenTree};
 use quote::ToTokens;
-use syn::{token, Expr, ExprAsync, ExprForLoop};
+use syn::{parse_quote, token, Expr, ExprAsync, ExprForLoop};
 
 use crate::utils::parse_as_empty;
 
 /// Processes streams using a for loop.
+///
+/// See [crate level documentation][for_await] for details.
+///
+/// [for_await]: crate#for_await
 #[proc_macro_attribute]
 pub fn for_await(args: TokenStream, input: TokenStream) -> TokenStream {
     if let Err(e) = parse_as_empty(&args.into()) {
@@ -32,7 +36,7 @@ pub fn for_await(args: TokenStream, input: TokenStream) -> TokenStream {
     }
 
     let mut expr: ExprForLoop = syn::parse_macro_input!(input);
-    expr.attrs.insert(0, syn::parse_quote!(#[for_await]));
+    expr.attrs.insert(0, parse_quote!(#[for_await]));
 
     let mut expr = Expr::ForLoop(expr);
     visitor::Visitor::default().visit_for_loop(&mut expr);
@@ -41,6 +45,10 @@ pub fn for_await(args: TokenStream, input: TokenStream) -> TokenStream {
 }
 
 /// Creates streams via generators.
+///
+/// See [crate level documentation][stream] for details.
+///
+/// [stream]: crate#stream
 #[proc_macro_attribute]
 pub fn stream(args: TokenStream, input: TokenStream) -> TokenStream {
     stream::attribute(args.into(), input.into(), parse::Context::Stream)
@@ -48,7 +56,9 @@ pub fn stream(args: TokenStream, input: TokenStream) -> TokenStream {
         .into()
 }
 
-/// Creates streams via generators. This is equivalent to `#[stream]` on async blocks.
+/// Creates streams via generators. This is equivalent to [`#[stream]`][stream] on async blocks.
+///
+/// [stream]: crate#stream
 #[proc_macro]
 pub fn stream_block(input: TokenStream) -> TokenStream {
     let input = TokenStream::from(TokenTree::Group(Group::new(Delimiter::Brace, input)));
@@ -66,6 +76,10 @@ pub fn stream_block(input: TokenStream) -> TokenStream {
 }
 
 /// Creates streams via generators.
+///
+/// See [crate level documentation][try_stream] for details.
+///
+/// [try_stream]: crate#try_stream
 #[proc_macro_attribute]
 pub fn try_stream(args: TokenStream, input: TokenStream) -> TokenStream {
     stream::attribute(args.into(), input.into(), parse::Context::TryStream)
@@ -73,7 +87,9 @@ pub fn try_stream(args: TokenStream, input: TokenStream) -> TokenStream {
         .into()
 }
 
-/// Creates streams via generators. This is equivalent to `#[try_stream]` on async blocks.
+/// Creates streams via generators. This is equivalent to [`#[try_stream]`][try_stream] on async blocks.
+///
+/// [try_stream]: crate#try_stream
 #[proc_macro]
 pub fn try_stream_block(input: TokenStream) -> TokenStream {
     let input = TokenStream::from(TokenTree::Group(Group::new(Delimiter::Brace, input)));

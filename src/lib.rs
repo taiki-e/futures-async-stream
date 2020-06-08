@@ -2,7 +2,7 @@
 //!
 //! This crate provides useful features for streams, using `async_await` and unstable `generators`.
 //!
-//! ## `#[for_await]`
+//! # `#[for_await]`
 //!
 //! Processes streams using a for loop.
 //!
@@ -26,7 +26,7 @@
 //!
 //! `value` has the `Item` type of the stream passed in. Note that async for loops can only be used inside of `async` functions, closures, blocks, `#[stream]` functions and `stream_block!` macros.
 //!
-//! ## `#[stream]`
+//! # `#[stream]`
 //!
 //! Creates streams via generators.
 //!
@@ -71,7 +71,7 @@
 //!
 //! Note that `#[stream]` on async block does not require the `item` argument, but it may require additional type annotations.
 //!
-//! ## Using async stream functions in traits
+//! # Using async stream functions in traits
 //!
 //! You can use async stream functions in traits by passing `boxed` or `boxed_local` as an argument.
 //!
@@ -126,7 +126,7 @@
 //! }
 //! ```
 //!
-//! ## `#[try_stream]`
+//! # `#[try_stream]`
 //!
 //! `?` operator can be used with the `#[try_stream]`. The `Item` of the returned stream is `Result` with `Ok` being the value yielded and `Err` the error type returned by `?` operator or `return Err(...)`.
 //!
@@ -145,9 +145,9 @@
 //! }
 //! ```
 //!
-//! ## How to write the equivalent code without this API?
+//! # How to write the equivalent code without this API?
 //!
-//! ### `#[for_await]`
+//! ## `#[for_await]`
 //!
 //! You can write this by combining `while let` loop, `.await`, `pin_mut` macro, and `StreamExt::next()` method:
 //!
@@ -167,7 +167,7 @@
 //! }
 //! ```
 //!
-//! ### `#[stream]`
+//! ## `#[stream]`
 //!
 //! You can write this by manually implementing the combinator:
 //!
