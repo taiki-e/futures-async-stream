@@ -6,9 +6,15 @@ This project adheres to [Semantic Versioning](https://semver.org).
 
 ## [Unreleased]
 
+* All macros can now compile with `forbid(unsafe_code)`.
+
+* Support overlapping lifetime names in HRTB.
+
+* Diagnostic improvements.
+
 ## [0.2.1] - 2020-05-21
 
-* Improved diagnostics.
+* Diagnostic improvements.
 
 ## [0.2.0] - 2020-05-10
 
@@ -20,7 +26,9 @@ This project adheres to [Semantic Versioning](https://semver.org).
 
 * [Renamed `async_try_stream_block!` to `try_stream_block!`.][45]
 
-* Some bug fixes and diagnostic improvements.
+* Bug fixes.
+
+* Diagnostic improvements.
 
 [45]: https://github.com/taiki-e/futures-async-stream/pull/45
 

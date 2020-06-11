@@ -2,16 +2,17 @@ use proc_macro2::TokenStream;
 use quote::{quote, ToTokens};
 use syn::{
     parse::{Parse, ParseStream},
+    parse_quote,
     punctuated::Punctuated,
     token,
     visit_mut::VisitMut,
-    Block, ExprAsync, FnArg, Pat, PatIdent, PatType, Result, Signature, Stmt, Type,
+    Block, ExprAsync, FnArg, Pat, PatIdent, PatType, Result, Signature, Stmt, Token, Type,
 };
 
 use crate::{
     elision,
     parse::{self, Context, FnOrAsync, FnSig},
-    utils::{parse_as_empty, TASK_CONTEXT},
+    utils::parse_as_empty,
     visitor::Visitor,
 };
 
@@ -93,7 +94,7 @@ impl ReturnTypeKind {
             if input.is_empty() {
                 break;
             }
-            let _: token::Comma = input.parse()?;
+            let _: Token![,] = input.parse()?;
         }
 
         Ok(())
@@ -104,12 +105,26 @@ impl ReturnTypeKind {
     }
 }
 
-// Replace `prev` with `new`. Returns `Err` if `prev` is `Some`.
-fn replace<T>(prev: &mut Option<T>, new: T, token: &impl ToTokens) -> Result<()> {
-    if prev.replace(new).is_some() {
-        Err(error!(token, "duplicate `{}` argument", token.to_token_stream()))
+// Parses `= <value>` in `<name> = <value>` and returns value and span of name-value pair.
+fn parse_value(
+    input: ParseStream<'_>,
+    name: &impl ToTokens,
+    has_prev: bool,
+) -> Result<(Type, TokenStream)> {
+    if input.is_empty() {
+        return Err(error!(name, "expected `{0} = <type>`, found `{0}`", name.to_token_stream()));
+    }
+    let eq_token: Token![=] = input.parse()?;
+    if input.is_empty() {
+        let span = quote!(#name #eq_token);
+        return Err(error!(span, "expected `{0} = <type>`, found `{0} =`", name.to_token_stream()));
+    }
+    let value: Type = input.parse()?;
+    let span = quote!(#name #value);
+    if has_prev {
+        Err(error!(span, "duplicate `{}` argument", name.to_token_stream()))
     } else {
-        Ok(())
+        Ok((value, span))
     }
 }
 
@@ -126,8 +141,8 @@ impl Parse for StreamArg {
             if input.peek(kw::item) {
                 // item = <Type>
                 let i: kw::item = input.parse()?;
-                let _: token::Eq = input.parse()?;
-                replace(&mut item_ty, input.parse()?, &i)
+                item_ty = Some(parse_value(input, &i, item_ty.is_some())?.0);
+                Ok(())
             } else if item_ty.is_none() {
                 input.parse::<kw::item>().map(|_| unreachable!())
             } else {
@@ -159,13 +174,13 @@ impl Parse for TryStreamArg {
             if input.peek(kw::ok) {
                 // ok = <Type>
                 let i: kw::ok = input.parse()?;
-                let _: token::Eq = input.parse()?;
-                replace(&mut ok, input.parse()?, &i)
+                ok = Some(parse_value(input, &i, ok.is_some())?.0);
+                Ok(())
             } else if input.peek(kw::error) {
                 // error = <Type>
                 let i: kw::error = input.parse()?;
-                let _: token::Eq = input.parse()?;
-                replace(&mut error, input.parse()?, &i)
+                error = Some(parse_value(input, &i, error.is_some())?.0);
+                Ok(())
             } else if ok.is_none() {
                 input.parse::<kw::ok>().map(|_| unreachable!())
             } else if error.is_none() {
@@ -256,7 +271,6 @@ fn parse_fn_inner(
 ) -> Result<TokenStream> {
     let FnSig { attrs, vis, sig, mut block, semi } = sig;
     let Signature { unsafety, abi, fn_token, ident, mut generics, inputs, .. } = sig;
-    let where_clause = &generics.where_clause;
 
     // Visit `#[for_await]`, `.await`, and `yield`.
     Visitor::new(cx.into()).visit_block_mut(&mut block);
@@ -265,13 +279,14 @@ fn parse_fn_inner(
     statements.append(&mut block.stmts);
     block.stmts = statements;
 
-    let body_inner = make_gen_body(Some(token::Move::default()), &block, cx, error, boxed);
+    let body_inner = make_gen_body(Some(<Token![move]>::default()), &block, cx, error, boxed);
     let mut body = TokenStream::new();
     block.brace_token.surround(&mut body, |tokens| {
         body_inner.to_tokens(tokens);
     });
 
-    elision::unelide_lifetimes(&mut generics.params, &mut arguments);
+    elision::unelide_lifetimes(&mut generics, &mut arguments);
+    let where_clause = &generics.where_clause;
     let lifetimes = generics.lifetimes().map(|def| &def.lifetime);
     let return_ty = return_ty(quote!(#(#lifetimes +)*));
 
@@ -284,7 +299,7 @@ fn parse_fn_inner(
     })
 }
 
-fn expand_async_body(inputs: Punctuated<FnArg, token::Comma>) -> (Vec<FnArg>, Vec<Stmt>) {
+fn expand_async_body(inputs: Punctuated<FnArg, Token![,]>) -> (Vec<FnArg>, Vec<Stmt>) {
     let mut arguments = Vec::new();
     let mut statements = Vec::new();
 
@@ -326,12 +341,12 @@ fn expand_async_body(inputs: Punctuated<FnArg, token::Comma>) -> (Vec<FnArg>, Ve
             let ident = def_site_ident!("__arg{}", i);
 
             // Construct the `let <pat> = __argN;` statement.
-            statements.push(syn::parse_quote!(let #pat = #ident;));
+            statements.push(parse_quote!(let #pat = #ident;));
 
             let pat = Box::new(Pat::Ident(PatIdent {
                 attrs: Vec::new(),
                 by_ref: None,
-                mutability: Some(token::Mut::default()),
+                mutability: Some(<Token![mut]>::default()),
                 ident,
                 subpat: None,
             }));
@@ -345,7 +360,7 @@ fn expand_async_body(inputs: Punctuated<FnArg, token::Comma>) -> (Vec<FnArg>, Ve
 }
 
 fn make_gen_body(
-    capture: Option<token::Move>,
+    capture: Option<Token![move]>,
     block: &Block,
     cx: Context,
     error: Option<&Type>,
@@ -367,7 +382,7 @@ fn make_gen_body(
         }
     };
 
-    let task_context = def_site_ident!(TASK_CONTEXT);
+    let task_context = def_site_ident!("__task_context");
     let body = quote! {
         #gen_function(
             static #capture |

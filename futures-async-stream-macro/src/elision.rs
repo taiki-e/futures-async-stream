@@ -1,42 +1,28 @@
 use proc_macro2::Span;
 use syn::{
     punctuated::Punctuated,
-    token,
     visit_mut::{self, VisitMut},
-    FnArg, GenericArgument, GenericParam, Lifetime, LifetimeDef, Receiver, TypeReference,
+    FnArg, GenericArgument, GenericParam, Generics, Lifetime, LifetimeDef, Receiver, Token,
+    TypeReference,
 };
 
-pub(crate) fn unelide_lifetimes(
-    generics: &mut Punctuated<GenericParam, token::Comma>,
-    args: &mut Vec<FnArg>,
-) {
+pub(crate) fn unelide_lifetimes(generics: &mut Generics, args: &mut Vec<FnArg>) {
     let mut visitor = UnelideLifetimes::new(generics);
     args.iter_mut().for_each(|arg| visitor.visit_fn_arg_mut(arg));
 }
 
 struct UnelideLifetimes<'a> {
-    generics: &'a mut Punctuated<GenericParam, token::Comma>,
+    generics: &'a mut Punctuated<GenericParam, Token![,]>,
     lifetime_index: usize,
     lifetime_name: String,
     count: u32,
 }
 
 impl<'a> UnelideLifetimes<'a> {
-    fn new(generics: &'a mut Punctuated<GenericParam, token::Comma>) -> Self {
-        let lifetime_index = lifetime_index(generics);
-        let lifetime_name = lifetime_name(generics);
-        Self { generics, lifetime_index, lifetime_name, count: 0 }
-    }
-
-    fn next_lifetime(&mut self) -> Lifetime {
-        let lifetime_name = format!("{}{}", self.lifetime_name, self.count);
-        let lifetime = Lifetime::new(&lifetime_name, Span::call_site());
-
-        let idx = self.lifetime_index + self.count as usize;
-        self.generics.insert(idx, GenericParam::Lifetime(LifetimeDef::new(lifetime.clone())));
-        self.count += 1;
-
-        lifetime
+    fn new(generics: &'a mut Generics) -> Self {
+        let lifetime_index = generics.lifetimes().count();
+        let lifetime_name = determine_lifetime_name(generics);
+        Self { generics: &mut generics.params, lifetime_index, lifetime_name, count: 0 }
     }
 
     fn visit_opt_lifetime(&mut self, lifetime: &mut Option<Lifetime>) {
@@ -50,6 +36,17 @@ impl<'a> UnelideLifetimes<'a> {
         if lifetime.ident == "_" {
             *lifetime = self.next_lifetime();
         }
+    }
+
+    fn next_lifetime(&mut self) -> Lifetime {
+        let lifetime_name = format!("{}{}", self.lifetime_name, self.count);
+        let lifetime = Lifetime::new(&lifetime_name, Span::call_site());
+
+        let idx = self.lifetime_index + self.count as usize;
+        self.generics.insert(idx, LifetimeDef::new(lifetime.clone()).into());
+        self.count += 1;
+
+        lifetime
     }
 }
 
@@ -73,28 +70,23 @@ impl VisitMut for UnelideLifetimes<'_> {
     }
 }
 
-fn lifetime_index(generics: &Punctuated<GenericParam, token::Comma>) -> usize {
-    generics
-        .iter()
-        .take_while(|param| if let GenericParam::Lifetime(_) = param { true } else { false })
-        .count()
-}
+/// Determine the prefix for all lifetime names. Ensure it doesn't overlap with
+/// any existing lifetime names.
+fn determine_lifetime_name(generics: &mut Generics) -> String {
+    struct CollectLifetimes(Vec<String>);
 
-// Determine the prefix for all lifetime names. Ensure it doesn't
-// overlap with any existing lifetime names.
-fn lifetime_name(generics: &Punctuated<GenericParam, token::Comma>) -> String {
+    impl VisitMut for CollectLifetimes {
+        fn visit_lifetime_def_mut(&mut self, def: &mut LifetimeDef) {
+            self.0.push(def.lifetime.to_string());
+        }
+    }
+
     let mut lifetime_name = String::from("'_async");
-    let existing_lifetimes: Vec<String> = generics
-        .iter()
-        .filter_map(|param| {
-            if let GenericParam::Lifetime(def) = param {
-                Some(def.lifetime.to_string())
-            } else {
-                None
-            }
-        })
-        .collect();
-    while existing_lifetimes.iter().any(|name| name.starts_with(&lifetime_name)) {
+
+    let mut lifetimes = CollectLifetimes(Vec::new());
+    lifetimes.visit_generics_mut(generics);
+
+    while lifetimes.0.iter().any(|name| name.starts_with(&lifetime_name)) {
         lifetime_name.push('_');
     }
     lifetime_name

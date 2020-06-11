@@ -44,3 +44,15 @@ pub async fn pat_ref<T>(_x: &T, _y: (&i32, &i8)) {
 pub async fn check_for_name_collision<'_async0, T>(_x: &T, _y: &'_async0 i32) {
     yield
 }
+
+pub trait A<'a> {}
+
+#[allow(single_use_lifetimes)]
+#[stream(item = ())]
+pub async fn check_for_name_collision2<T>(_x: &T)
+where
+    for<'_async0> &'_async0 T: Unpin,
+    T: for<'_async0> A<'_async0>,
+{
+    yield
+}

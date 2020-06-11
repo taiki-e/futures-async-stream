@@ -27,4 +27,4 @@ pin-project = "0.4"
 
 [dev-dependencies]
 trybuild = "1.0"
-futures = { version = "0.3", default-features = false, package = "futures-util" }
+futures = { version = "0.3", package = "futures-util", default-features = false }
