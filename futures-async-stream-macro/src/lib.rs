@@ -1,6 +1,6 @@
 //! The futures-async-stream procedural macro implementations - **do not use directly**
 
-#![doc(html_root_url = "https://docs.rs/futures-async-stream-macro/0.2.1")]
+#![doc(html_root_url = "https://docs.rs/futures-async-stream-macro/0.2.2")]
 #![doc(test(
     no_crate_inject,
     attr(deny(warnings, rust_2018_idioms, single_use_lifetimes), allow(dead_code))

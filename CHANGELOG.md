@@ -6,6 +6,8 @@ This project adheres to [Semantic Versioning](https://semver.org).
 
 ## [Unreleased]
 
+## [0.2.2] - 2020-06-11
+
 * All macros can now compile with `forbid(unsafe_code)`.
 
 * Support overlapping lifetime names in HRTB.
@@ -136,7 +138,8 @@ This project adheres to [Semantic Versioning](https://semver.org).
 
 Initial release
 
-[Unreleased]: https://github.com/taiki-e/futures-async-stream/compare/v0.2.1...HEAD
+[Unreleased]: https://github.com/taiki-e/futures-async-stream/compare/v0.2.2...HEAD
+[0.2.2]: https://github.com/taiki-e/futures-async-stream/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/taiki-e/futures-async-stream/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/taiki-e/futures-async-stream/compare/v0.1.5...v0.2.0
 [0.1.5]: https://github.com/taiki-e/futures-async-stream/compare/v0.1.4...v0.1.5
