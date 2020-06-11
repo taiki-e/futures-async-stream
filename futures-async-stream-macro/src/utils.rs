@@ -1,8 +1,9 @@
 use proc_macro2::TokenStream;
 use std::mem;
-use syn::{punctuated::Punctuated, token, Attribute, Error, Expr, ExprTuple, Result};
-
-pub(crate) const TASK_CONTEXT: &str = "__task_context";
+use syn::{
+    punctuated::Punctuated, token, Attribute, Block, Error, Expr, ExprAsync, ExprTuple, Result,
+    Token,
+};
 
 macro_rules! error {
     ($span:expr, $msg:expr) => {
@@ -10,6 +11,12 @@ macro_rules! error {
     };
     ($span:expr, $($tt:tt)*) => {
         error!($span, format!($($tt)*))
+    };
+}
+
+macro_rules! parse_quote_spanned {
+    ($span:expr => $($tt:tt)*) => {
+        syn::parse2(quote::quote_spanned!($span => $($tt)*)).unwrap_or_else(|e| panic!("{}", e))
     };
 }
 
@@ -24,6 +31,15 @@ macro_rules! def_site_ident {
 
 pub(crate) fn expr_compile_error(e: &Error) -> Expr {
     syn::parse2(e.to_compile_error()).unwrap()
+}
+
+pub(crate) fn expr_async(block: Block) -> ExprAsync {
+    ExprAsync {
+        attrs: Vec::new(),
+        async_token: <Token![async]>::default(),
+        capture: Some(<Token![move]>::default()),
+        block,
+    }
 }
 
 pub(crate) fn unit() -> Expr {
@@ -42,8 +58,8 @@ where
 }
 
 /// Check if `tokens` is an empty `TokenStream`.
-/// This is almost equivalent to `syn::parse2::<Nothing>()`,
-/// but produces a better error message and does not require ownership of `tokens`.
+/// This is almost equivalent to `syn::parse2::<Nothing>()`, but produces
+/// a better error message and does not require ownership of `tokens`.
 pub(crate) fn parse_as_empty(tokens: &TokenStream) -> Result<()> {
     if tokens.is_empty() { Ok(()) } else { Err(error!(tokens, "unexpected token: {}", tokens)) }
 }

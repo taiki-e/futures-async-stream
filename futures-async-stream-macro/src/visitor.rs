@@ -1,14 +1,14 @@
-use quote::{quote, quote_spanned};
+use quote::quote;
 use syn::{
+    parse_quote,
     spanned::Spanned,
-    token,
     visit_mut::{self, VisitMut},
-    Expr, ExprAwait, ExprCall, ExprForLoop, ExprYield, Item,
+    Expr, ExprAwait, ExprCall, ExprForLoop, ExprYield, Item, Token,
 };
 
 use crate::{
     parse, stream, stream_block, try_stream_block,
-    utils::{expr_compile_error, replace_expr, unit, SliceExt, TASK_CONTEXT},
+    utils::{expr_compile_error, replace_expr, unit, SliceExt},
 };
 
 /// The scope in which `#[for_await]`, `.await`, or `yield` was called.
@@ -107,7 +107,7 @@ impl Visitor {
                     }
                 }
                 Scope::Stream | Scope::TryStream => {
-                    let task_context = def_site_ident!(TASK_CONTEXT);
+                    let task_context = def_site_ident!("__task_context");
                     quote! {
                         match unsafe {
                             ::futures_async_stream::__private::stream::Stream::poll_next(
@@ -142,8 +142,8 @@ impl Visitor {
                 Scope::Other => unreachable!(),
             };
 
-            body.stmts.insert(0, syn::parse_quote!(let #pat = #match_next;));
-            *expr = syn::parse_quote! {{
+            body.stmts.insert(0, parse_quote!(let #pat = #match_next;));
+            *expr = parse_quote! {{
                 let mut #pinned = #e;
                 let mut #pinned = unsafe {
                     ::futures_async_stream::__private::Pin::new_unchecked(&mut #pinned)
@@ -159,12 +159,12 @@ impl Visitor {
             return;
         }
 
-        // Desugar `yield <e>` into `task_context = yield Poll::Ready(<e>)`.
+        // Desugar `yield <e>` into `__task_context = yield Poll::Ready(<e>)`.
         if let Expr::Yield(ExprYield { yield_token, expr: e, .. }) = expr {
             e.get_or_insert_with(|| Box::new(unit()));
 
-            let task_context = def_site_ident!(TASK_CONTEXT);
-            *expr = syn::parse_quote! {
+            let task_context = def_site_ident!("__task_context");
+            *expr = parse_quote! {
                 #task_context = #yield_token ::futures_async_stream::__private::Poll::Ready(#e)
             };
         }
@@ -246,18 +246,18 @@ impl Visitor {
         //     let mut __pinned = unsafe { Pin::new_unchecked(&mut __pinned) };
         //     loop {
         //         if let Poll::Ready(result) = unsafe {
-        //             Future::poll(Pin::as_mut(&mut __pinned), get_context(task_context))
+        //             Future::poll(Pin::as_mut(&mut __pinned), get_context(__task_context))
         //         } {
         //             break result;
         //         }
-        //         task_context = yield Poll::Pending;
+        //         __task_context = yield Poll::Pending;
         //     }
         // }
         if let Expr::Await(ExprAwait { base, await_token, .. }) = expr {
-            let task_context = def_site_ident!(TASK_CONTEXT);
+            let task_context = def_site_ident!("__task_context");
             // For interoperability with `forbid(unsafe_code)`, `unsafe` token should be call-site span.
-            let unsafety = token::Unsafe::default();
-            *expr = syn::parse2(quote_spanned! { await_token.span() => {
+            let unsafety = <Token![unsafe]>::default();
+            *expr = parse_quote_spanned! { await_token.span() => {
                 let mut __pinned = #base;
                 let mut __pinned = #unsafety {
                     ::futures_async_stream::__private::Pin::new_unchecked(&mut __pinned)
@@ -273,8 +273,7 @@ impl Visitor {
                     }
                     #task_context = yield ::futures_async_stream::__private::Poll::Pending;
                 }
-            }})
-            .unwrap();
+            }};
         }
     }
 }
@@ -289,17 +288,19 @@ impl VisitMut for Visitor {
                     attr.path.is_ident("stream") || attr.path.is_ident("try_stream")
                 }) =>
             {
-                self.scope = Scope::Other
+                self.scope = Scope::Other;
             }
-            Expr::Async(_) => self.scope = Scope::Future,
+            Expr::Async(_) => {
+                self.scope = Scope::Future;
+            }
             Expr::Closure(expr) => {
-                self.scope = if expr.asyncness.is_some() { Scope::Future } else { Scope::Closure }
+                self.scope = if expr.asyncness.is_some() { Scope::Future } else { Scope::Closure };
             }
             Expr::Macro(expr)
                 if expr.mac.path.is_ident("stream_block")
                     || expr.mac.path.is_ident("try_stream_block") =>
             {
-                self.scope = Scope::Other
+                self.scope = Scope::Other;
             }
             _ => {}
         }

@@ -24,21 +24,17 @@ error: unexpected end of input, expected `item`
    |
    = note: this error originates in an attribute macro (in Nightly builds, run with -Z macro-backtrace for more info)
 
-error: expected `=`
-  --> $DIR/invalid-argument.rs:38:5
+error: expected `item = <type>`, found `item`
+  --> $DIR/invalid-argument.rs:38:14
    |
 38 |     #[stream(item)] //~ ERROR expected `=`
-   |     ^^^^^^^^^^^^^^^
-   |
-   = note: this error originates in an attribute macro (in Nightly builds, run with -Z macro-backtrace for more info)
+   |              ^^^^
 
-error: unexpected end of input, expected one of: `for`, parentheses, `fn`, `unsafe`, `extern`, identifier, `::`, `<`, square brackets, `*`, `&`, `!`, `impl`, `_`, lifetime
-  --> $DIR/invalid-argument.rs:41:5
+error: expected `item = <type>`, found `item =`
+  --> $DIR/invalid-argument.rs:41:14
    |
 41 |     #[stream(item = )] //~ ERROR unexpected end of input, expected one of
-   |     ^^^^^^^^^^^^^^^^^^
-   |
-   = note: this error originates in an attribute macro (in Nightly builds, run with -Z macro-backtrace for more info)
+   |              ^^^^^^
 
 error: expected `item`
   --> $DIR/invalid-argument.rs:44:14
@@ -68,7 +64,7 @@ error: duplicate `item` argument
   --> $DIR/invalid-argument.rs:59:26
    |
 59 |     #[stream(item = i32, item = i32)] //~ ERROR duplicate `item` argument
-   |                          ^^^^
+   |                          ^^^^^^^^^^
 
 error: duplicate `boxed` argument
   --> $DIR/invalid-argument.rs:62:33
@@ -104,21 +100,17 @@ error: unexpected end of input, expected `ok`
    |
    = note: this error originates in an attribute macro (in Nightly builds, run with -Z macro-backtrace for more info)
 
-error: expected `=`
-  --> $DIR/invalid-argument.rs:81:5
+error: expected `ok = <type>`, found `ok`
+  --> $DIR/invalid-argument.rs:81:18
    |
 81 |     #[try_stream(ok)] //~ ERROR expected `=`
-   |     ^^^^^^^^^^^^^^^^^
-   |
-   = note: this error originates in an attribute macro (in Nightly builds, run with -Z macro-backtrace for more info)
+   |                  ^^
 
-error: unexpected end of input, expected one of: `for`, parentheses, `fn`, `unsafe`, `extern`, identifier, `::`, `<`, square brackets, `*`, `&`, `!`, `impl`, `_`, lifetime
-  --> $DIR/invalid-argument.rs:84:5
+error: expected `ok = <type>`, found `ok =`
+  --> $DIR/invalid-argument.rs:84:18
    |
 84 |     #[try_stream(ok = )] //~ ERROR unexpected end of input, expected one of
-   |     ^^^^^^^^^^^^^^^^^^^^
-   |
-   = note: this error originates in an attribute macro (in Nightly builds, run with -Z macro-backtrace for more info)
+   |                  ^^^^
 
 error: unexpected end of input, expected `error`
   --> $DIR/invalid-argument.rs:87:5
@@ -128,21 +120,17 @@ error: unexpected end of input, expected `error`
    |
    = note: this error originates in an attribute macro (in Nightly builds, run with -Z macro-backtrace for more info)
 
-error: expected `=`
-  --> $DIR/invalid-argument.rs:90:5
+error: expected `error = <type>`, found `error`
+  --> $DIR/invalid-argument.rs:90:18
    |
 90 |     #[try_stream(error)] //~ ERROR expected `=`
-   |     ^^^^^^^^^^^^^^^^^^^^
-   |
-   = note: this error originates in an attribute macro (in Nightly builds, run with -Z macro-backtrace for more info)
+   |                  ^^^^^
 
-error: unexpected end of input, expected one of: `for`, parentheses, `fn`, `unsafe`, `extern`, identifier, `::`, `<`, square brackets, `*`, `&`, `!`, `impl`, `_`, lifetime
-  --> $DIR/invalid-argument.rs:93:5
+error: expected `error = <type>`, found `error =`
+  --> $DIR/invalid-argument.rs:93:18
    |
 93 |     #[try_stream(error = )] //~ ERROR unexpected end of input, expected one of
-   |     ^^^^^^^^^^^^^^^^^^^^^^^
-   |
-   = note: this error originates in an attribute macro (in Nightly builds, run with -Z macro-backtrace for more info)
+   |                  ^^^^^^^
 
 error: expected `ok`
   --> $DIR/invalid-argument.rs:96:18
@@ -184,19 +172,19 @@ error: duplicate `ok` argument
    --> $DIR/invalid-argument.rs:117:27
     |
 117 |     #[try_stream(ok = (), ok = (), error = ())] //~ ERROR duplicate `ok` argument
-    |                           ^^
+    |                           ^^^^^^^
 
 error: duplicate `ok` argument
    --> $DIR/invalid-argument.rs:120:39
     |
 120 |     #[try_stream(ok = (), error = (), ok = (), error = ())] //~ ERROR duplicate `ok` argument
-    |                                       ^^
+    |                                       ^^^^^^^
 
 error: duplicate `error` argument
    --> $DIR/invalid-argument.rs:123:39
     |
 123 |     #[try_stream(ok = (), error = (), error = ())] //~ ERROR duplicate `error` argument
-    |                                       ^^^^^
+    |                                       ^^^^^^^^^^
 
 error: duplicate `boxed` argument
    --> $DIR/invalid-argument.rs:126:46

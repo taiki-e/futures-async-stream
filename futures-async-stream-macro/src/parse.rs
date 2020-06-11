@@ -1,7 +1,8 @@
 use proc_macro2::TokenStream;
 use syn::{
     parse::{Parse, ParseStream},
-    *,
+    token, Abi, Attribute, Block, ExprAsync, Result, ReturnType, Signature, Token, TraitItemMethod,
+    Type, Visibility,
 };
 
 use crate::{utils::SliceExt, visitor::Scope};
@@ -50,7 +51,7 @@ pub(crate) fn parse(input: TokenStream, cx: Context) -> Result<FnOrAsync> {
     }
 }
 
-// Based on https://github.com/dtolnay/syn/blob/1.0.23/src/item.rs#L1562-L1569
+// Based on https://github.com/dtolnay/syn/blob/1.0.30/src/item.rs#L1625-L1632
 fn peek_signature(input: ParseStream<'_>) -> bool {
     let fork = input.fork();
     fork.parse::<Visibility>().is_ok()
@@ -96,7 +97,7 @@ fn validate_signature(item: Option<&FnSig>, attrs: &[Attribute], cx: Context) ->
 
 pub(crate) enum FnOrAsync {
     Fn(FnSig),
-    Async(ExprAsync, Option<token::Semi>),
+    Async(ExprAsync, Option<Token![;]>),
     NotAsync,
 }
 
@@ -114,7 +115,7 @@ impl Parse for FnOrAsync {
             fn_sig.vis = vis;
 
             Ok(Self::Fn(fn_sig))
-        } else if input.peek(token::Async) {
+        } else if input.peek(Token![async]) {
             let mut expr: ExprAsync = input.parse()?;
             attrs.append(&mut expr.attrs);
             expr.attrs = attrs;
@@ -132,7 +133,7 @@ pub(crate) struct FnSig {
     pub(crate) vis: Visibility,
     pub(crate) sig: Signature,
     pub(crate) block: Block,
-    pub(crate) semi: Option<token::Semi>,
+    pub(crate) semi: Option<Token![;]>,
 }
 
 impl From<TraitItemMethod> for FnSig {
