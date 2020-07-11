@@ -8,8 +8,6 @@
 #![warn(unsafe_code)]
 #![warn(rust_2018_idioms, single_use_lifetimes, unreachable_pub)]
 #![warn(clippy::all, clippy::default_trait_access)]
-// https://github.com/rust-lang/rust-clippy/issues/5704
-#![allow(clippy::unnested_or_patterns)]
 #![feature(proc_macro_def_site)]
 
 #[macro_use]

@@ -220,8 +220,6 @@
 #![warn(missing_docs)]
 #![warn(rust_2018_idioms, single_use_lifetimes, unreachable_pub)]
 #![warn(clippy::all, clippy::default_trait_access)]
-// https://github.com/rust-lang/rust-clippy/issues/5704
-#![allow(clippy::unnested_or_patterns)]
 #![feature(generator_trait)]
 #![cfg_attr(doctest, feature(external_doc))]
 
