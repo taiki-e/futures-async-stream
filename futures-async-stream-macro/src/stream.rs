@@ -101,7 +101,7 @@ impl ReturnTypeKind {
     }
 
     fn is_boxed(self) -> bool {
-        if let Self::Boxed { .. } = self { true } else { false }
+        matches!(self, Self::Boxed { .. })
     }
 }
 

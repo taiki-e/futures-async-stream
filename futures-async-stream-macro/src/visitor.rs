@@ -36,10 +36,7 @@ pub(crate) enum Scope {
 
 impl Scope {
     fn is_stream(self) -> bool {
-        match self {
-            Self::Stream | Self::TryStream => true,
-            _ => false,
-        }
+        matches!(self, Self::Stream | Self::TryStream)
     }
 }
 
