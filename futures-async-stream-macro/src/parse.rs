@@ -105,7 +105,7 @@ impl Parse for FnOrAsync {
     fn parse(input: ParseStream<'_>) -> Result<Self> {
         let mut attrs = input.call(Attribute::parse_outer)?;
 
-        if peek_signature(&input) {
+        if peek_signature(input) {
             let vis: Visibility = input.parse()?;
             let method: TraitItemMethod = input.parse()?;
 
