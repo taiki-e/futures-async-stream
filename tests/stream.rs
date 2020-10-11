@@ -1,5 +1,6 @@
 #![warn(rust_2018_idioms, single_use_lifetimes)]
 #![feature(generators, proc_macro_hygiene, stmt_expr_attributes)]
+#![allow(clippy::needless_lifetimes)] // broken
 
 use futures::{
     future::Future,
