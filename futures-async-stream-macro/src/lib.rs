@@ -1,4 +1,4 @@
-//! The futures-async-stream procedural macro implementations - **do not use directly**
+//! Implementation detail of the `futures-async-stream` crate. - **do not use directly**
 
 #![doc(html_root_url = "https://docs.rs/futures-async-stream-macro/0.2.2")]
 #![doc(test(
