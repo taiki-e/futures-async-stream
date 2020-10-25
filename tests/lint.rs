@@ -1,4 +1,4 @@
-#![allow(incomplete_features)]
+#![allow(incomplete_features)] // for impl_trait_in_bindings
 #![feature(generators, impl_trait_in_bindings)]
 #![forbid(unsafe_code)]
 #![warn(

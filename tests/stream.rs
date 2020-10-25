@@ -97,7 +97,7 @@ pub async fn async_block3() {
 }
 
 pub async fn async_block_weird_fmt() {
-    let _s = #[stream]
+    let _ = #[stream]
     async move {
         #[for_await]
         for i in stream(2) {
@@ -177,17 +177,17 @@ pub mod arguments {
 
     #[stream(item = ())]
     pub async fn arg_ref(ref x: u8) {
-        let _x = x;
+        let _ = x;
     }
 
     #[stream(item = ())]
     pub async fn arg_mut(mut x: u8) {
-        let _x = &mut x;
+        let _ = &mut x;
     }
 
     #[stream(item = ())]
     pub async fn arg_ref_mut(ref mut x: u8) {
-        let _x = x;
+        let _ = x;
     }
 }
 
