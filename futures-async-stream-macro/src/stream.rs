@@ -44,13 +44,15 @@ pub(crate) fn parse_async(expr: &mut ExprAsync, cx: Context) -> Result<TokenStre
     Ok(make_gen_body(expr.capture, &expr.block, cx, None, false))
 }
 
-#[allow(dead_code)] // FIXME: fixed in latest nightly
 #[derive(Clone, Copy)]
 enum ReturnTypeKind {
     // impl Stream<Item = ..> $(+ $lifetime)?
     Default,
     // Pin<Box<dyn Stream<Item = ..> (+ Send)? $(+ $lifetime)?>>
-    Boxed { send: bool },
+    #[allow(dead_code)] // false positive that fixed in Rust 1.39
+    Boxed {
+        send: bool,
+    },
 }
 
 impl ReturnTypeKind {

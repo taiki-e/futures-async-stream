@@ -2,6 +2,7 @@
 
 use std::env;
 
+#[rustversion::attr(before(2020-10-06), ignore)] // Note: This date is commit-date and the day before the toolchain date.
 #[test]
 fn ui() {
     if !env::var_os("CI").map_or(false, |v| v == "true") {
