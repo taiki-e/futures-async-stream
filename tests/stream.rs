@@ -173,7 +173,7 @@ pub async fn array() {
 
 #[allow(clippy::toplevel_ref_arg)]
 pub mod arguments {
-    use super::*;
+    use futures_async_stream::stream;
 
     #[stream(item = ())]
     pub async fn arg_ref(ref x: u8) {
