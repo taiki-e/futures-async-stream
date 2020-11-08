@@ -14,7 +14,7 @@ use crate::{
 /// The scope in which `#[for_await]`, `.await`, or `yield` was called.
 ///
 /// The type of generator depends on which scope is called.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub(crate) enum Scope {
     /// `async fn`, `async {}`, or `async ||`
     Future,
