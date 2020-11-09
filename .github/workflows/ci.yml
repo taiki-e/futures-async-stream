@@ -33,12 +33,10 @@ jobs:
       - name: Install Rust
         run: ci/install-rust.sh ${{ matrix.rust }}
       - run: rustup target add thumbv7m-none-eabi
-      - if: matrix.rust == 'nightly'
-        run: cargo install cargo-hack
+      - run: cargo install cargo-hack
       - run: cargo test --all --all-features
       - run: cargo check --manifest-path tests/no-std/Cargo.toml --target thumbv7m-none-eabi
-      - if: matrix.rust == 'nightly'
-        run: bash scripts/check-minimal-versions.sh
+      - run: bash scripts/check-minimal-versions.sh
 
   clippy:
     runs-on: ubuntu-latest
