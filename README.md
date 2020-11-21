@@ -1,17 +1,10 @@
 # futures-async-stream
 
-[![crates-badge]][crates-url]
-[![docs-badge]][docs-url]
-[![license-badge]][license]
-![rustc-badge]
-
-[crates-badge]: https://img.shields.io/crates/v/futures-async-stream.svg
-[crates-url]: https://crates.io/crates/futures-async-stream
-[docs-badge]: https://docs.rs/futures-async-stream/badge.svg
-[docs-url]: https://docs.rs/futures-async-stream
-[license-badge]: https://img.shields.io/badge/license-Apache--2.0%20OR%20MIT-blue.svg
-[license]: #license
-[rustc-badge]: https://img.shields.io/badge/rustc-nightly-lightgray.svg
+[![crates.io](https://img.shields.io/crates/v/futures-async-stream.svg?style=flat-square&logo=rust)](https://crates.io/crates/futures-async-stream)
+[![docs.rs](https://img.shields.io/badge/docs.rs-futures--async--stream-blue?style=flat-square)](https://docs.rs/futures-async-stream)
+[![license](https://img.shields.io/badge/license-Apache--2.0_OR_MIT-blue.svg?style=flat-square)](#license)
+[![rustc](https://img.shields.io/badge/rustc-nightly-orange.svg?style=flat-square)](https://www.rust-lang.org)
+[![build status](https://img.shields.io/github/workflow/status/taiki-e/futures-async-stream/CI/master?style=flat-square)](https://github.com/taiki-e/futures-async-stream/actions?query=workflow%3ACI+branch%3Amaster)
 
 Async stream for Rust and the futures crate.
 
@@ -27,7 +20,7 @@ futures-async-stream = "0.2"
 futures = "0.3"
 ```
 
-The current futures-async-stream requires Rust nightly-2020-03-22 or later.
+*Compiler support: requires rustc nightly-2020-03-22+*
 
 ## `#[for_await]`
 
@@ -250,7 +243,5 @@ where
 ## License
 
 Licensed under either of [Apache License, Version 2.0](LICENSE-APACHE) or [MIT license](LICENSE-MIT) at your option.
-
-### Contribution
 
 Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in the work by you, as defined in the Apache-2.0 license, shall be dual licensed as above, without any additional terms or conditions.
