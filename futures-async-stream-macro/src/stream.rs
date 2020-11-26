@@ -29,7 +29,7 @@ pub(crate) fn attribute(args: TokenStream, input: TokenStream, cx: Context) -> R
         FnOrAsync::Fn(sig) => parse_fn(args, sig, cx),
         FnOrAsync::Async(mut expr, semi) => {
             parse_as_empty(&args)?;
-            let mut tokens = parse_async(&mut expr, cx)?;
+            let mut tokens = parse_async(&mut expr, cx);
             if let Some(semi) = semi {
                 semi.to_tokens(&mut tokens);
             }
@@ -39,9 +39,9 @@ pub(crate) fn attribute(args: TokenStream, input: TokenStream, cx: Context) -> R
     }
 }
 
-pub(crate) fn parse_async(expr: &mut ExprAsync, cx: Context) -> Result<TokenStream> {
+pub(crate) fn parse_async(expr: &mut ExprAsync, cx: Context) -> TokenStream {
     Visitor::new(cx.into()).visit_expr_async_mut(expr);
-    Ok(make_gen_body(expr.capture, &expr.block, cx, None, false))
+    make_gen_body(expr.capture, &expr.block, cx, None, false)
 }
 
 #[derive(Clone, Copy)]
@@ -49,7 +49,7 @@ enum ReturnTypeKind {
     // impl Stream<Item = ..> $(+ $lifetime)?
     Default,
     // Pin<Box<dyn Stream<Item = ..> (+ Send)? $(+ $lifetime)?>>
-    #[allow(dead_code)] // false positive that fixed in Rust 1.39
+    #[allow(dead_code)] // false positive that fixed in Rust 1.38
     Boxed {
         send: bool,
     },
@@ -202,7 +202,7 @@ impl Parse for TryStreamArg {
 }
 
 fn parse_fn(args: TokenStream, sig: FnSig, cx: Context) -> Result<TokenStream> {
-    match cx {
+    Ok(match cx {
         Context::Stream => {
             let StreamArg { item_ty, boxed } = syn::parse2(args)?;
             let trait_ = quote! {
@@ -261,7 +261,7 @@ fn parse_fn(args: TokenStream, sig: FnSig, cx: Context) -> Result<TokenStream> {
                 }
             })
         }
-    }
+    })
 }
 
 fn parse_fn_inner(
@@ -270,7 +270,7 @@ fn parse_fn_inner(
     error: Option<&Type>,
     boxed: bool,
     return_ty: impl FnOnce(TokenStream) -> TokenStream,
-) -> Result<TokenStream> {
+) -> TokenStream {
     let FnSig { attrs, vis, sig, mut block, semi } = sig;
     let Signature { unsafety, abi, fn_token, ident, mut generics, inputs, .. } = sig;
 
@@ -293,12 +293,12 @@ fn parse_fn_inner(
     let return_ty = return_ty(quote!(#(#lifetimes +)*));
 
     let body = semi.map_or(body, ToTokens::into_token_stream);
-    Ok(quote! {
+    quote! {
         #(#attrs)*
         #vis #unsafety #abi #fn_token #ident #generics (#(#arguments),*) -> #return_ty
         #where_clause
         #body
-    })
+    }
 }
 
 fn expand_async_body(inputs: Punctuated<FnArg, Token![,]>) -> (Vec<FnArg>, Vec<Stmt>) {

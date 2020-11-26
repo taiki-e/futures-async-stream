@@ -57,7 +57,8 @@ where
     *this = f(mem::replace(this, Expr::Verbatim(TokenStream::new())));
 }
 
-/// Check if `tokens` is an empty `TokenStream`.
+/// Checks if `tokens` is an empty `TokenStream`.
+///
 /// This is almost equivalent to `syn::parse2::<Nothing>()`, but produces
 /// a better error message and does not require ownership of `tokens`.
 pub(crate) fn parse_as_empty(tokens: &TokenStream) -> Result<()> {
@@ -88,6 +89,6 @@ impl SliceExt for [Attribute] {
     }
 
     fn find(&self, ident: &str) -> Option<&Attribute> {
-        self.iter().position(|attr| attr.path.is_ident(ident)).and_then(|i| self.get(i))
+        self.iter().position(|attr| attr.path.is_ident(ident)).map(|i| &self[i])
     }
 }

@@ -209,17 +209,11 @@ impl Visitor {
                 }
                 (Ok(Some(i)), _) => {
                     e.attrs.remove(i);
-                    *expr = match stream::parse_async(e, parse::Context::Stream) {
-                        Ok(tokens) => syn::parse2(tokens).unwrap(),
-                        Err(e) => expr_compile_error(&e),
-                    }
+                    *expr = syn::parse2(stream::parse_async(e, parse::Context::Stream)).unwrap();
                 }
                 (_, Ok(Some(i))) => {
                     e.attrs.remove(i);
-                    *expr = match stream::parse_async(e, parse::Context::TryStream) {
-                        Ok(tokens) => syn::parse2(tokens).unwrap(),
-                        Err(e) => expr_compile_error(&e),
-                    }
+                    *expr = syn::parse2(stream::parse_async(e, parse::Context::TryStream)).unwrap();
                 }
                 (Ok(None), Ok(None)) => unreachable!(),
             }

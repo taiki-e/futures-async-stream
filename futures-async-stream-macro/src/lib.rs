@@ -24,6 +24,7 @@ use syn::{parse_quote, Expr, ExprForLoop};
 use crate::utils::{expr_async, parse_as_empty};
 
 /// Processes streams using a for loop.
+///
 /// See crate level documentation for details.
 #[proc_macro_attribute]
 pub fn for_await(args: TokenStream, input: TokenStream) -> TokenStream {
@@ -41,6 +42,7 @@ pub fn for_await(args: TokenStream, input: TokenStream) -> TokenStream {
 }
 
 /// Creates streams via generators.
+///
 /// See crate level documentation for details.
 #[proc_macro_attribute]
 pub fn stream(args: TokenStream, input: TokenStream) -> TokenStream {
@@ -56,12 +58,11 @@ pub fn stream_block(input: TokenStream) -> TokenStream {
     let block = syn::parse_macro_input!(input);
     let mut expr = expr_async(block);
 
-    stream::parse_async(&mut expr, parse::Context::Stream)
-        .unwrap_or_else(|e| e.to_compile_error())
-        .into()
+    stream::parse_async(&mut expr, parse::Context::Stream).into()
 }
 
 /// Creates streams via generators.
+///
 /// See crate level documentation for details.
 #[proc_macro_attribute]
 pub fn try_stream(args: TokenStream, input: TokenStream) -> TokenStream {
@@ -77,7 +78,5 @@ pub fn try_stream_block(input: TokenStream) -> TokenStream {
     let block = syn::parse_macro_input!(input);
     let mut expr = expr_async(block);
 
-    stream::parse_async(&mut expr, parse::Context::TryStream)
-        .unwrap_or_else(|e| e.to_compile_error())
-        .into()
+    stream::parse_async(&mut expr, parse::Context::TryStream).into()
 }
