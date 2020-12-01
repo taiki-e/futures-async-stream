@@ -3,7 +3,7 @@
 [![crates.io](https://img.shields.io/crates/v/futures-async-stream.svg?style=flat-square&logo=rust)](https://crates.io/crates/futures-async-stream)
 [![docs.rs](https://img.shields.io/badge/docs.rs-futures--async--stream-blue?style=flat-square)](https://docs.rs/futures-async-stream)
 [![license](https://img.shields.io/badge/license-Apache--2.0_OR_MIT-blue.svg?style=flat-square)](#license)
-[![rustc](https://img.shields.io/badge/rustc-nightly-orange.svg?style=flat-square)](https://www.rust-lang.org)
+[![rustc](https://img.shields.io/badge/rustc-nightly--2020--03--22+-orange.svg?style=flat-square)](https://www.rust-lang.org)
 [![build status](https://img.shields.io/github/workflow/status/taiki-e/futures-async-stream/CI/master?style=flat-square)](https://github.com/taiki-e/futures-async-stream/actions?query=workflow%3ACI+branch%3Amaster)
 
 Async stream for Rust and the futures crate.
