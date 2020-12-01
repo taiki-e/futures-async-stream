@@ -25,6 +25,7 @@ futures-core = { version = "0.3", default-features = false }
 pin-project = "1"
 
 [dev-dependencies]
-rustversion = "1"
-trybuild = "1"
 futures = { version = "0.3", package = "futures-util", default-features = false }
+rustversion = "1"
+tempfile = "3"
+trybuild = "1"
