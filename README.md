@@ -8,7 +8,8 @@
 
 Async stream for Rust and the futures crate.
 
-This crate provides useful features for streams, using `async_await` and unstable `generators`.
+This crate provides useful features for streams, using `async_await` and
+unstable [`generators`](https://github.com/rust-lang/rust/issues/43122).
 
 ## Usage
 
@@ -26,7 +27,9 @@ futures = "0.3"
 
 Processes streams using a for loop.
 
-This is a reimplement of [futures-await]'s `#[async]` for loops for futures 0.3 and is an experimental implementation of [the idea listed as the next step of async/await](https://github.com/rust-lang/rfcs/blob/master/text/2394-async_await.md#for-await-and-processing-streams).
+This is a reimplement of [futures-await]'s `#[async]` for loops for
+futures 0.3 and is an experimental implementation of [the idea listed as the
+next step of async/await](https://github.com/rust-lang/rfcs/blob/master/text/2394-async_await.md#for-await-and-processing-streams).
 
 ```rust
 #![feature(proc_macro_hygiene, stmt_expr_attributes)]
@@ -44,13 +47,17 @@ async fn collect(stream: impl Stream<Item = i32>) -> Vec<i32> {
 }
 ```
 
-`value` has the `Item` type of the stream passed in. Note that async for loops can only be used inside of `async` functions, closures, blocks, `#[stream]` functions and `stream_block!` macros.
+`value` has the `Item` type of the stream passed in. Note that async for
+loops can only be used inside of `async` functions, closures, blocks,
+`#[stream]` functions and `stream_block!` macros.
 
 ## `#[stream]`
 
 Creates streams via generators.
 
-This is a reimplement of [futures-await]'s `#[stream]` for futures 0.3 and is an experimental implementation of [the idea listed as the next step of async/await](https://github.com/rust-lang/rfcs/blob/master/text/2394-async_await.md#generators-and-streams).
+This is a reimplement of [futures-await]'s `#[stream]` for futures 0.3 and
+is an experimental implementation of [the idea listed as the next step of
+async/await](https://github.com/rust-lang/rfcs/blob/master/text/2394-async_await.md#generators-and-streams).
 
 ```rust
 #![feature(generators)]
@@ -69,7 +76,9 @@ async fn foo(stream: impl Stream<Item = String>) {
 }
 ```
 
-`#[stream]` on async fn must have an item type specified via `item = some::Path` and the values output from the stream must be yielded via the `yield` expression.
+`#[stream]` on async fn must have an item type specified via
+`item = some::Path` and the values output from the stream must be yielded
+via the `yield` expression.
 
 `#[stream]` can also be used on async blocks:
 
@@ -89,11 +98,13 @@ fn foo() -> impl Stream<Item = i32> {
 }
 ```
 
-Note that `#[stream]` on async block does not require the `item` argument, but it may require additional type annotations.
+Note that `#[stream]` on async block does not require the `item` argument,
+but it may require additional type annotations.
 
 ## Using async stream functions in traits
 
-You can use async stream functions in traits by passing `boxed` or `boxed_local` as an argument.
+You can use async stream functions in traits by passing `boxed` or
+`boxed_local` as an argument.
 
 ```rust
 #![feature(generators)]
@@ -117,8 +128,10 @@ impl Foo for Bar {
 }
 ```
 
-A async stream function that received a `boxed` argument is converted to a function that returns `Pin<Box<dyn Stream<Item = item> + Send + 'lifetime>>`.
-If you passed `boxed_local` instead of `boxed`, async stream function returns a non-threadsafe stream (`Pin<Box<dyn Stream<Item = item> + 'lifetime>>`).
+A async stream function that received a `boxed` argument is converted to a
+function that returns `Pin<Box<dyn Stream<Item = item> + Send + 'lifetime>>`.
+If you passed `boxed_local` instead of `boxed`, async stream function
+returns a non-threadsafe stream (`Pin<Box<dyn Stream<Item = item> + 'lifetime>>`).
 
 ```rust
 #![feature(generators)]
@@ -147,7 +160,9 @@ impl Foo for Bar {
 
 ## `#[try_stream]`
 
-`?` operator can be used with the `#[try_stream]`. The `Item` of the returned stream is `Result` with `Ok` being the value yielded and `Err` the error type returned by `?` operator or `return Err(...)`.
+`?` operator can be used with the `#[try_stream]`. The `Item` of the
+returned stream is `Result` with `Ok` being the value yielded and `Err` the
+error type returned by `?` operator or `return Err(...)`.
 
 ```rust
 #![feature(generators)]
@@ -178,7 +193,8 @@ async fn foo(stream: impl Stream<Item = String>) {
 
 ### `#[for_await]`
 
-You can write this by combining `while let` loop, `.await`, `pin_mut` macro, and `StreamExt::next()` method:
+You can write this by combining `while let` loop, `.await`, `pin_mut` macro,
+and `StreamExt::next()` method:
 
 ```rust
 use futures::{
@@ -242,6 +258,9 @@ where
 
 ## License
 
-Licensed under either of [Apache License, Version 2.0](LICENSE-APACHE) or [MIT license](LICENSE-MIT) at your option.
+Licensed under either of [Apache License, Version 2.0](LICENSE-APACHE) or
+[MIT license](LICENSE-MIT) at your option.
 
-Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in the work by you, as defined in the Apache-2.0 license, shall be dual licensed as above, without any additional terms or conditions.
+Unless you explicitly state otherwise, any contribution intentionally submitted
+for inclusion in the work by you, as defined in the Apache-2.0 license, shall
+be dual licensed as above, without any additional terms or conditions.
