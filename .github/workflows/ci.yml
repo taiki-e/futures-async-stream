@@ -24,7 +24,8 @@ jobs:
       matrix:
         rust:
           # This is the minimum supported Rust version of this crate.
-          # When updating this, the reminder to update the minimum supported Rust version in README.md.
+          # When updating this, the reminder to update the minimum supported
+          # Rust version in README.md.
           - nightly-2020-03-22
           - nightly
     runs-on: ubuntu-latest
