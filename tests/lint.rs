@@ -1,5 +1,3 @@
-#![allow(incomplete_features)] // for impl_trait_in_bindings
-#![feature(generators, impl_trait_in_bindings)]
 #![forbid(unsafe_code)]
 #![warn(
     future_incompatible,
@@ -44,6 +42,8 @@
 #![warn(clippy::restriction)]
 #![allow(clippy::blanket_clippy_restriction_lints)] // this is a test, so enable all restriction lints intentionally.
 #![allow(clippy::implicit_return, clippy::let_underscore_must_use)]
+#![allow(incomplete_features)] // for impl_trait_in_bindings
+#![feature(generators, impl_trait_in_bindings)]
 
 // Check interoperability with rustc and clippy lints.
 
@@ -57,7 +57,7 @@ pub mod basic {
 }
 
 #[allow(clippy::restriction)]
-#[rustversion::attr(before(2020-12-08), ignore)] // Note: This date is commit-date and the day before the toolchain date.
+#[rustversion::attr(before(2020-12-22), ignore)] // Note: This date is commit-date and the day before the toolchain date.
 #[test]
 fn check_lint_list() {
     use auxiliary::assert_diff;
