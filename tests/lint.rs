@@ -47,24 +47,9 @@
 
 // Check interoperability with rustc and clippy lints.
 
-mod auxiliary;
-
 pub mod basic {
     use futures_async_stream::{stream, try_stream};
     use futures_core::stream::Stream;
 
     include!("include/basic.rs");
-}
-
-#[allow(clippy::restriction)]
-#[rustversion::attr(before(2020-12-22), ignore)] // Note: This date is commit-date and the day before the toolchain date.
-#[test]
-fn check_lint_list() {
-    use auxiliary::assert_diff;
-    use std::{env, process::Command, str};
-
-    let rustc = env::var_os("RUSTC").unwrap_or_else(|| "rustc".into());
-    let output = Command::new(rustc).args(&["-W", "help"]).output().unwrap();
-    let new = str::from_utf8(&output.stdout).unwrap();
-    assert_diff("tests/lint.txt", new);
 }

@@ -1,6 +1,6 @@
 #![warn(rust_2018_idioms, single_use_lifetimes)]
-#![feature(generators)]
 #![allow(clippy::needless_lifetimes)] // broken
+#![feature(generators)]
 
 use futures_async_stream::stream;
 

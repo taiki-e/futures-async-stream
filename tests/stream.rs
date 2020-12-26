@@ -1,6 +1,6 @@
 #![warn(rust_2018_idioms, single_use_lifetimes)]
-#![feature(generators, proc_macro_hygiene, stmt_expr_attributes)]
 #![allow(clippy::needless_lifetimes)] // broken
+#![feature(generators, proc_macro_hygiene, stmt_expr_attributes)]
 
 use futures::{
     future::Future,
@@ -173,7 +173,7 @@ pub async fn array() {
 
 #[allow(clippy::toplevel_ref_arg)]
 pub mod arguments {
-    use futures_async_stream::stream;
+    use super::*;
 
     #[stream(item = ())]
     pub async fn arg_ref(ref x: u8) {
