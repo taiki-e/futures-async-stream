@@ -8,75 +8,75 @@ This project adheres to [Semantic Versioning](https://semver.org).
 
 ## [0.2.3] - 2020-11-08
 
-* Update `pin-project` to 1.0.
+- Update `pin-project` to 1.0.
 
 ## [0.2.2] - 2020-06-11
 
-* All macros can now compile with `forbid(unsafe_code)`.
+- All macros can now compile with `forbid(unsafe_code)`.
 
-* Support overlapping lifetime names in HRTB.
+- Support overlapping lifetime names in HRTB.
 
-* Diagnostic improvements.
+- Diagnostic improvements.
 
 ## [0.2.1] - 2020-05-21
 
-* Diagnostic improvements.
+- Diagnostic improvements.
 
 ## [0.2.0] - 2020-05-10
 
-* [Renamed `#[async_stream]` to `#[stream]`.][45]
+- [Renamed `#[async_stream]` to `#[stream]`.][45]
 
-* [Renamed `#[async_try_stream]` to `#[stream]`.][45]
+- [Renamed `#[async_try_stream]` to `#[stream]`.][45]
 
-* [Renamed `async_stream_block!` to `stream_block!`.][45]
+- [Renamed `async_stream_block!` to `stream_block!`.][45]
 
-* [Renamed `async_try_stream_block!` to `try_stream_block!`.][45]
+- [Renamed `async_try_stream_block!` to `try_stream_block!`.][45]
 
-* Bug fixes.
+- Bug fixes.
 
-* Diagnostic improvements.
+- Diagnostic improvements.
 
 [45]: https://github.com/taiki-e/futures-async-stream/pull/45
 
 ## [0.1.5] - 2020-05-04
 
-* [`#[async_stream]` and `#[async_try_stream]` attributes can now be used on async blocks.][44]
+- [`#[async_stream]` and `#[async_try_stream]` attributes can now be used on async blocks.][44]
 
 [44]: https://github.com/taiki-e/futures-async-stream/pull/44
 
 ## [0.1.4] - 2020-04-22
 
-* [futures-async-stream now works on no-std environment.][34]
+- [futures-async-stream now works on no-std environment.][34]
 
 [34]: https://github.com/taiki-e/futures-async-stream/pull/34
 
 ## [0.1.3] - 2020-02-20
 
-* [Fixed build failure on latest nightly.][33]
+- [Fixed build failure on latest nightly.][33]
 
 [33]: https://github.com/taiki-e/futures-async-stream/pull/33
 
 ## [0.1.2] - 2019-12-10
 
-* [Fixed build failure on latest nightly.][31]
+- [Fixed build failure on latest nightly.][31]
 
 [31]: https://github.com/taiki-e/futures-async-stream/pull/31
 
 ## [0.1.1] - 2019-11-13
 
-* Fixed duplicate documentation.
+- Fixed duplicate documentation.
 
 ## [0.1.0] - 2019-11-13
 
-* Updated `futures` to 0.3.0.
+- Updated `futures` to 0.3.0.
 
 ## [0.1.0-alpha.7] - 2019-09-25
 
-* Updated `pin-project` to 0.4.
+- Updated `pin-project` to 0.4.
 
 ## [0.1.0-alpha.6] - 2019-09-06
 
-* [Added `async_try_stream` to support `?` operator in async stream.][15] e.g. You can write the following:
+- [Added `async_try_stream` to support `?` operator in async stream.][15] e.g. You can write the following:
 
   ```rust
   #![feature(generators)]
@@ -92,27 +92,27 @@ This project adheres to [Semantic Versioning](https://semver.org).
   }
   ```
 
-* Updated `pin-project` to 0.4.0-alpha.9.
+- Updated `pin-project` to 0.4.0-alpha.9.
 
 [15]: https://github.com/taiki-e/futures-async-stream/pull/15
 
 ## [0.1.0-alpha.5] - 2019-08-29
 
-* Pinned the version of pin-project dependency.
+- Pinned the version of pin-project dependency.
 
 ## [0.1.0-alpha.4] - 2019-08-23
 
-* Removed usage of some feature gates.
+- Removed usage of some feature gates.
 
-* Updated `pin-project` to 0.4.0-alpha.4.
+- Updated `pin-project` to 0.4.0-alpha.4.
 
 ## [0.1.0-alpha.3] - 2019-08-14
 
-* Updated `proc-macro2`, `syn`, and `quote` to 1.0.
+- Updated `proc-macro2`, `syn`, and `quote` to 1.0.
 
 ## [0.1.0-alpha.2] - 2019-08-07
 
-* [You can now use async stream functions in traits.][12] e.g. You can write the following:
+- [You can now use async stream functions in traits.][12] e.g. You can write the following:
 
   ```rust
   #![feature(async_await, generators)]
@@ -142,7 +142,7 @@ This project adheres to [Semantic Versioning](https://semver.org).
 
 Initial release
 
-[Unreleased]: https://github.com/taiki-e/futures-async-stream/compare/v0.2.3...HEAD
+[unreleased]: https://github.com/taiki-e/futures-async-stream/compare/v0.2.3...HEAD
 [0.2.3]: https://github.com/taiki-e/futures-async-stream/compare/v0.2.2...v0.2.3
 [0.2.2]: https://github.com/taiki-e/futures-async-stream/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/taiki-e/futures-async-stream/compare/v0.2.0...v0.2.1
