@@ -9,6 +9,7 @@ documentation = "https://docs.rs/futures-async-stream"
 keywords = ["async", "future", "futures", "stream", "macros"]
 categories = ["asynchronous", "no-std"]
 readme = "README.md"
+exclude = ["/.github", "/ci", "/scripts"]
 description = """
 Async stream for Rust and the futures crate.
 """
