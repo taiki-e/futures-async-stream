@@ -22,7 +22,7 @@ mod visitor;
 
 use proc_macro::{Delimiter, Group, TokenStream, TokenTree};
 use quote::ToTokens;
-use syn::{parse_quote, Expr, ExprForLoop};
+use syn::{parse_quote, Error, Expr, ExprForLoop};
 
 use crate::utils::{expr_async, parse_as_empty};
 
@@ -50,7 +50,7 @@ pub fn for_await(args: TokenStream, input: TokenStream) -> TokenStream {
 #[proc_macro_attribute]
 pub fn stream(args: TokenStream, input: TokenStream) -> TokenStream {
     stream::attribute(args.into(), input.into(), parse::Context::Stream)
-        .unwrap_or_else(|e| e.to_compile_error())
+        .unwrap_or_else(Error::into_compile_error)
         .into()
 }
 
@@ -70,7 +70,7 @@ pub fn stream_block(input: TokenStream) -> TokenStream {
 #[proc_macro_attribute]
 pub fn try_stream(args: TokenStream, input: TokenStream) -> TokenStream {
     stream::attribute(args.into(), input.into(), parse::Context::TryStream)
-        .unwrap_or_else(|e| e.to_compile_error())
+        .unwrap_or_else(Error::into_compile_error)
         .into()
 }
 
