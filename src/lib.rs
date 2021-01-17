@@ -285,7 +285,6 @@ mod future {
     pub struct ResumeTy(pub(crate) NonNull<Context<'static>>);
 
     unsafe impl Send for ResumeTy {}
-
     unsafe impl Sync for ResumeTy {}
 
     /// Wrap a generator in a future.
@@ -297,25 +296,25 @@ mod future {
     where
         G: Generator<ResumeTy, Yield = ()>,
     {
-        #[pin_project]
-        struct GenFuture<G>(#[pin] G);
+        GenFuture(gen)
+    }
 
-        impl<G> Future for GenFuture<G>
-        where
-            G: Generator<ResumeTy, Yield = ()>,
-        {
-            type Output = G::Return;
+    #[pin_project]
+    pub(crate) struct GenFuture<G>(#[pin] G);
 
-            fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
-                let this = self.project();
-                match this.0.resume(ResumeTy(NonNull::from(cx).cast::<Context<'static>>())) {
-                    GeneratorState::Yielded(()) => Poll::Pending,
-                    GeneratorState::Complete(x) => Poll::Ready(x),
-                }
+    impl<G> Future for GenFuture<G>
+    where
+        G: Generator<ResumeTy, Yield = ()>,
+    {
+        type Output = G::Return;
+
+        fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
+            let this = self.project();
+            match this.0.resume(ResumeTy(NonNull::from(cx).cast::<Context<'static>>())) {
+                GeneratorState::Yielded(()) => Poll::Pending,
+                GeneratorState::Complete(x) => Poll::Ready(x),
             }
         }
-
-        GenFuture(gen)
     }
 
     #[doc(hidden)]
@@ -346,25 +345,25 @@ mod stream {
     where
         G: Generator<ResumeTy, Yield = Poll<T>, Return = ()>,
     {
-        #[pin_project]
-        struct GenStream<G>(#[pin] G);
+        GenStream(gen)
+    }
 
-        impl<G, T> Stream for GenStream<G>
-        where
-            G: Generator<ResumeTy, Yield = Poll<T>, Return = ()>,
-        {
-            type Item = T;
+    #[pin_project]
+    pub(crate) struct GenStream<G>(#[pin] G);
 
-            fn poll_next(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
-                let this = self.project();
-                match this.0.resume(ResumeTy(NonNull::from(cx).cast::<Context<'static>>())) {
-                    GeneratorState::Yielded(x) => x.map(Some),
-                    GeneratorState::Complete(()) => Poll::Ready(None),
-                }
+    impl<G, T> Stream for GenStream<G>
+    where
+        G: Generator<ResumeTy, Yield = Poll<T>, Return = ()>,
+    {
+        type Item = T;
+
+        fn poll_next(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
+            let this = self.project();
+            match this.0.resume(ResumeTy(NonNull::from(cx).cast::<Context<'static>>())) {
+                GeneratorState::Yielded(x) => x.map(Some),
+                GeneratorState::Complete(()) => Poll::Ready(None),
             }
         }
-
-        GenStream(gen)
     }
 
     // This is equivalent to the `futures::stream::StreamExt::next` method.
@@ -374,20 +373,20 @@ mod stream {
     where
         S: Stream + Unpin,
     {
-        struct Next<'a, S>(&'a mut S);
-
-        impl<S> Future for Next<'_, S>
-        where
-            S: Stream + Unpin,
-        {
-            type Output = Option<S::Item>;
-
-            fn poll(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
-                Pin::new(&mut self.0).poll_next(cx)
-            }
-        }
-
         Next(stream)
+    }
+
+    pub(crate) struct Next<'a, S>(&'a mut S);
+
+    impl<S> Future for Next<'_, S>
+    where
+        S: Stream + Unpin,
+    {
+        type Output = Option<S::Item>;
+
+        fn poll(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
+            Pin::new(&mut self.0).poll_next(cx)
+        }
     }
 }
 
@@ -414,44 +413,43 @@ mod try_stream {
     where
         G: Generator<ResumeTy, Yield = Poll<T>, Return = Result<(), E>>,
     {
-        #[pin_project]
-        struct GenTryStream<G>(#[pin] Option<G>);
-
-        impl<G, T, E> Stream for GenTryStream<G>
-        where
-            G: Generator<ResumeTy, Yield = Poll<T>, Return = Result<(), E>>,
-        {
-            type Item = Result<T, E>;
-
-            fn poll_next(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
-                let mut this = self.project();
-                if let Some(gen) = this.0.as_mut().as_pin_mut() {
-                    let res =
-                        match gen.resume(ResumeTy(NonNull::from(cx).cast::<Context<'static>>())) {
-                            GeneratorState::Yielded(x) => x.map(|x| Some(Ok(x))),
-                            GeneratorState::Complete(Err(e)) => Poll::Ready(Some(Err(e))),
-                            GeneratorState::Complete(Ok(())) => Poll::Ready(None),
-                        };
-                    if let Poll::Ready(Some(Err(_))) | Poll::Ready(None) = &res {
-                        this.0.set(None);
-                    }
-                    res
-                } else {
-                    Poll::Ready(None)
-                }
-            }
-        }
-
-        impl<G, T, E> FusedStream for GenTryStream<G>
-        where
-            G: Generator<ResumeTy, Yield = Poll<T>, Return = Result<(), E>>,
-        {
-            fn is_terminated(&self) -> bool {
-                self.0.is_none()
-            }
-        }
-
         GenTryStream(Some(gen))
+    }
+
+    #[pin_project]
+    pub(crate) struct GenTryStream<G>(#[pin] Option<G>);
+
+    impl<G, T, E> Stream for GenTryStream<G>
+    where
+        G: Generator<ResumeTy, Yield = Poll<T>, Return = Result<(), E>>,
+    {
+        type Item = Result<T, E>;
+
+        fn poll_next(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
+            let mut this = self.project();
+            if let Some(gen) = this.0.as_mut().as_pin_mut() {
+                let res = match gen.resume(ResumeTy(NonNull::from(cx).cast::<Context<'static>>())) {
+                    GeneratorState::Yielded(x) => x.map(|x| Some(Ok(x))),
+                    GeneratorState::Complete(Err(e)) => Poll::Ready(Some(Err(e))),
+                    GeneratorState::Complete(Ok(())) => Poll::Ready(None),
+                };
+                if let Poll::Ready(Some(Err(_))) | Poll::Ready(None) = &res {
+                    this.0.set(None);
+                }
+                res
+            } else {
+                Poll::Ready(None)
+            }
+        }
+    }
+
+    impl<G, T, E> FusedStream for GenTryStream<G>
+    where
+        G: Generator<ResumeTy, Yield = Poll<T>, Return = Result<(), E>>,
+    {
+        fn is_terminated(&self) -> bool {
+            self.0.is_none()
+        }
     }
 }
 
@@ -490,4 +488,40 @@ pub mod __private {
         #[doc(hidden)]
         pub use crate::try_stream::*;
     }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::*;
+    use core::marker::PhantomPinned;
+    use static_assertions::{
+        assert_impl_all as assert_impl, assert_not_impl_all as assert_not_impl,
+    };
+
+    assert_impl!(future::GenFuture<()>: Send);
+    assert_impl!(future::GenFuture<()>: Sync);
+    assert_not_impl!(future::GenFuture<*const ()>: Send);
+    assert_not_impl!(future::GenFuture<*const ()>: Sync);
+    assert_impl!(future::GenFuture<()>: Unpin);
+    assert_not_impl!(future::GenFuture<PhantomPinned>: Unpin);
+
+    assert_impl!(stream::GenStream<()>: Send);
+    assert_impl!(stream::GenStream<()>: Sync);
+    assert_not_impl!(stream::GenStream<*const ()>: Send);
+    assert_not_impl!(stream::GenStream<*const ()>: Sync);
+    assert_impl!(stream::GenStream<()>: Unpin);
+    assert_not_impl!(stream::GenStream<PhantomPinned>: Unpin);
+
+    assert_impl!(stream::Next<'_, ()>: Send);
+    assert_impl!(stream::Next<'_, ()>: Sync);
+    assert_not_impl!(stream::Next<'_, *const ()>: Send);
+    assert_not_impl!(stream::Next<'_, *const ()>: Sync);
+    assert_impl!(stream::Next<'_, PhantomPinned>: Unpin);
+
+    assert_impl!(try_stream::GenTryStream<()>: Send);
+    assert_impl!(try_stream::GenTryStream<()>: Sync);
+    assert_not_impl!(try_stream::GenTryStream<*const ()>: Send);
+    assert_not_impl!(try_stream::GenTryStream<*const ()>: Sync);
+    assert_impl!(try_stream::GenTryStream<()>: Unpin);
+    assert_not_impl!(try_stream::GenTryStream<PhantomPinned>: Unpin);
 }
