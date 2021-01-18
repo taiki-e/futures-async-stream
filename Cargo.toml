@@ -7,7 +7,7 @@ license = "Apache-2.0 OR MIT"
 repository = "https://github.com/taiki-e/futures-async-stream"
 documentation = "https://docs.rs/futures-async-stream"
 keywords = ["async", "future", "futures", "stream", "macros"]
-categories = ["asynchronous", "no-std"]
+categories = ["asynchronous", "no-std", "rust-patterns"]
 exclude = ["/.*", "/ci", "/scripts"]
 description = """
 Async stream for Rust and the futures crate.
