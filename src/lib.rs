@@ -117,9 +117,10 @@
 //! ```rust
 //! #![feature(generators)]
 //!
+//! use std::pin::Pin;
+//!
 //! use futures::stream::Stream;
 //! use futures_async_stream::stream;
-//! use std::pin::Pin;
 //!
 //! // The trait itself can be defined without unstable features.
 //! trait Foo {
@@ -188,13 +189,14 @@
 //! You can write this by manually implementing the combinator:
 //!
 //! ```rust
+//! use std::pin::Pin;
+//!
 //! use futures::{
 //!     ready,
 //!     stream::Stream,
 //!     task::{Context, Poll},
 //! };
 //! use pin_project::pin_project;
-//! use std::pin::Pin;
 //!
 //! fn foo<S>(stream: S) -> impl Stream<Item = i32>
 //! where
@@ -247,16 +249,12 @@ const _README: () = ();
 
 #[doc(inline)]
 pub use futures_async_stream_macro::for_await;
-
 #[doc(inline)]
 pub use futures_async_stream_macro::stream;
-
 #[doc(inline)]
 pub use futures_async_stream_macro::stream_block;
-
 #[doc(inline)]
 pub use futures_async_stream_macro::try_stream;
-
 #[doc(inline)]
 pub use futures_async_stream_macro::try_stream_block;
 
@@ -268,6 +266,7 @@ mod future {
         ptr::NonNull,
         task::{Context, Poll},
     };
+
     use pin_project::pin_project;
 
     // Refs: https://github.com/rust-lang/rust/blob/2454a68cfbb63aa7b8e09fe05114d5f98b2f9740/src/libcore/future/mod.rs
@@ -331,6 +330,7 @@ mod stream {
         ptr::NonNull,
         task::{Context, Poll},
     };
+
     use futures_core::stream::Stream;
     use pin_project::pin_project;
 
@@ -397,6 +397,7 @@ mod try_stream {
         ptr::NonNull,
         task::{Context, Poll},
     };
+
     use futures_core::stream::{FusedStream, Stream};
     use pin_project::pin_project;
 
@@ -492,35 +493,37 @@ pub mod __private {
 
 #[cfg(test)]
 mod tests {
-    use crate::*;
     use core::marker::PhantomPinned;
+
     use static_assertions::{
         assert_impl_all as assert_impl, assert_not_impl_all as assert_not_impl,
     };
 
+    use crate::*;
+
     assert_impl!(future::GenFuture<()>: Send);
-    assert_impl!(future::GenFuture<()>: Sync);
     assert_not_impl!(future::GenFuture<*const ()>: Send);
+    assert_impl!(future::GenFuture<()>: Sync);
     assert_not_impl!(future::GenFuture<*const ()>: Sync);
     assert_impl!(future::GenFuture<()>: Unpin);
     assert_not_impl!(future::GenFuture<PhantomPinned>: Unpin);
 
     assert_impl!(stream::GenStream<()>: Send);
-    assert_impl!(stream::GenStream<()>: Sync);
     assert_not_impl!(stream::GenStream<*const ()>: Send);
+    assert_impl!(stream::GenStream<()>: Sync);
     assert_not_impl!(stream::GenStream<*const ()>: Sync);
     assert_impl!(stream::GenStream<()>: Unpin);
     assert_not_impl!(stream::GenStream<PhantomPinned>: Unpin);
 
     assert_impl!(stream::Next<'_, ()>: Send);
-    assert_impl!(stream::Next<'_, ()>: Sync);
     assert_not_impl!(stream::Next<'_, *const ()>: Send);
+    assert_impl!(stream::Next<'_, ()>: Sync);
     assert_not_impl!(stream::Next<'_, *const ()>: Sync);
     assert_impl!(stream::Next<'_, PhantomPinned>: Unpin);
 
     assert_impl!(try_stream::GenTryStream<()>: Send);
-    assert_impl!(try_stream::GenTryStream<()>: Sync);
     assert_not_impl!(try_stream::GenTryStream<*const ()>: Send);
+    assert_impl!(try_stream::GenTryStream<()>: Sync);
     assert_not_impl!(try_stream::GenTryStream<*const ()>: Sync);
     assert_impl!(try_stream::GenTryStream<()>: Unpin);
     assert_not_impl!(try_stream::GenTryStream<PhantomPinned>: Unpin);

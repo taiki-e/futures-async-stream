@@ -1,5 +1,6 @@
-use proc_macro2::TokenStream;
 use std::mem;
+
+use proc_macro2::TokenStream;
 use syn::{
     punctuated::Punctuated, token, Attribute, Block, Error, Expr, ExprAsync, ExprTuple, Result,
     Token,

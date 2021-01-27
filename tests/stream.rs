@@ -2,6 +2,8 @@
 #![allow(clippy::needless_lifetimes)] // broken
 #![feature(generators, proc_macro_hygiene, stmt_expr_attributes)]
 
+use std::{pin::Pin, rc::Rc, sync::Arc};
+
 use futures::{
     future::Future,
     pin_mut,
@@ -9,7 +11,6 @@ use futures::{
     task::{noop_waker, Context, Poll},
 };
 use futures_async_stream::{for_await, stream, stream_block};
-use std::{pin::Pin, rc::Rc, sync::Arc};
 
 fn run<F: Future>(f: F) -> F::Output {
     let w = noop_waker();
