@@ -1,13 +1,13 @@
-error[E0277]: `dyn Stream<Item = i32>` cannot be sent between threads safely
+error[E0277]: `dyn futures_async_stream::__private::stream::Stream<Item = i32>` cannot be sent between threads safely
   --> $DIR/threads-sendsync.rs:27:17
    |
 5  | fn assert_send<T: Send>(_: T) {}
    |                   ---- required by this bound in `assert_send`
 ...
 27 |     assert_send(boxed_local()); //~ ERROR `dyn futures_core::stream::Stream<Item = i32>` cannot be sent between threads safely
-   |                 ^^^^^^^^^^^^^ `dyn Stream<Item = i32>` cannot be sent between threads safely
+   |                 ^^^^^^^^^^^^^ `dyn futures_async_stream::__private::stream::Stream<Item = i32>` cannot be sent between threads safely
    |
-   = help: the trait `Send` is not implemented for `dyn Stream<Item = i32>`
-   = note: required because of the requirements on the impl of `Send` for `Unique<dyn Stream<Item = i32>>`
-   = note: required because it appears within the type `Box<dyn Stream<Item = i32>>`
-   = note: required because it appears within the type `Pin<Box<dyn Stream<Item = i32>>>`
+   = help: the trait `Send` is not implemented for `dyn futures_async_stream::__private::stream::Stream<Item = i32>`
+   = note: required because of the requirements on the impl of `Send` for `Unique<dyn futures_async_stream::__private::stream::Stream<Item = i32>>`
+   = note: required because it appears within the type `Box<dyn futures_async_stream::__private::stream::Stream<Item = i32>>`
+   = note: required because it appears within the type `Pin<Box<dyn futures_async_stream::__private::stream::Stream<Item = i32>>>`

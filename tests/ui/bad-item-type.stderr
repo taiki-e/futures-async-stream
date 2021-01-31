@@ -58,7 +58,7 @@ error[E0308]: mismatched types
    = note: expected type `{integer}`
              found tuple `({integer}, {integer})`
 
-error[E0271]: type mismatch resolving `<impl Stream as Stream>::Item == (i32, i32)`
+error[E0271]: type mismatch resolving `<impl futures_async_stream::__private::stream::Stream as futures_async_stream::__private::stream::Stream>::Item == (i32, i32)`
   --> $DIR/bad-item-type.rs:27:1
    |
 27 | #[stream(item = (i32, i32))]
@@ -192,7 +192,7 @@ error[E0308]: mismatched types
    = note: expected type `{integer}`
              found tuple `({integer}, {integer})`
 
-error[E0271]: type mismatch resolving `<impl Stream as Stream>::Item == (i32, i32)`
+error[E0271]: type mismatch resolving `<impl futures_async_stream::__private::stream::Stream as futures_async_stream::__private::stream::Stream>::Item == (i32, i32)`
   --> $DIR/bad-item-type.rs:35:1
    |
 35 | #[stream(item = (i32, i32), boxed)]
@@ -200,7 +200,7 @@ error[E0271]: type mismatch resolving `<impl Stream as Stream>::Item == (i32, i3
    |
    = note: expected tuple `(i32, i32)`
                found type `{integer}`
-   = note: required for the cast to the object type `dyn Stream<Item = (i32, i32)> + Send`
+   = note: required for the cast to the object type `dyn futures_async_stream::__private::stream::Stream<Item = (i32, i32)> + Send`
    = note: this error originates in an attribute macro (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error[E0698]: type inside generator must be known in this context
