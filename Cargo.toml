@@ -19,7 +19,7 @@ targets = ["x86_64-unknown-linux-gnu"]
 [workspace]
 members = ["futures-async-stream-macro", "tests/no-std"]
 
-# NB: futures-core is public dependencies.
+# Note: futures-core is public dependencies.
 [dependencies]
 futures-async-stream-macro = { version = "=0.2.5", path = "futures-async-stream-macro", default-features = false }
 futures-core = { version = "0.3", default-features = false }
