@@ -336,7 +336,7 @@ fn expand_async_body(inputs: Punctuated<FnArg, Token![,]>) -> (Vec<FnArg>, Vec<S
                 _ => true,
             };
             if captured_naturally {
-                arguments.push(FnArg::Typed(PatType { attrs, pat, ty, colon_token }));
+                arguments.push(FnArg::Typed(PatType { attrs, pat, colon_token, ty }));
                 continue;
             }
 
@@ -352,7 +352,7 @@ fn expand_async_body(inputs: Punctuated<FnArg, Token![,]>) -> (Vec<FnArg>, Vec<S
                 ident,
                 subpat: None,
             }));
-            arguments.push(FnArg::Typed(PatType { attrs, pat, ty, colon_token }));
+            arguments.push(FnArg::Typed(PatType { attrs, pat, colon_token, ty }));
         } else {
             arguments.push(argument);
         }
