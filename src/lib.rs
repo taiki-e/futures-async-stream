@@ -9,7 +9,7 @@
 //!
 //! This is a reimplement of [futures-await]'s `#[async]` for loops for
 //! futures 0.3 and is an experimental implementation of [the idea listed as the
-//! next step of async/await](https://github.com/rust-lang/rfcs/blob/master/text/2394-async_await.md#for-await-and-processing-streams).
+//! next step of async/await](https://github.com/rust-lang/rfcs/blob/HEAD/text/2394-async_await.md#for-await-and-processing-streams).
 //!
 //! ```rust
 //! #![feature(proc_macro_hygiene, stmt_expr_attributes)]
@@ -37,7 +37,7 @@
 //!
 //! This is a reimplement of [futures-await]'s `#[stream]` for futures 0.3 and
 //! is an experimental implementation of [the idea listed as the next step of
-//! async/await](https://github.com/rust-lang/rfcs/blob/master/text/2394-async_await.md#generators-and-streams).
+//! async/await](https://github.com/rust-lang/rfcs/blob/HEAD/text/2394-async_await.md#generators-and-streams).
 //!
 //! ```rust
 //! #![feature(generators)]

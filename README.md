@@ -4,7 +4,7 @@
 [![docs.rs](https://img.shields.io/badge/docs.rs-futures--async--stream-blue?style=flat-square)](https://docs.rs/futures-async-stream)
 [![license](https://img.shields.io/badge/license-Apache--2.0_OR_MIT-blue?style=flat-square)](#license)
 [![rustc](https://img.shields.io/badge/rustc-nightly--2020--03--22+-orange?style=flat-square&logo=rust)](https://www.rust-lang.org)
-[![build status](https://img.shields.io/github/workflow/status/taiki-e/futures-async-stream/CI/master?style=flat-square&logo=github)](https://github.com/taiki-e/futures-async-stream/actions)
+[![build status](https://img.shields.io/github/workflow/status/taiki-e/futures-async-stream/CI/main?style=flat-square&logo=github)](https://github.com/taiki-e/futures-async-stream/actions)
 
 Async stream for Rust and the futures crate.
 
@@ -29,7 +29,7 @@ Processes streams using a for loop.
 
 This is a reimplement of [futures-await]'s `#[async]` for loops for
 futures 0.3 and is an experimental implementation of [the idea listed as the
-next step of async/await](https://github.com/rust-lang/rfcs/blob/master/text/2394-async_await.md#for-await-and-processing-streams).
+next step of async/await](https://github.com/rust-lang/rfcs/blob/HEAD/text/2394-async_await.md#for-await-and-processing-streams).
 
 ```rust
 #![feature(proc_macro_hygiene, stmt_expr_attributes)]
@@ -57,7 +57,7 @@ Creates streams via generators.
 
 This is a reimplement of [futures-await]'s `#[stream]` for futures 0.3 and
 is an experimental implementation of [the idea listed as the next step of
-async/await](https://github.com/rust-lang/rfcs/blob/master/text/2394-async_await.md#generators-and-streams).
+async/await](https://github.com/rust-lang/rfcs/blob/HEAD/text/2394-async_await.md#generators-and-streams).
 
 ```rust
 #![feature(generators)]
