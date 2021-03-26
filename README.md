@@ -170,7 +170,7 @@ error type returned by `?` operator or `return Err(...)`.
 use futures::stream::Stream;
 use futures_async_stream::try_stream;
 
-#[try_stream(ok = i32, error = Box<dyn std::error::Error + Send + Sync>)]
+#[try_stream(ok = i32, error = Box<dyn std::error::Error>)]
 async fn foo(stream: impl Stream<Item = String>) {
     #[for_await]
     for x in stream {

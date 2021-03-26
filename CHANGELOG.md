@@ -85,7 +85,7 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
   use futures::stream::Stream;
   use futures_async_stream::async_try_stream;
 
-  #[async_try_stream(ok = i32, error = Box<dyn std::error::Error + Send + Sync>)]
+  #[async_try_stream(ok = i32, error = Box<dyn std::error::Error>)]
   async fn foo(stream: impl Stream<Item = String>) {
       #[for_await]
       for x in stream {
