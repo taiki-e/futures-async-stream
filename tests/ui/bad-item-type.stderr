@@ -62,10 +62,10 @@ error[E0271]: type mismatch resolving `<impl futures_async_stream::__private::st
   --> $DIR/bad-item-type.rs:27:1
    |
 27 | #[stream(item = (i32, i32))]
-   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected integer, found tuple
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected tuple, found integer
    |
-   = note: expected type `{integer}`
-             found tuple `(i32, i32)`
+   = note: expected tuple `(i32, i32)`
+               found type `{integer}`
 
 error[E0698]: type inside generator must be known in this context
   --> $DIR/bad-item-type.rs:30:15
