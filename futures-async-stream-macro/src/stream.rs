@@ -49,9 +49,7 @@ enum ReturnTypeKind {
     // impl Stream<Item = ..> $(+ $lifetime)?
     Default,
     // Pin<Box<dyn Stream<Item = ..> (+ Send)? $(+ $lifetime)?>>
-    Boxed {
-        send: bool,
-    },
+    Boxed { send: bool },
 }
 
 impl ReturnTypeKind {
