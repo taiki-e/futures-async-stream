@@ -239,7 +239,7 @@
 ))]
 #![warn(future_incompatible, rust_2018_idioms, single_use_lifetimes, unreachable_pub)]
 #![warn(missing_docs)]
-#![warn(clippy::all, clippy::default_trait_access)]
+#![warn(clippy::default_trait_access)]
 #![feature(generator_trait)]
 #![cfg_attr(doctest, feature(external_doc))]
 
