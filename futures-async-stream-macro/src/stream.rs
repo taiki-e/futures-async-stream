@@ -49,7 +49,6 @@ enum ReturnTypeKind {
     // impl Stream<Item = ..> $(+ $lifetime)?
     Default,
     // Pin<Box<dyn Stream<Item = ..> (+ Send)? $(+ $lifetime)?>>
-    #[allow(dead_code)] // false positive that fixed in Rust 1.38
     Boxed {
         send: bool,
     },
