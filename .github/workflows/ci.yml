@@ -36,7 +36,7 @@ jobs:
         with:
           toolchain: ${{ matrix.rust }}
       - run: rustup target add thumbv7m-none-eabi
-      - run: cargo install cargo-hack
+      - run: cargo +stable install cargo-hack
       - run: cargo test --all --all-features
       - run: cargo build --manifest-path tests/no-std/Cargo.toml --target thumbv7m-none-eabi
       - run: tools/check-minimal-versions.sh
