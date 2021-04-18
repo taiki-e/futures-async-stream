@@ -9,6 +9,11 @@ error[E0308]: mismatched types
    |
    = note: expected enum `Option<_>`
               found type `{integer}`
+note: return type inferred to be `Option<_>` here
+  --> $DIR/bad-item-type.rs:10:9
+   |
+10 |         return;
+   |         ^^^^^^
 
 error[E0698]: type inside generator must be known in this context
  --> $DIR/bad-item-type.rs:7:9
@@ -143,6 +148,11 @@ error[E0308]: mismatched types
    |
    = note: expected enum `Option<_>`
               found type `{integer}`
+note: return type inferred to be `Option<_>` here
+  --> $DIR/bad-item-type.rs:21:9
+   |
+21 |         return;
+   |         ^^^^^^
 
 error[E0698]: type inside generator must be known in this context
   --> $DIR/bad-item-type.rs:18:9
