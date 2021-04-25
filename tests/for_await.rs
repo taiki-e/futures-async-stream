@@ -72,6 +72,6 @@ pub fn in_stream_block() -> impl Stream<Item = i32> {
 fn test() {
     run(async {
         assert_eq!(in_async_fn().await, 10);
-        assert_eq!(nested().await, true);
+        assert!(nested().await);
     })
 }
