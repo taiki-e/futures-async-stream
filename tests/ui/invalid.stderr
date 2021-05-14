@@ -100,7 +100,7 @@ error: #[stream] attribute may only be used on async functions or async blocks
 111 |     #[stream(item = ())] //~ ERROR #[stream] attribute may only be used on async functions or async blocks
     |     ^^^^^^^^^^^^^^^^^^^^
     |
-    = note: this error originates in an attribute macro (in Nightly builds, run with -Z macro-backtrace for more info)
+    = note: this error originates in the attribute macro `stream` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: #[stream] attribute may only be used on async functions or async blocks
    --> $DIR/invalid.rs:114:5
@@ -108,7 +108,7 @@ error: #[stream] attribute may only be used on async functions or async blocks
 114 |     #[stream(item = ())] //~ ERROR #[stream] attribute may only be used on async functions or async blocks
     |     ^^^^^^^^^^^^^^^^^^^^
     |
-    = note: this error originates in an attribute macro (in Nightly builds, run with -Z macro-backtrace for more info)
+    = note: this error originates in the attribute macro `stream` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: #[stream] attribute may only be used on async functions or async blocks
    --> $DIR/invalid.rs:117:5
@@ -116,4 +116,4 @@ error: #[stream] attribute may only be used on async functions or async blocks
 117 |     #[stream(item = ())] //~ ERROR #[stream] attribute may only be used on async functions or async blocks
     |     ^^^^^^^^^^^^^^^^^^^^
     |
-    = note: this error originates in an attribute macro (in Nightly builds, run with -Z macro-backtrace for more info)
+    = note: this error originates in the attribute macro `stream` (in Nightly builds, run with -Z macro-backtrace for more info)

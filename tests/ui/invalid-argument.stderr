@@ -22,7 +22,7 @@ error: unexpected end of input, expected `item`
 35 |     #[stream] //~ ERROR unexpected end of input, expected `item`
    |     ^^^^^^^^^
    |
-   = note: this error originates in an attribute macro (in Nightly builds, run with -Z macro-backtrace for more info)
+   = note: this error originates in the attribute macro `stream` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: expected `item = <type>`, found `item`
   --> $DIR/invalid-argument.rs:38:14
@@ -90,7 +90,7 @@ error: unexpected end of input, expected `ok`
 75 |     #[try_stream] //~ ERROR unexpected end of input, expected `ok`
    |     ^^^^^^^^^^^^^
    |
-   = note: this error originates in an attribute macro (in Nightly builds, run with -Z macro-backtrace for more info)
+   = note: this error originates in the attribute macro `try_stream` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: unexpected end of input, expected `ok`
   --> $DIR/invalid-argument.rs:78:5
@@ -98,7 +98,7 @@ error: unexpected end of input, expected `ok`
 78 |     #[try_stream(error = ())] //~ ERROR unexpected end of input, expected `ok`
    |     ^^^^^^^^^^^^^^^^^^^^^^^^^
    |
-   = note: this error originates in an attribute macro (in Nightly builds, run with -Z macro-backtrace for more info)
+   = note: this error originates in the attribute macro `try_stream` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: expected `ok = <type>`, found `ok`
   --> $DIR/invalid-argument.rs:81:18
@@ -118,7 +118,7 @@ error: unexpected end of input, expected `error`
 87 |     #[try_stream(ok = ())] //~ ERROR unexpected end of input, expected `error`
    |     ^^^^^^^^^^^^^^^^^^^^^^
    |
-   = note: this error originates in an attribute macro (in Nightly builds, run with -Z macro-backtrace for more info)
+   = note: this error originates in the attribute macro `try_stream` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: expected `error = <type>`, found `error`
   --> $DIR/invalid-argument.rs:90:18
