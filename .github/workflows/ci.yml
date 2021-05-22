@@ -38,7 +38,10 @@ jobs:
           toolchain: ${{ matrix.rust }}
       - run: rustup target add thumbv7m-none-eabi
       - run: cargo +stable install cargo-hack
+      - run: cargo test --all --all-features --tests
+        if: matrix.rust != 'nightly'
       - run: cargo test --all --all-features
+        if: matrix.rust == 'nightly'
       - run: cargo build --manifest-path tests/no-std/Cargo.toml --target thumbv7m-none-eabi
       - run: tools/check-minimal-versions.sh
 
