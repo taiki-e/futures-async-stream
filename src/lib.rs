@@ -241,10 +241,10 @@
 #![warn(missing_docs)]
 #![warn(clippy::default_trait_access)]
 #![feature(generator_trait)]
-#![cfg_attr(doctest, feature(external_doc))]
 
 #[cfg(doctest)]
-#[doc(include = "../README.md")]
+// https://github.com/rust-lang/rust/issues/82768
+#[cfg_attr(doctest, cfg_attr(doctest, doc = include_str!("../README.md")))]
 const _README: () = ();
 
 #[doc(inline)]
