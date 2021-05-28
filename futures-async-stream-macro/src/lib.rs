@@ -9,7 +9,7 @@
 ))]
 #![warn(unsafe_code)]
 #![warn(future_incompatible, rust_2018_idioms, single_use_lifetimes, unreachable_pub)]
-#![warn(clippy::default_trait_access)]
+#![warn(clippy::default_trait_access, clippy::wildcard_imports)]
 #![feature(proc_macro_def_site)]
 
 #[macro_use]

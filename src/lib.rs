@@ -237,9 +237,8 @@
         allow(dead_code, unused_variables)
     )
 ))]
-#![warn(future_incompatible, rust_2018_idioms, single_use_lifetimes, unreachable_pub)]
-#![warn(missing_docs)]
-#![warn(clippy::default_trait_access)]
+#![warn(future_incompatible, missing_docs, rust_2018_idioms, single_use_lifetimes, unreachable_pub)]
+#![warn(clippy::default_trait_access, clippy::wildcard_imports)]
 #![feature(generator_trait)]
 
 #[cfg(doctest)]
@@ -472,7 +471,7 @@ pub mod __private {
         pub use core::future::Future;
 
         #[doc(hidden)]
-        pub use crate::future::*;
+        pub use crate::future::{from_generator, get_context, ResumeTy};
     }
 
     #[doc(hidden)]
@@ -481,16 +480,17 @@ pub mod __private {
         pub use futures_core::stream::Stream;
 
         #[doc(hidden)]
-        pub use crate::stream::*;
+        pub use crate::stream::{from_generator, next};
     }
 
     #[doc(hidden)]
     pub mod try_stream {
         #[doc(hidden)]
-        pub use crate::try_stream::*;
+        pub use crate::try_stream::from_generator;
     }
 }
 
+#[allow(clippy::wildcard_imports)]
 #[cfg(test)]
 mod tests {
     use core::marker::PhantomPinned;
