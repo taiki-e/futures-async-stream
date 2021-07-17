@@ -5,7 +5,7 @@ error[E0308]: mismatched types
    |           ^^^
    |           |
    |           expected enum `Option`, found integer
-   |           help: try using a variant of the expected enum: `Some(val)`
+   |           help: try using a variant of the expected enum: `futures_async_stream::__private::Some(val)`
    |
    = note: expected enum `Option<_>`
               found type `{integer}`
@@ -40,7 +40,7 @@ error[E0308]: mismatched types
    |           ^^^
    |           |
    |           expected enum `Option`, found integer
-   |           help: try using a variant of the expected enum: `Some(val)`
+   |           help: try using a variant of the expected enum: `futures_async_stream::__private::Some(val)`
    |
    = note: expected enum `Option<_>`
               found type `{integer}`
