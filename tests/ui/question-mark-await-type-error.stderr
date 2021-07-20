@@ -1,90 +1,122 @@
 error[E0277]: the `?` operator can only be applied to values that implement `Try`
-  --> $DIR/question-mark-await-type-error.rs:14:9
-   |
-14 |         async {}.await?; //~ ERROR the `?` operator can only be applied to values that implement `std::ops::Try`
-   |         ^^^^^^^^^^^^^^^ the `?` operator cannot be applied to type `()`
-   |
-   = help: the trait `Try` is not implemented for `()`
-   = note: required by `branch`
+   --> $DIR/question-mark-await-type-error.rs:14:9
+    |
+14  |         async {}.await?; //~ ERROR the `?` operator can only be applied to values that implement `std::ops::Try`
+    |         ^^^^^^^^^^^^^^^ the `?` operator cannot be applied to type `()`
+    |
+    = help: the trait `Try` is not implemented for `()`
+note: required by `branch`
+   --> $DIR/try_trait.rs:218:5
+    |
+218 |     fn branch(self) -> ControlFlow<Self::Residual, Self::Output>;
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 error[E0277]: the `?` operator can only be used in an async function that returns `Result` or `Option` (or another type that implements `FromResidual`)
-  --> $DIR/question-mark-await-type-error.rs:14:23
-   |
-12 |   async fn async_fn() {
-   |  _____________________-
-13 | |     for _i in 1..2 {
-14 | |         async {}.await?; //~ ERROR the `?` operator can only be applied to values that implement `std::ops::Try`
-   | |                       ^ cannot use the `?` operator in an async function that returns `()`
-15 | |     }
-16 | | }
-   | |_- this function should return `Result` or `Option` to accept `?`
-   |
-   = help: the trait `FromResidual<_>` is not implemented for `()`
-   = note: required by `from_residual`
+   --> $DIR/question-mark-await-type-error.rs:14:23
+    |
+12  |   async fn async_fn() {
+    |  _____________________-
+13  | |     for _i in 1..2 {
+14  | |         async {}.await?; //~ ERROR the `?` operator can only be applied to values that implement `std::ops::Try`
+    | |                       ^ cannot use the `?` operator in an async function that returns `()`
+15  | |     }
+16  | | }
+    | |_- this function should return `Result` or `Option` to accept `?`
+    |
+    = help: the trait `FromResidual<_>` is not implemented for `()`
+note: required by `from_residual`
+   --> $DIR/try_trait.rs:339:5
+    |
+339 |     fn from_residual(residual: R) -> Self;
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 error[E0277]: the `?` operator can only be applied to values that implement `Try`
-  --> $DIR/question-mark-await-type-error.rs:28:9
-   |
-28 |         async {}.await?; //~ ERROR the `?` operator can only be applied to values that implement `std::ops::Try`
-   |         ^^^^^^^^^^^^^^^ the `?` operator cannot be applied to type `()`
-   |
-   = help: the trait `Try` is not implemented for `()`
-   = note: required by `branch`
+   --> $DIR/question-mark-await-type-error.rs:28:9
+    |
+28  |         async {}.await?; //~ ERROR the `?` operator can only be applied to values that implement `std::ops::Try`
+    |         ^^^^^^^^^^^^^^^ the `?` operator cannot be applied to type `()`
+    |
+    = help: the trait `Try` is not implemented for `()`
+note: required by `branch`
+   --> $DIR/try_trait.rs:218:5
+    |
+218 |     fn branch(self) -> ControlFlow<Self::Residual, Self::Output>;
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 error[E0277]: the `?` operator can only be used in an async function that returns `Result` or `Option` (or another type that implements `FromResidual`)
-  --> $DIR/question-mark-await-type-error.rs:28:23
-   |
-25 |   async fn async_fn_and_for_await() {
-   |  ___________________________________-
-26 | |     #[for_await]
-27 | |     for _i in stream(2) {
-28 | |         async {}.await?; //~ ERROR the `?` operator can only be applied to values that implement `std::ops::Try`
-   | |                       ^ cannot use the `?` operator in an async function that returns `()`
-29 | |     }
-30 | | }
-   | |_- this function should return `Result` or `Option` to accept `?`
-   |
-   = help: the trait `FromResidual<_>` is not implemented for `()`
-   = note: required by `from_residual`
+   --> $DIR/question-mark-await-type-error.rs:28:23
+    |
+25  |   async fn async_fn_and_for_await() {
+    |  ___________________________________-
+26  | |     #[for_await]
+27  | |     for _i in stream(2) {
+28  | |         async {}.await?; //~ ERROR the `?` operator can only be applied to values that implement `std::ops::Try`
+    | |                       ^ cannot use the `?` operator in an async function that returns `()`
+29  | |     }
+30  | | }
+    | |_- this function should return `Result` or `Option` to accept `?`
+    |
+    = help: the trait `FromResidual<_>` is not implemented for `()`
+note: required by `from_residual`
+   --> $DIR/try_trait.rs:339:5
+    |
+339 |     fn from_residual(residual: R) -> Self;
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 error[E0277]: the `?` operator can only be applied to values that implement `Try`
-  --> $DIR/question-mark-await-type-error.rs:21:18
-   |
-21 |         async {}.await?; //~ ERROR the `?` operator can only be applied to values that implement `std::ops::Try`
-   |                  ^^^^^^ the `?` operator cannot be applied to type `()`
-   |
-   = help: the trait `Try` is not implemented for `()`
-   = note: required by `branch`
+   --> $DIR/question-mark-await-type-error.rs:21:18
+    |
+21  |         async {}.await?; //~ ERROR the `?` operator can only be applied to values that implement `std::ops::Try`
+    |                  ^^^^^^ the `?` operator cannot be applied to type `()`
+    |
+    = help: the trait `Try` is not implemented for `()`
+note: required by `branch`
+   --> $DIR/try_trait.rs:218:5
+    |
+218 |     fn branch(self) -> ControlFlow<Self::Residual, Self::Output>;
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 error[E0277]: the `?` operator can only be used in a generator that returns `Result` or `Option` (or another type that implements `FromResidual`)
-  --> $DIR/question-mark-await-type-error.rs:21:23
-   |
-18 | #[stream(item = i32)]
-   | --------------------- this function should return `Result` or `Option` to accept `?`
+   --> $DIR/question-mark-await-type-error.rs:21:23
+    |
+18  | #[stream(item = i32)]
+    | --------------------- this function should return `Result` or `Option` to accept `?`
 ...
-21 |         async {}.await?; //~ ERROR the `?` operator can only be applied to values that implement `std::ops::Try`
-   |                       ^ cannot use the `?` operator in a generator that returns `()`
-   |
-   = help: the trait `FromResidual<_>` is not implemented for `()`
-   = note: required by `from_residual`
+21  |         async {}.await?; //~ ERROR the `?` operator can only be applied to values that implement `std::ops::Try`
+    |                       ^ cannot use the `?` operator in a generator that returns `()`
+    |
+    = help: the trait `FromResidual<_>` is not implemented for `()`
+note: required by `from_residual`
+   --> $DIR/try_trait.rs:339:5
+    |
+339 |     fn from_residual(residual: R) -> Self;
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 error[E0277]: the `?` operator can only be applied to values that implement `Try`
-  --> $DIR/question-mark-await-type-error.rs:36:18
-   |
-36 |         async {}.await?; //~ ERROR the `?` operator can only be applied to values that implement `std::ops::Try`
-   |                  ^^^^^^ the `?` operator cannot be applied to type `()`
-   |
-   = help: the trait `Try` is not implemented for `()`
-   = note: required by `branch`
+   --> $DIR/question-mark-await-type-error.rs:36:18
+    |
+36  |         async {}.await?; //~ ERROR the `?` operator can only be applied to values that implement `std::ops::Try`
+    |                  ^^^^^^ the `?` operator cannot be applied to type `()`
+    |
+    = help: the trait `Try` is not implemented for `()`
+note: required by `branch`
+   --> $DIR/try_trait.rs:218:5
+    |
+218 |     fn branch(self) -> ControlFlow<Self::Residual, Self::Output>;
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 error[E0277]: the `?` operator can only be used in a generator that returns `Result` or `Option` (or another type that implements `FromResidual`)
-  --> $DIR/question-mark-await-type-error.rs:36:23
-   |
-32 | #[stream(item = i32)]
-   | --------------------- this function should return `Result` or `Option` to accept `?`
+   --> $DIR/question-mark-await-type-error.rs:36:23
+    |
+32  | #[stream(item = i32)]
+    | --------------------- this function should return `Result` or `Option` to accept `?`
 ...
-36 |         async {}.await?; //~ ERROR the `?` operator can only be applied to values that implement `std::ops::Try`
-   |                       ^ cannot use the `?` operator in a generator that returns `()`
-   |
-   = help: the trait `FromResidual<_>` is not implemented for `()`
-   = note: required by `from_residual`
+36  |         async {}.await?; //~ ERROR the `?` operator can only be applied to values that implement `std::ops::Try`
+    |                       ^ cannot use the `?` operator in a generator that returns `()`
+    |
+    = help: the trait `FromResidual<_>` is not implemented for `()`
+note: required by `from_residual`
+   --> $DIR/try_trait.rs:339:5
+    |
+339 |     fn from_residual(residual: R) -> Self;
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
