@@ -6,10 +6,6 @@ error[E0277]: the `?` operator can only be applied to values that implement `Try
     |
     = help: the trait `Try` is not implemented for `()`
 note: required by `branch`
-   --> $DIR/try_trait.rs:218:5
-    |
-218 |     fn branch(self) -> ControlFlow<Self::Residual, Self::Output>;
-    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 error[E0277]: the `?` operator can only be used in an async function that returns `Result` or `Option` (or another type that implements `FromResidual`)
    --> $DIR/question-mark-await-type-error.rs:14:23
@@ -25,10 +21,6 @@ error[E0277]: the `?` operator can only be used in an async function that return
     |
     = help: the trait `FromResidual<_>` is not implemented for `()`
 note: required by `from_residual`
-   --> $DIR/try_trait.rs:339:5
-    |
-339 |     fn from_residual(residual: R) -> Self;
-    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 error[E0277]: the `?` operator can only be applied to values that implement `Try`
    --> $DIR/question-mark-await-type-error.rs:28:9
@@ -38,10 +30,6 @@ error[E0277]: the `?` operator can only be applied to values that implement `Try
     |
     = help: the trait `Try` is not implemented for `()`
 note: required by `branch`
-   --> $DIR/try_trait.rs:218:5
-    |
-218 |     fn branch(self) -> ControlFlow<Self::Residual, Self::Output>;
-    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 error[E0277]: the `?` operator can only be used in an async function that returns `Result` or `Option` (or another type that implements `FromResidual`)
    --> $DIR/question-mark-await-type-error.rs:28:23
@@ -58,10 +46,6 @@ error[E0277]: the `?` operator can only be used in an async function that return
     |
     = help: the trait `FromResidual<_>` is not implemented for `()`
 note: required by `from_residual`
-   --> $DIR/try_trait.rs:339:5
-    |
-339 |     fn from_residual(residual: R) -> Self;
-    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 error[E0277]: the `?` operator can only be applied to values that implement `Try`
    --> $DIR/question-mark-await-type-error.rs:21:18
@@ -71,10 +55,6 @@ error[E0277]: the `?` operator can only be applied to values that implement `Try
     |
     = help: the trait `Try` is not implemented for `()`
 note: required by `branch`
-   --> $DIR/try_trait.rs:218:5
-    |
-218 |     fn branch(self) -> ControlFlow<Self::Residual, Self::Output>;
-    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 error[E0277]: the `?` operator can only be used in a generator that returns `Result` or `Option` (or another type that implements `FromResidual`)
    --> $DIR/question-mark-await-type-error.rs:21:23
@@ -87,10 +67,6 @@ error[E0277]: the `?` operator can only be used in a generator that returns `Res
     |
     = help: the trait `FromResidual<_>` is not implemented for `()`
 note: required by `from_residual`
-   --> $DIR/try_trait.rs:339:5
-    |
-339 |     fn from_residual(residual: R) -> Self;
-    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 error[E0277]: the `?` operator can only be applied to values that implement `Try`
    --> $DIR/question-mark-await-type-error.rs:36:18
@@ -100,10 +76,6 @@ error[E0277]: the `?` operator can only be applied to values that implement `Try
     |
     = help: the trait `Try` is not implemented for `()`
 note: required by `branch`
-   --> $DIR/try_trait.rs:218:5
-    |
-218 |     fn branch(self) -> ControlFlow<Self::Residual, Self::Output>;
-    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 error[E0277]: the `?` operator can only be used in a generator that returns `Result` or `Option` (or another type that implements `FromResidual`)
    --> $DIR/question-mark-await-type-error.rs:36:23
@@ -116,7 +88,3 @@ error[E0277]: the `?` operator can only be used in a generator that returns `Res
     |
     = help: the trait `FromResidual<_>` is not implemented for `()`
 note: required by `from_residual`
-   --> $DIR/try_trait.rs:339:5
-    |
-339 |     fn from_residual(residual: R) -> Self;
-    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
