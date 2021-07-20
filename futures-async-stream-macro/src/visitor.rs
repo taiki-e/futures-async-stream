@@ -187,7 +187,7 @@ impl Visitor {
             } else {
                 unreachable!()
             }
-        })
+        });
     }
 
     /// Visits `#[stream] async (move) <block>`.
