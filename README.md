@@ -120,7 +120,7 @@ struct Bar(u32);
 impl Foo for Bar {
     #[stream(boxed, item = u32)]
     async fn method(&mut self) {
-        while self.0 < u32::max_value() {
+        while self.0 < u32::MAX {
             self.0 += 1;
             yield self.0;
         }
@@ -150,7 +150,7 @@ struct Bar(u32);
 impl Foo for Bar {
     #[stream(boxed, item = u32)]
     async fn method(&mut self) {
-        while self.0 < u32::max_value() {
+        while self.0 < u32::MAX {
             self.0 += 1;
             yield self.0;
         }
