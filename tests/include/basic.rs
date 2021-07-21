@@ -25,7 +25,7 @@ pub async fn for_await_in_try_stream_fn() {
 
 #[stream(item = ())]
 pub async fn stream_in_stream_fn() {
-    let _: impl Stream<Item = ()> = {
+    let _ = {
         #[stream]
         async move {
             yield;
@@ -38,7 +38,7 @@ pub async fn stream_in_stream_fn() {
 
 #[try_stream(ok = (), error = ())]
 pub async fn stream_in_try_stream_fn() {
-    let _: impl Stream<Item = ()> = {
+    let _ = {
         #[stream]
         async move {
             yield;
@@ -51,11 +51,13 @@ pub async fn stream_in_try_stream_fn() {
 
 #[stream(item = ())]
 pub async fn try_stream_in_stream_fn() {
-    let _: impl Stream<Item = Result<(), ()>> = {
+    let _ = {
         #[try_stream]
         async move {
             yield;
             async {}.await;
+            // TODO: allow specifying error type in #[try_stream] attribute and remove this hack.
+            return Err(());
         }
     };
     yield;
@@ -64,11 +66,13 @@ pub async fn try_stream_in_stream_fn() {
 
 #[try_stream(ok = (), error = ())]
 pub async fn try_stream_in_try_stream_fn() {
-    let _: impl Stream<Item = Result<(), ()>> = {
+    let _ = {
         #[try_stream]
         async move {
             yield;
             async {}.await;
+            // TODO: allow specifying error type in #[try_stream] attribute and remove this hack.
+            return Err(());
         }
     };
     yield;

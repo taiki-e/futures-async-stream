@@ -1,6 +1,5 @@
 #![warn(rust_2018_idioms, single_use_lifetimes)]
-#![allow(incomplete_features)] // for impl_trait_in_bindings
-#![feature(generators, impl_trait_in_bindings)]
+#![feature(generators)]
 
 // See https://github.com/rust-lang/pin-utils/pull/26#discussion_r344491597
 //
@@ -13,6 +12,5 @@ extern crate futures_async_stream as core;
 mod futures_async_stream {}
 
 use ::futures_async_stream::{stream, try_stream};
-use futures_core::stream::Stream;
 
 include!("include/basic.rs");

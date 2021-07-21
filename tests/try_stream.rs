@@ -1,8 +1,7 @@
 #![warn(rust_2018_idioms, single_use_lifetimes)]
-#![allow(incomplete_features)] // for impl_trait_in_bindings
 #![allow(clippy::try_err, clippy::unused_async)]
 #![allow(clippy::semicolon_if_nothing_returned)] // broken
-#![feature(generators, proc_macro_hygiene, stmt_expr_attributes, impl_trait_in_bindings)]
+#![feature(generators, proc_macro_hygiene, stmt_expr_attributes)]
 
 use futures::{
     future::Future,
@@ -21,6 +20,11 @@ fn run<F: Future>(f: F) -> F::Output {
             return x;
         }
     }
+}
+
+// TODO: allow specifying error type in #[try_stream] attribute and remove this hack.
+fn ensure_item_type<T, E, S: Stream<Item = Result<T, E>>>(s: S) -> S {
+    s
 }
 
 #[stream(item = T)]
@@ -43,12 +47,13 @@ pub async fn nested() {
 }
 
 pub async fn nested2() -> Result<(), i32> {
-    let s: impl Stream<Item = Result<i32, i32>> = try_stream_block! {
+    let s = try_stream_block! {
         #[for_await]
         for i in iter(vec![Ok(1), Err(2)]) {
             yield async { i }.await?;
         }
     };
+    let s = ensure_item_type::<i32, i32, _>(s);
     #[for_await]
     for i in s {
         async { i }.await?;
@@ -57,7 +62,7 @@ pub async fn nested2() -> Result<(), i32> {
 }
 
 pub async fn async_block1() -> Result<(), i32> {
-    let s: impl Stream<Item = Result<i32, i32>> = {
+    let s = {
         #[try_stream]
         async {
             #[for_await]
@@ -66,13 +71,14 @@ pub async fn async_block1() -> Result<(), i32> {
             }
         }
     };
+    let s = ensure_item_type::<i32, i32, _>(s);
     #[for_await]
     for _i in s {}
     Ok::<(), i32>(())
 }
 
 pub async fn async_block2() -> Result<(), i32> {
-    let s: impl Stream<Item = Result<i32, i32>> = {
+    let s = {
         #[try_stream]
         async move {
             #[for_await]
@@ -81,6 +87,7 @@ pub async fn async_block2() -> Result<(), i32> {
             }
         }
     };
+    let s = ensure_item_type::<i32, i32, _>(s);
     #[for_await]
     for _i in s {}
     Ok::<(), i32>(())
@@ -88,7 +95,7 @@ pub async fn async_block2() -> Result<(), i32> {
 
 #[try_stream(ok = i32, error = i32)]
 pub async fn async_block3() {
-    let s: impl Stream<Item = Result<i32, i32>> = {
+    let s = {
         #[try_stream]
         async move {
             #[for_await]
@@ -97,18 +104,20 @@ pub async fn async_block3() {
             }
         }
     };
+    let s = ensure_item_type::<i32, i32, _>(s);
     #[for_await]
     for _i in s {}
 }
 
 pub async fn async_block_weird_fmt() {
-    let _: impl Stream<Item = Result<i32, i32>> = #[try_stream]
+    let s = #[try_stream]
     async move {
         #[for_await]
         for i in iter(vec![Ok(1), Err(2)]) {
             yield async { i }.await?;
         }
     };
+    let _ = ensure_item_type::<i32, i32, _>(s);
 }
 
 #[try_stream(ok = u64, error = i32)]
