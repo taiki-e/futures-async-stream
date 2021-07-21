@@ -21,29 +21,29 @@ pub struct Foo(i32);
 impl Foo {
     #[stream(item = &i32)]
     pub async fn foo(&self) {
-        yield &self.0
+        yield &self.0;
     }
 }
 
 #[stream(item = &i32)]
 pub async fn single_ref(x: &i32) {
-    yield x
+    yield x;
 }
 
 #[stream(item = ())]
 pub async fn multi_ref<T>(_x: &T, _y: &i32) {
-    yield
+    yield;
 }
 
 #[stream(item = ())]
 pub async fn pat_ref<T>(_x: &T, _y: (&i32, &i8)) {
-    yield
+    yield;
 }
 
 #[allow(single_use_lifetimes)]
 #[stream(item = ())]
 pub async fn check_for_name_collision<'_async0, T>(_x: &T, _y: &'_async0 i32) {
-    yield
+    yield;
 }
 
 pub trait A<'a> {}
@@ -55,5 +55,5 @@ where
     for<'_async0> &'_async0 T: Unpin,
     T: for<'_async0> A<'_async0>,
 {
-    yield
+    yield;
 }

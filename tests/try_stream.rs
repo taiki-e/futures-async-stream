@@ -1,6 +1,7 @@
 #![warn(rust_2018_idioms, single_use_lifetimes)]
 #![allow(incomplete_features)] // for impl_trait_in_bindings
-#![allow(clippy::try_err)]
+#![allow(clippy::try_err, clippy::unused_async)]
+#![allow(clippy::semicolon_if_nothing_returned)] // broken
 #![feature(generators, proc_macro_hygiene, stmt_expr_attributes, impl_trait_in_bindings)]
 
 use futures::{
@@ -149,13 +150,13 @@ fn test() {
 
         let mut v = [1, 2, 3, 4, 10].iter();
         #[for_await]
-        for x in stream3(v.clone().cloned().take(4)) {
+        for x in stream3(v.clone().copied().take(4)) {
             assert_eq!(x.unwrap(), *v.next().unwrap());
         }
 
         #[for_await]
         for x in stream3(Vec::new()) {
-            assert_eq!(Err(0), x)
+            assert_eq!(Err(0), x);
         }
-    })
+    });
 }

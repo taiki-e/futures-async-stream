@@ -1,4 +1,5 @@
 #![warn(rust_2018_idioms, single_use_lifetimes)]
+#![allow(clippy::semicolon_if_nothing_returned)] // broken
 #![feature(generators, proc_macro_hygiene, stmt_expr_attributes)]
 
 use futures::{
@@ -63,7 +64,7 @@ pub fn in_stream_block() -> impl Stream<Item = i32> {
     stream_block! {
         #[for_await]
         for item in in_stream_fn() {
-            yield item
+            yield item;
         }
     }
 }
@@ -73,5 +74,5 @@ fn test() {
     run(async {
         assert_eq!(in_async_fn().await, 10);
         assert!(nested().await);
-    })
+    });
 }

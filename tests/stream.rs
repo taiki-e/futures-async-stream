@@ -1,5 +1,6 @@
 #![warn(rust_2018_idioms, single_use_lifetimes)]
-#![allow(clippy::needless_lifetimes)] // broken
+#![allow(clippy::unused_async)]
+#![allow(clippy::needless_lifetimes, clippy::semicolon_if_nothing_returned)] // broken
 #![feature(generators, proc_macro_hygiene, stmt_expr_attributes)]
 
 use std::{pin::Pin, rc::Rc, sync::Arc};
@@ -26,7 +27,7 @@ fn run<F: Future>(f: F) -> F::Output {
 #[stream(item = i32)]
 async fn stream(x: i32) {
     for i in 1..=x {
-        yield i
+        yield i;
     }
 }
 
@@ -197,47 +198,47 @@ pub struct Receiver(i32);
 impl Receiver {
     #[stream(item = i32)]
     pub async fn take_self(self) {
-        yield self.0
+        yield self.0;
     }
 
     #[stream(item = i32)]
     pub async fn take_ref_self(&self) {
-        yield self.0
+        yield self.0;
     }
 
     #[stream(item = i32)]
     pub async fn take_ref_mut_self(&mut self) {
-        yield self.0
+        yield self.0;
     }
 
     #[stream(item = i32)]
     pub async fn take_box_self(self: Box<Self>) {
-        yield self.0
+        yield self.0;
     }
 
     #[stream(item = i32)]
     pub async fn take_rc_self(self: Rc<Self>) {
-        yield self.0
+        yield self.0;
     }
 
     #[stream(item = i32)]
     pub async fn take_arc_self(self: Arc<Self>) {
-        yield self.0
+        yield self.0;
     }
 
     #[stream(item = i32)]
     pub async fn take_pin_ref_self(self: Pin<&Self>) {
-        yield self.0
+        yield self.0;
     }
 
     #[stream(item = i32)]
     pub async fn take_pin_ref_mut_self(self: Pin<&mut Self>) {
-        yield self.0
+        yield self.0;
     }
 
     #[stream(item = i32)]
     pub async fn take_pin_box_self(self: Pin<Box<Self>>) {
-        yield self.0
+        yield self.0;
     }
 }
 
@@ -302,5 +303,5 @@ fn test() {
         for x in Receiver(11).take_self() {
             assert_eq!(x, 11);
         }
-    })
+    });
 }
