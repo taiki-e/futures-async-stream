@@ -62,28 +62,18 @@ impl ReturnTypeKind {
                 let i: kw::boxed = input.parse()?;
                 match self {
                     Self::Default => *self = Self::Boxed { send: true },
-                    Self::Boxed { send: true } => {
-                        return Err(error!(i, "duplicate `boxed` argument"));
-                    }
+                    Self::Boxed { send: true } => bail!(i, "duplicate `boxed` argument"),
                     Self::Boxed { send: false } => {
-                        return Err(error!(
-                            i,
-                            "`boxed` and `boxed_local` may not be used at the same time"
-                        ));
+                        bail!(i, "`boxed` and `boxed_local` may not be used at the same time");
                     }
                 }
             } else if input.peek(kw::boxed_local) {
                 let i: kw::boxed_local = input.parse()?;
                 match self {
                     Self::Default => *self = Self::Boxed { send: false },
-                    Self::Boxed { send: false } => {
-                        return Err(error!(i, "duplicate `boxed_local` argument"));
-                    }
+                    Self::Boxed { send: false } => bail!(i, "duplicate `boxed_local` argument"),
                     Self::Boxed { send: true } => {
-                        return Err(error!(
-                            i,
-                            "`boxed` and `boxed_local` may not be used at the same time"
-                        ));
+                        bail!(i, "`boxed` and `boxed_local` may not be used at the same time");
                     }
                 }
             } else {
@@ -111,20 +101,19 @@ fn parse_value(
     has_prev: bool,
 ) -> Result<(Type, TokenStream)> {
     if input.is_empty() {
-        return Err(error!(name, "expected `{0} = <type>`, found `{0}`", name.to_token_stream()));
+        bail!(name, "expected `{0} = <type>`, found `{0}`", name.to_token_stream());
     }
     let eq_token: Token![=] = input.parse()?;
     if input.is_empty() {
         let span = quote!(#name #eq_token);
-        return Err(error!(span, "expected `{0} = <type>`, found `{0} =`", name.to_token_stream()));
+        bail!(span, "expected `{0} = <type>`, found `{0} =`", name.to_token_stream());
     }
     let value: Type = input.parse()?;
     let span = quote!(#name #value);
     if has_prev {
-        Err(error!(span, "duplicate `{}` argument", name.to_token_stream()))
-    } else {
-        Ok((value, span))
+        bail!(span, "duplicate `{}` argument", name.to_token_stream())
     }
+    Ok((value, span))
 }
 
 struct StreamArg {
@@ -146,7 +135,7 @@ impl Parse for StreamArg {
                 input.parse::<kw::item>().map(|_| unreachable!())
             } else {
                 let token = input.parse::<TokenStream>()?;
-                Err(error!(token, "unexpected argument: {}", token))
+                bail!(token, "unexpected argument: {}", token)
             }
         })?;
 
@@ -186,7 +175,7 @@ impl Parse for TryStreamArg {
                 input.parse::<kw::error>().map(|_| unreachable!())
             } else {
                 let token = input.parse::<TokenStream>()?;
-                Err(error!(token, "unexpected argument: {}", token))
+                bail!(token, "unexpected argument: {}", token)
             }
         })?;
 

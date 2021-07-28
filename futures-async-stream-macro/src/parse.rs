@@ -42,12 +42,12 @@ pub(crate) fn parse(input: TokenStream, cx: Context) -> Result<FnOrAsync> {
             validate_signature(None, &expr.attrs, cx)?;
             Ok(input)
         }
-        FnOrAsync::NotAsync => Err(error!(
+        FnOrAsync::NotAsync => bail!(
             // Highlight the attribute itself, like `derive` and `proc_macro` do.
             TokenStream::new(),
             "#[{}] attribute may only be used on async functions or async blocks",
             cx.as_str()
-        )),
+        ),
     }
 }
 
@@ -65,19 +65,19 @@ fn peek_signature(input: ParseStream<'_>) -> bool {
 fn validate_signature(item: Option<&FnSig>, attrs: &[Attribute], cx: Context) -> Result<()> {
     if let Some(item) = item {
         if item.sig.asyncness.is_none() {
-            return Err(error!(item.sig.fn_token, "async stream must be declared as async"));
+            bail!(item.sig.fn_token, "async stream must be declared as async");
         }
         if let Some(constness) = item.sig.constness {
-            return Err(error!(constness, "async stream may not be const"));
+            bail!(constness, "async stream may not be const");
         }
         if let Some(variadic) = &item.sig.variadic {
-            return Err(error!(variadic, "async stream may not be variadic"));
+            bail!(variadic, "async stream may not be variadic");
         }
 
         if let ReturnType::Type(_, ty) = &item.sig.output {
             match &**ty {
                 Type::Tuple(ty) if ty.elems.is_empty() => {}
-                _ => return Err(error!(ty, "async stream must return the unit type")),
+                _ => bail!(ty, "async stream must return the unit type"),
             }
         }
     }
@@ -87,12 +87,11 @@ fn validate_signature(item: Option<&FnSig>, attrs: &[Attribute], cx: Context) ->
         Context::TryStream => ("try_stream", "stream"),
     };
     if let Some(attr) = attrs.find(duplicate) {
-        Err(error!(attr, "duplicate #[{}] attribute", duplicate))
+        bail!(attr, "duplicate #[{}] attribute", duplicate)
     } else if let Some(attr) = attrs.find(another) {
-        Err(error!(attr, "#[stream] and #[try_stream] may not be used at the same time"))
-    } else {
-        Ok(())
+        bail!(attr, "#[stream] and #[try_stream] may not be used at the same time")
     }
+    Ok(())
 }
 
 pub(crate) enum FnOrAsync {

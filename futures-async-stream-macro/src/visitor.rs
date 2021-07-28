@@ -129,7 +129,7 @@ impl Visitor {
                     }
                 }
                 Scope::Closure => {
-                    *expr = expr_compile_error(&error!(
+                    *expr = expr_compile_error(&format_err!(
                         &expr,
                         "for await may not be allowed outside of \
                          async blocks, functions, closures, async stream blocks, and functions",
@@ -202,7 +202,7 @@ impl Visitor {
                     *expr = expr_compile_error(&e);
                 }
                 (Ok(Some(_)), Ok(Some(i))) => {
-                    *expr = expr_compile_error(&error!(
+                    *expr = expr_compile_error(&format_err!(
                         e.attrs.remove(i),
                         "#[stream] and #[try_stream] may not be used at the same time"
                     ));
