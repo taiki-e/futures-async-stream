@@ -11,6 +11,7 @@ on:
       - staging
   schedule:
     - cron: '40 1 * * *'
+  workflow_dispatch:
 
 env:
   CARGO_INCREMENTAL: 0
@@ -50,7 +51,7 @@ jobs:
       - run: cargo build --manifest-path tests/no-std/Cargo.toml --target thumbv7m-none-eabi
       - run: tools/check-minimal-versions.sh
 
-  clippy:
+  tidy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -58,19 +59,12 @@ jobs:
           persist-credentials: false
       - uses: taiki-e/github-actions/install-rust@main
         with:
-          component: clippy
+          component: clippy,rustfmt
       - run: cargo clippy --all --all-features --all-targets
-
-  fmt:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          persist-credentials: false
-      - uses: taiki-e/github-actions/install-rust@main
-        with:
-          component: rustfmt
       - run: cargo fmt --all -- --check
+        if: always()
+      - run: shellcheck **/*.sh
+        if: always()
 
   docs:
     runs-on: ubuntu-latest
@@ -83,14 +77,6 @@ jobs:
         env:
           RUSTDOCFLAGS: -D warnings
 
-  shellcheck:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          persist-credentials: false
-      - run: shellcheck **/*.sh
-
   # This job doesn't actually test anything, but they're used to tell bors the
   # build completed, as there is no practical way to detect when a workflow is
   # successful listening to webhooks only.
@@ -102,10 +88,8 @@ jobs:
     if: github.event_name == 'push' && success()
     needs:
       - test
-      - clippy
-      - fmt
+      - tidy
       - docs
-      - shellcheck
     runs-on: ubuntu-latest
     steps:
       - name: Mark the job as a success
