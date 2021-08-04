@@ -391,5 +391,9 @@ fn make_gen_body(
         )
     };
 
-    if boxed { quote!(Box::pin(#body)) } else { body }
+    if boxed {
+        quote!(Box::pin(#body))
+    } else {
+        body
+    }
 }
