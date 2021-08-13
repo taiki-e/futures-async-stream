@@ -32,6 +32,7 @@ error[E0271]: type mismatch resolving `<impl futures_async_stream::__private::st
    |
    = note: expected tuple `(i32, i32)`
                found type `{integer}`
+   = note: this error originates in the attribute macro `stream` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error[E0308]: mismatched types
   --> $DIR/bad-item-type.rs:24:11

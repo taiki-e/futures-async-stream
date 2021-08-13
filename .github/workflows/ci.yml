@@ -42,6 +42,7 @@ jobs:
       - uses: taiki-e/github-actions/install-rust@main
         with:
           toolchain: ${{ matrix.rust }}
+          component: rust-src
       - run: rustup target add thumbv7m-none-eabi
       - run: cargo +stable install cargo-hack
       - run: cargo test --all --all-features --tests
