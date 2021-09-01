@@ -184,9 +184,9 @@ async fn foo(stream: impl Stream<Item = String>) {
 <!--
 ## List of features that may be added in the future as an extension of this feature:
 
-  * `async_sink` (https://github.com/rust-lang-nursery/futures-rs/pull/1548#issuecomment-486205382)
-  * Support `.await` in macro (https://github.com/rust-lang-nursery/futures-rs/pull/1548#discussion_r285341883)
-  * Parallel version of `for_await` (https://github.com/rustasync/runtime/pull/25)
+- `async_sink` (https://github.com/rust-lang-nursery/futures-rs/pull/1548#issuecomment-486205382)
+- Support `.await` in macro (https://github.com/rust-lang-nursery/futures-rs/pull/1548#discussion_r285341883)
+- Parallel version of `for_await` (https://github.com/rustasync/runtime/pull/25)
 -->
 
 ## How to write the equivalent code without this API?
