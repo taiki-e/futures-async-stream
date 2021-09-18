@@ -1,16 +1,16 @@
-error: unexpected token: bar
+error: unexpected token: `bar`
   --> $DIR/invalid-argument.rs:10:21
    |
 10 |         #[for_await(bar)] //~ ERROR unexpected token
    |                     ^^^
 
-error: unexpected token: (bar)
+error: unexpected token: `(bar)`
   --> $DIR/invalid-argument.rs:21:20
    |
 21 |         #[for_await(bar)] //~ ERROR unexpected token
    |                    ^^^^^
 
-error: unexpected token: ()
+error: unexpected token: `()`
   --> $DIR/invalid-argument.rs:27:20
    |
 27 |         #[for_await()] //~ ERROR unexpected token
