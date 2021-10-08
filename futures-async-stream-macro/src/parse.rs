@@ -94,6 +94,7 @@ fn validate_signature(item: Option<&FnSig>, attrs: &[Attribute], cx: Context) ->
     Ok(())
 }
 
+#[allow(clippy::large_enum_variant)]
 pub(crate) enum FnOrAsync {
     Fn(FnSig),
     Async(ExprAsync, Option<Token![;]>),
