@@ -1,5 +1,5 @@
 error[E0412]: cannot find type `L` in this scope
- --> $DIR/unresolved-type.rs:5:17
+ --> tests/ui/unresolved-type.rs:5:17
   |
 5 | #[stream(item = L)] //~ ERROR cannot find type `Left` in this scope
   |                 ^ not found in this scope

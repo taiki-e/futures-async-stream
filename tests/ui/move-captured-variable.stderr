@@ -1,5 +1,5 @@
 error[E0507]: cannot move out of `a`, a captured variable in an `FnMut` closure
-  --> $DIR/move-captured-variable.rs:10:9
+  --> tests/ui/move-captured-variable.rs:10:9
    |
 8  |        let a = String::new();
    |            - captured outer variable

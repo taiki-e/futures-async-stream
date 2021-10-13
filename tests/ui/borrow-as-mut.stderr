@@ -1,5 +1,5 @@
 error[E0596]: cannot borrow `a` as mutable, as it is not declared as mutable
- --> $DIR/borrow-as-mut.rs:7:5
+ --> tests/ui/borrow-as-mut.rs:7:5
   |
 6 | async fn borrow_mut(a: Vec<u8>) {
   |                     - help: consider changing this to be mutable: `mut a`

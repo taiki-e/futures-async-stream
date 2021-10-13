@@ -29,4 +29,4 @@ pin-project = "1"
 futures = { package = "futures-util", version = "0.3", default-features = false }
 rustversion = "1"
 static_assertions = "1"
-trybuild = "1"
+trybuild = "1.0.49"
