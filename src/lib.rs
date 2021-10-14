@@ -237,7 +237,13 @@
         allow(dead_code, unused_variables)
     )
 ))]
-#![warn(missing_docs, rust_2018_idioms, single_use_lifetimes, unreachable_pub)]
+#![warn(
+    missing_docs,
+    rust_2018_idioms,
+    single_use_lifetimes,
+    unreachable_pub,
+    unsafe_op_in_unsafe_fn
+)]
 #![warn(clippy::default_trait_access, clippy::wildcard_imports)]
 #![feature(generator_trait)]
 
@@ -268,12 +274,12 @@ mod future {
 
     use pin_project::pin_project;
 
-    // Refs: https://github.com/rust-lang/rust/blob/2454a68cfbb63aa7b8e09fe05114d5f98b2f9740/src/libcore/future/mod.rs
+    // Refs: https://github.com/rust-lang/rust/blob/1.52.1/library/core/src/future/mod.rs
 
     /// This type is needed because:
     ///
     /// a) Generators cannot implement `for<'a, 'b> Generator<&'a mut Context<'b>>`, so we need to pass
-    ///    a raw pointer (see https://github.com/rust-lang/rust/issues/68923).
+    ///    a raw pointer (see <https://github.com/rust-lang/rust/issues/68923>).
     /// b) Raw pointers and `NonNull` aren't `Send` or `Sync`, so that would make every single future
     ///    non-Send/Sync as well, and we don't want that.
     ///
@@ -308,6 +314,8 @@ mod future {
 
         fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
             let this = self.project();
+            // Resume the generator, turning the `&mut Context` into a `NonNull` raw pointer. The
+            // `.await` lowering will safely cast that back to a `&mut Context`.
             match this.0.resume(ResumeTy(NonNull::from(cx).cast::<Context<'static>>())) {
                 GeneratorState::Yielded(()) => Poll::Pending,
                 GeneratorState::Complete(x) => Poll::Ready(x),
@@ -317,7 +325,9 @@ mod future {
 
     #[doc(hidden)]
     pub unsafe fn get_context<'a, 'b>(cx: ResumeTy) -> &'a mut Context<'b> {
-        &mut *cx.0.as_ptr().cast()
+        // SAFETY: the caller must guarantee that `cx.0` is a valid pointer
+        // that fulfills all the requirements for a mutable reference.
+        unsafe { &mut *cx.0.as_ptr().cast() }
     }
 }
 

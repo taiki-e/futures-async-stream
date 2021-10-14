@@ -31,8 +31,8 @@ jobs:
         rust:
           # This is the minimum supported Rust version of this crate.
           # When updating this, the reminder to update the minimum supported
-          # Rust version in README.md.
-          - nightly-2021-01-09
+          # Rust version in README.md and .clippy.toml.
+          - nightly-2021-03-11
           - nightly
     runs-on: ubuntu-latest
     steps:
