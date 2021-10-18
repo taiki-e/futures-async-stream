@@ -44,13 +44,11 @@ jobs:
           toolchain: ${{ matrix.rust }}
           component: rust-src
       - run: rustup target add thumbv7m-none-eabi
-      - run: cargo +stable install cargo-hack
       - run: cargo test --all --all-features --tests --no-run
         if: matrix.rust != 'nightly'
       - run: cargo test --all --all-features
         if: matrix.rust == 'nightly'
       - run: cargo build --manifest-path tests/no-std/Cargo.toml --target thumbv7m-none-eabi
-      - run: tools/check-minimal-versions.sh
 
   tidy:
     runs-on: ubuntu-latest
@@ -61,8 +59,12 @@ jobs:
       - uses: taiki-e/github-actions/install-rust@main
         with:
           component: clippy,rustfmt
-      - run: cargo clippy --all --all-features --all-targets
+      - run: cargo install cargo-hack --debug
       - run: cargo fmt --all -- --check
+        if: always()
+      - run: cargo clippy --all --all-features --all-targets
+        if: always()
+      - run: tools/check-minimal-versions.sh
         if: always()
       - run: shellcheck **/*.sh
         if: always()
