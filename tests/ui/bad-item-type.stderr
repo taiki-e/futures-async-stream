@@ -20,7 +20,7 @@ error[E0308]: mismatched types
    = note: expected type `{integer}`
              found tuple `({integer}, {integer})`
 
-error[E0271]: type mismatch resolving `<impl futures_async_stream::__private::stream::Stream as futures_async_stream::__private::stream::Stream>::Item == (i32, i32)`
+error[E0271]: type mismatch resolving `<impl futures_async_stream::__private::stream::Stream<Item = {integer}> as futures_async_stream::__private::stream::Stream>::Item == (i32, i32)`
   --> tests/ui/bad-item-type.rs:27:1
    |
 27 | #[stream(item = (i32, i32))]
@@ -52,7 +52,7 @@ error[E0308]: mismatched types
    = note: expected type `{integer}`
              found tuple `({integer}, {integer})`
 
-error[E0271]: type mismatch resolving `<impl futures_async_stream::__private::stream::Stream as futures_async_stream::__private::stream::Stream>::Item == (i32, i32)`
+error[E0271]: type mismatch resolving `<impl futures_async_stream::__private::stream::Stream<Item = {integer}> as futures_async_stream::__private::stream::Stream>::Item == (i32, i32)`
   --> tests/ui/bad-item-type.rs:35:1
    |
 35 | #[stream(item = (i32, i32), boxed)]
