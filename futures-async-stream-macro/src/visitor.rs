@@ -1,6 +1,6 @@
 use quote::quote;
 use syn::{
-    parse_quote,
+    parse_quote, parse_quote_spanned,
     spanned::Spanned,
     visit_mut::{self, VisitMut},
     Expr, ExprAwait, ExprCall, ExprForLoop, ExprYield, Item, Token,

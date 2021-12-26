@@ -21,12 +21,6 @@ macro_rules! bail {
     };
 }
 
-macro_rules! parse_quote_spanned {
-    ($span:expr => $($tt:tt)*) => {
-        syn::parse2(quote::quote_spanned!($span => $($tt)*)).unwrap_or_else(|e| panic!("{}", e))
-    };
-}
-
 macro_rules! def_site_ident {
     ($s:expr) => {
         syn::Ident::new($s, proc_macro::Span::def_site().into())
