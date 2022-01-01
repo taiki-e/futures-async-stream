@@ -8,6 +8,7 @@ on:
   push:
     branches:
       - main
+      - dev
       - staging
   schedule:
     - cron: '0 1 * * *'
@@ -45,10 +46,10 @@ jobs:
         with:
           toolchain: ${{ matrix.rust }}
           component: rust-src
-      - run: rustup target add thumbv7m-none-eabi
-      - run: cargo test --all --all-features --tests --no-run
+          target: thumbv7m-none-eabi
+      - run: cargo test --workspace --all-features --tests --no-run
         if: matrix.rust != 'nightly'
-      - run: cargo test --all --all-features
+      - run: cargo test --workspace --all-features
         if: matrix.rust == 'nightly'
       - run: cargo build --manifest-path tests/no-std/Cargo.toml --target thumbv7m-none-eabi
 
@@ -61,14 +62,16 @@ jobs:
       - uses: taiki-e/github-actions/install-rust@main
         with:
           component: clippy,rustfmt
-      - run: cargo install cargo-hack --debug
+      - uses: taiki-e/install-action@cargo-hack
+      - uses: taiki-e/install-action@cargo-minimal-versions
+      - uses: taiki-e/install-action@shellcheck
       - run: cargo fmt --all -- --check
         if: always()
-      - run: cargo clippy --all --all-features --all-targets
+      - run: cargo clippy --workspace --all-features --all-targets
         if: always()
-      - run: tools/check-minimal-versions.sh
+      - run: cargo minimal-versions build --workspace --all-features --ignore-private
         if: always()
-      - run: shellcheck **/*.sh
+      - run: shellcheck $(git ls-files '*.sh')
         if: always()
 
   docs:
@@ -78,7 +81,7 @@ jobs:
         with:
           persist-credentials: false
       - uses: taiki-e/github-actions/install-rust@main
-      - run: cargo doc --no-deps --all --all-features
+      - run: cargo doc --workspace --all-features
         env:
           RUSTDOCFLAGS: -D warnings
 
