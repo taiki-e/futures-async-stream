@@ -1,7 +1,7 @@
 #!/bin/bash
-
 set -euo pipefail
 IFS=$'\n\t'
+cd "$(dirname "$0")"/..
 
 # A list of paths to the crate to be published.
 # It will be published in the order listed.
@@ -9,8 +9,6 @@ MEMBERS=(
     "futures-async-stream-macro"
     "."
 )
-
-cd "$(cd "$(dirname "$0")" && pwd)"/..
 
 set -x
 
