@@ -19,6 +19,7 @@ env:
   CARGO_NET_RETRY: 10
   CARGO_TERM_COLOR: always
   RUST_BACKTRACE: full
+  RUSTDOCFLAGS: -D warnings
   RUSTFLAGS: -D warnings
   RUSTUP_MAX_RETRIES: 10
 
@@ -96,8 +97,6 @@ jobs:
           persist-credentials: false
       - uses: taiki-e/github-actions/install-rust@main
       - run: cargo doc --workspace --all-features
-        env:
-          RUSTDOCFLAGS: -D warnings
 
   # This job doesn't actually test anything, but they're used to tell bors the
   # build completed, as there is no practical way to detect when a workflow is

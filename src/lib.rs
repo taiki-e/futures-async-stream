@@ -244,7 +244,13 @@
     unreachable_pub,
     unsafe_op_in_unsafe_fn
 )]
-#![warn(clippy::default_trait_access, clippy::wildcard_imports)]
+#![warn(
+    clippy::default_trait_access,
+    clippy::exhaustive_enums,
+    clippy::exhaustive_structs,
+    clippy::undocumented_unsafe_blocks,
+    clippy::wildcard_imports
+)]
 #![feature(generator_trait)]
 
 #[cfg(doctest)]
