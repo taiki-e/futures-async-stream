@@ -1,7 +1,7 @@
 # futures-async-stream
 
 [![crates.io](https://img.shields.io/crates/v/futures-async-stream?style=flat-square&logo=rust)](https://crates.io/crates/futures-async-stream)
-[![docs.rs](https://img.shields.io/badge/docs.rs-futures--async--stream-blue?style=flat-square)](https://docs.rs/futures-async-stream)
+[![docs.rs](https://img.shields.io/badge/docs.rs-futures--async--stream-blue?style=flat-square&logo=docs.rs)](https://docs.rs/futures-async-stream)
 [![license](https://img.shields.io/badge/license-Apache--2.0_OR_MIT-blue?style=flat-square)](#license)
 [![rustc](https://img.shields.io/badge/rustc-nightly--2021--03--11+-orange?style=flat-square&logo=rust)](https://www.rust-lang.org)
 [![build status](https://img.shields.io/github/workflow/status/taiki-e/futures-async-stream/CI/main?style=flat-square&logo=github)](https://github.com/taiki-e/futures-async-stream/actions)
