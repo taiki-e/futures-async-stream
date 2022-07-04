@@ -22,7 +22,7 @@ members = ["futures-async-stream-macro", "tests/no-std"]
 [dependencies]
 futures-async-stream-macro = { version = "=0.2.5", path = "futures-async-stream-macro" }
 futures-core = { version = "0.3", default-features = false }
-pin-project = "1.0.11"
+pin-project = "1"
 
 [dev-dependencies]
 futures = { package = "futures-util", version = "0.3", default-features = false }
