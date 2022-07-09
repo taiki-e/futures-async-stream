@@ -1,20 +1,17 @@
 error[E0507]: cannot move out of `a`, a captured variable in an `FnMut` closure
   --> tests/ui/move-captured-variable.rs:10:9
    |
-8  |        let a = String::new();
-   |            - captured outer variable
-9  |        foo(|| {
-   |   _________-
-10 |  |         stream_block! { //~ ERROR cannot move out of `a`, a captured variable in an `FnMut` closure
-   |  |_________^
-11 | ||             yield a
-   | ||                   -
-   | ||                   |
-   | ||                   variable moved due to use in generator
-   | ||                   move occurs because `a` has type `String`, which does not implement the `Copy` trait
-12 | ||         };
-   | ||_________^ move out of `a` occurs here
-13 |  |     });
-   |  |_____- captured by this `FnMut` closure
+8  |       let a = String::new();
+   |           - captured outer variable
+9  |       foo(|| {
+   |           -- captured by this `FnMut` closure
+10 | /         stream_block! { //~ ERROR cannot move out of `a`, a captured variable in an `FnMut` closure
+11 | |             yield a
+   | |                   -
+   | |                   |
+   | |                   variable moved due to use in generator
+   | |                   move occurs because `a` has type `String`, which does not implement the `Copy` trait
+12 | |         };
+   | |_________^ move out of `a` occurs here
    |
    = note: this error originates in the macro `stream_block` (in Nightly builds, run with -Z macro-backtrace for more info)
