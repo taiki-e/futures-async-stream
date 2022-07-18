@@ -280,7 +280,7 @@ mod future {
 
     use pin_project::pin_project;
 
-    // Refs: https://github.com/rust-lang/rust/blob/1.52.1/library/core/src/future/mod.rs
+    // Based on https://github.com/rust-lang/rust/blob/1.62.0/library/core/src/future/mod.rs.
 
     /// This type is needed because:
     ///
