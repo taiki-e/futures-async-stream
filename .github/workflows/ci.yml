@@ -47,7 +47,7 @@ jobs:
         with:
           toolchain: ${{ matrix.rust }}
           components: rust-src
-          target: thumbv7m-none-eabi
+          targets: thumbv7m-none-eabi
       - run: cargo test --workspace --all-features --tests --no-run
         if: matrix.rust != 'nightly'
       - run: cargo test --workspace --all-features
