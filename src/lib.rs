@@ -245,12 +245,12 @@
     unsafe_op_in_unsafe_fn
 )]
 #![warn(
-    clippy::default_trait_access,
     clippy::exhaustive_enums,
     clippy::exhaustive_structs,
-    clippy::undocumented_unsafe_blocks,
-    clippy::wildcard_imports
+    clippy::pedantic,
+    clippy::undocumented_unsafe_blocks
 )]
+#![allow(clippy::must_use_candidate)]
 #![feature(generator_trait)]
 
 #[cfg(doctest)]

@@ -9,7 +9,7 @@
 ))]
 #![warn(unsafe_code)]
 #![warn(rust_2018_idioms, single_use_lifetimes, unreachable_pub, unsafe_op_in_unsafe_fn)]
-#![warn(clippy::default_trait_access, clippy::undocumented_unsafe_blocks, clippy::wildcard_imports)]
+#![warn(clippy::pedantic, clippy::undocumented_unsafe_blocks)]
 #![feature(proc_macro_def_site)]
 
 #[macro_use]
