@@ -7,9 +7,9 @@
         allow(dead_code, unused_variables)
     )
 ))]
-#![warn(unsafe_code)]
+#![forbid(unsafe_code)]
 #![warn(rust_2018_idioms, single_use_lifetimes, unreachable_pub, unsafe_op_in_unsafe_fn)]
-#![warn(clippy::pedantic, clippy::undocumented_unsafe_blocks)]
+#![warn(clippy::pedantic)]
 #![feature(proc_macro_def_site)]
 
 #[macro_use]
