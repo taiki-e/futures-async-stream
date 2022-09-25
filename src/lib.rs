@@ -459,7 +459,7 @@ mod try_stream {
                     GeneratorState::Complete(Err(e)) => Poll::Ready(Some(Err(e))),
                     GeneratorState::Complete(Ok(())) => Poll::Ready(None),
                 };
-                if let Poll::Ready(Some(Err(_))) | Poll::Ready(None) = &res {
+                if let Poll::Ready(Some(Err(_)) | None) = &res {
                     this.0.set(None);
                 }
                 res
