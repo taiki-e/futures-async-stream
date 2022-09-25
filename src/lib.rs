@@ -498,6 +498,7 @@ pub mod __private {
         pub use core::future::Future;
 
         #[doc(hidden)]
+        #[allow(unreachable_pub)] // false positive
         pub use crate::future::{from_generator, get_context, ResumeTy};
     }
 
