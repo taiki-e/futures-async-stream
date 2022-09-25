@@ -262,8 +262,7 @@
 #![feature(generator_trait)]
 
 #[cfg(doctest)]
-// https://github.com/rust-lang/rust/issues/82768
-#[cfg_attr(doctest, cfg_attr(doctest, doc = include_str!("../README.md")))]
+#[doc = include_str!("../README.md")]
 const _README: () = ();
 
 #[doc(inline)]
