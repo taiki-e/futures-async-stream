@@ -169,3 +169,49 @@ fn test() {
         }
     });
 }
+
+#[test]
+fn test_early_exit() {
+    #[try_stream(ok = i32, error = i32)]
+    async fn early_exit() {
+        for i in 0..10 {
+            if i == 5 {
+                return Ok(());
+            }
+            yield i;
+        }
+    }
+
+    #[try_stream(ok = i32, error = i32)]
+    pub async fn early_exit_block() {
+        let s = try_stream_block! {
+            for i in 0..10 {
+                if i == 5 {
+                    // This will exit the block, not the function.
+                    return Ok(());
+                }
+                yield i;
+            }
+        };
+        let s = ensure_item_type::<i32, i32, _>(s);
+
+        #[for_await]
+        for i in s {
+            yield i? + 1
+        }
+    }
+
+    run(async {
+        let mut v = 0..5;
+        #[for_await]
+        for x in early_exit() {
+            assert_eq!(x.unwrap(), v.next().unwrap());
+        }
+
+        let mut v = 1..6;
+        #[for_await]
+        for x in early_exit_block() {
+            assert_eq!(x.unwrap(), v.next().unwrap());
+        }
+    });
+}

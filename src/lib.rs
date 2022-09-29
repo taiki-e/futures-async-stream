@@ -56,6 +56,8 @@
 //! }
 //! ```
 //!
+//! To early exit from a `#[stream]` function or block, use `return`.
+//!
 //! `#[stream]` on async fn must have an item type specified via
 //! `item = some::Path` and the values output from the stream must be yielded
 //! via the `yield` expression.
@@ -160,6 +162,8 @@
 //!     }
 //! }
 //! ```
+//!
+//! To early exit from a `#[try_stream]` function or block, use `return Ok(())`.
 //!
 //! # How to write the equivalent code without this API?
 //!
