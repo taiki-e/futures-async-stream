@@ -501,7 +501,7 @@ pub mod __private {
         pub use core::future::Future;
 
         #[doc(hidden)]
-        #[allow(unreachable_pub)] // false positive: https://github.com/rust-lang/rust/issues/102352
+        #[allow(unreachable_pub)] // https://github.com/rust-lang/rust/issues/102352
         pub use crate::future::{from_generator, get_context, ResumeTy};
     }
 
