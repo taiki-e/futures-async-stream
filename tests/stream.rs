@@ -31,6 +31,7 @@ async fn stream(x: i32) {
     }
 }
 
+#[allow(clippy::let_underscore_future)]
 #[stream(item = i32)]
 pub async fn nested() {
     let _ = async {
