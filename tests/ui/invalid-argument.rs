@@ -45,7 +45,7 @@ mod stream {
     async fn unexpected_first() {}
 
     #[stream(item = i32, baz)] //~ ERROR unexpected argument
-    async fn unexpected_secont() {}
+    async fn unexpected_second() {}
 
     #[stream(boxed, item = i32)] // Ok
     async fn boxed_first() {}
@@ -97,7 +97,7 @@ mod try_stream {
     async fn unexpected_first() {}
 
     #[try_stream(ok = (), baz, error = ())] //~ ERROR expected `error`
-    async fn unexpected_secont() {}
+    async fn unexpected_second() {}
 
     #[try_stream(ok = (), error = (), baz)] //~ ERROR unexpected argument
     async fn unexpected_third() {}

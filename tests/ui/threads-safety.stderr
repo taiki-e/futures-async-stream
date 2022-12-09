@@ -1,5 +1,5 @@
 error[E0277]: `dyn Stream<Item = i32>` cannot be sent between threads safely
-  --> tests/ui/threads-sendsync.rs:27:17
+  --> tests/ui/threads-safety.rs:27:17
    |
 27 |     assert_send(boxed_local()); //~ ERROR `dyn futures_core::stream::Stream<Item = i32>` cannot be sent between threads safely
    |     ----------- ^^^^^^^^^^^^^ `dyn Stream<Item = i32>` cannot be sent between threads safely
@@ -11,7 +11,7 @@ error[E0277]: `dyn Stream<Item = i32>` cannot be sent between threads safely
    = note: required because it appears within the type `Box<dyn Stream<Item = i32>>`
    = note: required because it appears within the type `Pin<Box<dyn Stream<Item = i32>>>`
 note: required by a bound in `assert_send`
-  --> tests/ui/threads-sendsync.rs:5:19
+  --> tests/ui/threads-safety.rs:5:19
    |
 5  | fn assert_send<T: Send>(_: T) {}
    |                   ^^^^ required by this bound in `assert_send`
