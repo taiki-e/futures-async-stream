@@ -13,10 +13,9 @@ MEMBERS=(
     "."
 )
 
-set -x
-
 for i in "${!MEMBERS[@]}"; do
     (
+        set -x
         cd "${MEMBERS[${i}]}"
         cargo publish
     )
