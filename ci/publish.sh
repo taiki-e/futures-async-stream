@@ -8,18 +8,18 @@ trap 's=$?; echo >&2 "$0: Error on line "${LINENO}": ${BASH_COMMAND}"; exit ${s}
 
 # A list of paths to the crate to be published.
 # It will be published in the order listed.
-MEMBERS=(
+members=(
     "futures-async-stream-macro"
     "."
 )
 
-for i in "${!MEMBERS[@]}"; do
+for i in "${!members[@]}"; do
     (
         set -x
-        cd "${MEMBERS[${i}]}"
+        cd "${members[${i}]}"
         cargo publish
     )
-    if [[ $((i + 1)) != "${#MEMBERS[@]}" ]]; then
+    if [[ $((i + 1)) != "${#members[@]}" ]]; then
         sleep 45
     fi
 done
