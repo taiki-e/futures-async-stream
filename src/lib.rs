@@ -305,8 +305,10 @@ mod future {
     #[derive(Debug, Copy, Clone)]
     pub struct ResumeTy(pub(crate) NonNull<Context<'static>>);
 
-    // SAFETY: `Context` is `Send + Sync` and the caller of the `get_context` function
-    // that dereferences a pointer must guarantee that no data races will occur.
+    // SAFETY: the caller of the `get_context` function that dereferences a
+    // pointer must guarantee that no data races will occur.
+    // Note: Since https://github.com/rust-lang/rust/pull/95985, `Context` is
+    // `!Send` and `!Sync`.
     unsafe impl Send for ResumeTy {}
     // SAFETY: see `Send` impl
     unsafe impl Sync for ResumeTy {}

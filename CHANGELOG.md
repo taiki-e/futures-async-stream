@@ -10,6 +10,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
+- Fix "generator cannot be sent between threads safely" error since nightly-2023-01-04.
+
 ## [0.2.5] - 2021-01-05
 
 - Exclude unneeded files from crates.io.

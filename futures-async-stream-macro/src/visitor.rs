@@ -105,15 +105,17 @@ impl Visitor {
                 }
                 Scope::Stream | Scope::TryStream => {
                     let task_context = def_site_ident!("__task_context");
-                    quote! {
-                        match unsafe {
+                    let poll_result = def_site_ident!("__poll_result");
+                    quote! {{
+                        let #poll_result = unsafe {
                             ::futures_async_stream::__private::stream::Stream::poll_next(
                                 ::futures_async_stream::__private::Pin::as_mut(&mut #pinned),
                                 ::futures_async_stream::__private::future::get_context(
                                     #task_context,
                                 ),
                             )
-                        } {
+                        };
+                        match #poll_result {
                             ::futures_async_stream::__private::Poll::Ready(
                                 ::futures_async_stream::__private::Some(e),
                             ) => e,
@@ -126,7 +128,7 @@ impl Visitor {
                                 continue;
                             }
                         }
-                    }
+                    }}
                 }
                 Scope::Closure => {
                     *expr = expr_compile_error(&format_err!(
