@@ -1,10 +1,10 @@
 /*!
-Async stream API experiment that may be introduced as a language feature in the future.
+Async stream for Rust and the futures crate.
 
 This crate provides useful features for streams, using `async_await` and
 unstable [`generators`](https://github.com/rust-lang/rust/issues/43122).
 
-# `#[for_await]`
+## `#[for_await]`
 
 Processes streams using a for loop.
 
@@ -32,7 +32,7 @@ async fn collect(stream: impl Stream<Item = i32>) -> Vec<i32> {
 loops can only be used inside of `async` functions, closures, blocks,
 `#[stream]` functions and `stream_block!` macros.
 
-# `#[stream]`
+## `#[stream]`
 
 Creates streams via generators.
 
@@ -84,7 +84,7 @@ fn foo() -> impl Stream<Item = i32> {
 Note that `#[stream]` on async block does not require the `item` argument,
 but it may require additional type annotations.
 
-# Using async stream functions in traits
+## Using async stream functions in traits
 
 You can use async stream functions in traits by passing `boxed` or
 `boxed_local` as an argument.
@@ -143,7 +143,7 @@ impl Foo for Bar {
 }
 ```
 
-# `#[try_stream]`
+## `#[try_stream]`
 
 `?` operator can be used with the `#[try_stream]`. The `Item` of the
 returned stream is `Result` with `Ok` being the value yielded and `Err` the
@@ -164,11 +164,21 @@ async fn foo(stream: impl Stream<Item = String>) {
 }
 ```
 
+`#[try_stream]` can be used wherever `#[stream]` can be used.
+
 To early exit from a `#[try_stream]` function or block, use `return Ok(())`.
 
-# How to write the equivalent code without this API?
+<!--
+## List of features that may be added in the future as an extension of this feature:
 
-## `#[for_await]`
+- `async_sink` (https://github.com/rust-lang-nursery/futures-rs/pull/1548#issuecomment-486205382)
+- Support `.await` in macro (https://github.com/rust-lang-nursery/futures-rs/pull/1548#discussion_r285341883)
+- Parallel version of `for_await` (https://github.com/rustasync/runtime/pull/25)
+-->
+
+## How to write the equivalent code without this API?
+
+### `#[for_await]`
 
 You can write this by combining `while let` loop, `.await`, `pin_mut` macro,
 and `StreamExt::next()` method:
@@ -189,18 +199,17 @@ async fn collect(stream: impl Stream<Item = i32>) -> Vec<i32> {
 }
 ```
 
-## `#[stream]`
+### `#[stream]`
 
 You can write this by manually implementing the combinator:
 
 ```rust
-use std::pin::Pin;
-
-use futures::{
-    ready,
-    stream::Stream,
-    task::{Context, Poll},
+use std::{
+    pin::Pin,
+    task::{ready, Context, Poll},
 };
+
+use futures::stream::Stream;
 use pin_project::pin_project;
 
 fn foo<S>(stream: S) -> impl Stream<Item = i32>

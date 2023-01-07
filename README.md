@@ -76,6 +76,8 @@ async fn foo(stream: impl Stream<Item = String>) {
 }
 ```
 
+To early exit from a `#[stream]` function or block, use `return`.
+
 `#[stream]` on async fn must have an item type specified via
 `item = some::Path` and the values output from the stream must be yielded
 via the `yield` expression.
@@ -108,6 +110,7 @@ You can use async stream functions in traits by passing `boxed` or
 
 ```rust
 #![feature(generators)]
+
 use futures_async_stream::stream;
 
 trait Foo {
@@ -136,9 +139,10 @@ returns a non-threadsafe stream (`Pin<Box<dyn Stream<Item = item> + 'lifetime>>`
 ```rust
 #![feature(generators)]
 
+use std::pin::Pin;
+
 use futures::stream::Stream;
 use futures_async_stream::stream;
-use std::pin::Pin;
 
 // The trait itself can be defined without unstable features.
 trait Foo {
@@ -181,6 +185,8 @@ async fn foo(stream: impl Stream<Item = String>) {
 
 `#[try_stream]` can be used wherever `#[stream]` can be used.
 
+To early exit from a `#[try_stream]` function or block, use `return Ok(())`.
+
 <!--
 ## List of features that may be added in the future as an extension of this feature:
 
@@ -217,13 +223,13 @@ async fn collect(stream: impl Stream<Item = i32>) -> Vec<i32> {
 You can write this by manually implementing the combinator:
 
 ```rust
-use futures::{
-    ready,
-    stream::Stream,
-    task::{Context, Poll},
+use std::{
+    pin::Pin,
+    task::{ready, Context, Poll},
 };
+
+use futures::stream::Stream;
 use pin_project::pin_project;
-use std::pin::Pin;
 
 fn foo<S>(stream: S) -> impl Stream<Item = i32>
 where
