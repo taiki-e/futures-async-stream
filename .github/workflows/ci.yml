@@ -75,7 +75,7 @@ jobs:
       - name: Install cargo-careful
         run: cargo install -f cargo-careful --root "${{ runner.tool_cache }}/cargo-careful" --locked --version "${CARGO_CAREFUL_VERSION}"
         if: matrix.rust == 'nightly' && steps.cache-cargo-careful.outputs.cache-hit != 'true'
-      - run: cargo test --workspace --all-features --tests --no-run
+      - run: cargo test --workspace --all-features --tests --no-run --exclude futures-async-stream-internal-codegen
         if: matrix.rust != 'nightly'
       - run: cargo test --workspace --all-features
         if: matrix.rust == 'nightly'
@@ -101,13 +101,24 @@ jobs:
           RUSTDOCFLAGS: ${{ env.RUSTDOCFLAGS }} -Z randomize-layout
           RUSTFLAGS: ${{ env.RUSTFLAGS }} -Z randomize-layout
 
+  codegen:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+      - name: Install Rust
+        run: rustup toolchain add nightly --no-self-update && rustup default nightly
+      - run: tools/gen.sh
+      - run: git add -N . && git diff --exit-code
+
   # ALL THE PREVIOUS JOBS NEEDS TO BE ADDED TO THE `needs` SECTION OF THIS JOB!
 
   ci-success:
     name: ci
     if: github.event_name == 'push' && success()
     # prettier-ignore
-    needs: [check-external-types, deny, docs, tidy, test, miri] # tidy:needs
+    needs: [check-external-types, deny, docs, tidy, test, miri, codegen] # tidy:needs
     runs-on: ubuntu-latest
     steps:
       - name: Mark the job as a success

@@ -1,7 +1,7 @@
 #![warn(rust_2018_idioms, single_use_lifetimes)]
 #![allow(clippy::unused_async)]
 #![allow(clippy::needless_lifetimes, clippy::semicolon_if_nothing_returned)] // broken
-#![feature(generators, proc_macro_hygiene, stmt_expr_attributes)]
+#![feature(generators, proc_macro_hygiene, stmt_expr_attributes, gen_future)]
 
 use std::{pin::Pin, rc::Rc, sync::Arc};
 
@@ -354,3 +354,10 @@ fn test_early_exit() {
         }
     });
 }
+
+const _: fn() = || {
+    fn assert_send<T: ?Sized + Send>() {}
+    fn assert_sync<T: ?Sized + Sync>() {}
+    assert_send::<std::future::ResumeTy>();
+    assert_sync::<std::future::ResumeTy>();
+};

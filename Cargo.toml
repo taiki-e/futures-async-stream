@@ -16,7 +16,7 @@ targets = ["x86_64-unknown-linux-gnu"]
 
 [workspace]
 resolver = "2"
-members = ["futures-async-stream-macro", "tests/no-std"]
+members = ["futures-async-stream-macro", "tests/no-std", "tools/codegen"]
 
 [lib]
 doc-scrape-examples = false

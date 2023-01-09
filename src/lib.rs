@@ -276,9 +276,16 @@ where
 #![allow(clippy::must_use_candidate)]
 #![feature(generator_trait)]
 
+#[cfg(test)]
+extern crate std;
+
 #[cfg(doctest)]
 #[doc = include_str!("../README.md")]
 const _README: () = ();
+
+#[cfg(test)]
+#[path = "gen/assert_impl.rs"]
+mod assert_impl;
 
 #[doc(inline)]
 pub use futures_async_stream_macro::for_await;
@@ -534,6 +541,7 @@ pub mod __private {
     }
 }
 
+// TODO: generate this with codegen
 #[allow(clippy::wildcard_imports)]
 #[cfg(test)]
 mod tests {
