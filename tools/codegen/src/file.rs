@@ -43,13 +43,72 @@ pub fn write(function_name: &str, path: &Path, contents: TokenStream) -> Result<
     write_raw(function_name, path, format_tokens(contents))
 }
 
-pub fn format_tokens(contents: TokenStream) -> String {
-    prettyplease::unparse(
+fn format_tokens(contents: TokenStream) -> Vec<u8> {
+    let mut out = prettyplease::unparse(
         &syn::parse2(contents.clone()).unwrap_or_else(|e| panic!("{e} in:\n---\n{contents}\n---")),
     )
-    .replace("crate ::", "crate::")
-    .replace(" < ", "<")
-    .replace(" >", ">")
+    .into_bytes();
+    format_macros(&mut out);
+    out
+}
+
+// Roughly format the code inside macro calls.
+fn format_macros(bytes: &mut Vec<u8>) {
+    let mut i = 0;
+    while i < bytes.len() {
+        if bytes[i..].starts_with(b"!(") {
+            i += 2;
+            let mut count = 0;
+            while i < bytes.len() {
+                match bytes[i] {
+                    b'(' => count += 1,
+                    b')' => {
+                        if count == 0 {
+                            break;
+                        } else {
+                            count -= 1;
+                        }
+                    }
+                    _ => {
+                        fn replace(
+                            bytes: &mut Vec<u8>,
+                            i: usize,
+                            needle: &[u8],
+                            with: &[u8],
+                        ) -> usize {
+                            if bytes[i..].starts_with(needle) {
+                                bytes.splice(i..i + needle.len(), with.iter().cloned());
+                                i + with.len() - 1
+                            } else {
+                                i
+                            }
+                        }
+                        i = replace(bytes, i, b"crate ::", b"crate::");
+                        i = replace(bytes, i, b" < ", b"<");
+                        i = replace(bytes, i, b" >", b">");
+                    }
+                }
+                i += 1;
+            }
+        } else {
+            i += 1;
+        }
+    }
+}
+#[test]
+fn test_format_macros() {
+    #[track_caller]
+    fn t(from: &[u8], expected: &[u8]) {
+        let b = &mut from.to_owned();
+        format_macros(b);
+        assert_eq!(b, expected);
+    }
+    t(b"m!(crate ::a::b)", b"m!(crate::a::b)");
+    t(b"(crate ::a::b)", b"(crate ::a::b)");
+    t(b"m!(crate ::a::b < () >)", b"m!(crate::a::b<()>)");
+    t(b"m!(crate ::a::b <  >)", b"m!(crate::a::b<>)");
+    t(b"if < 0 ", b"if < 0 ");
+    t(b"if > 0 ", b"if > 0 ");
 }
 
 #[track_caller]
