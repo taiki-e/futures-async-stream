@@ -50,6 +50,7 @@ jobs:
           - nightly-2021-10-11
           - nightly
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v3
         with:
@@ -89,6 +90,7 @@ jobs:
 
   miri:
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v3
         with:
@@ -103,6 +105,7 @@ jobs:
 
   codegen:
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v3
         with:
@@ -120,6 +123,7 @@ jobs:
     # prettier-ignore
     needs: [check-external-types, deny, docs, tidy, test, miri, codegen] # tidy:needs
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     steps:
       - name: Mark the job as a success
         run: exit 0
