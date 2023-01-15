@@ -65,9 +65,8 @@ fn format_macros(bytes: &mut Vec<u8>) {
                     b')' => {
                         if count == 0 {
                             break;
-                        } else {
-                            count -= 1;
                         }
+                        count -= 1;
                     }
                     _ => {
                         fn replace(
@@ -77,7 +76,7 @@ fn format_macros(bytes: &mut Vec<u8>) {
                             with: &[u8],
                         ) -> usize {
                             if bytes[i..].starts_with(needle) {
-                                bytes.splice(i..i + needle.len(), with.iter().cloned());
+                                bytes.splice(i..i + needle.len(), with.iter().copied());
                                 i + with.len() - 1
                             } else {
                                 i
