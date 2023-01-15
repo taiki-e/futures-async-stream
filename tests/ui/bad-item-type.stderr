@@ -9,11 +9,20 @@ error[E0308]: mismatched types
    |
    = note: expected enum `Option<_>`
               found type `{integer}`
+help: the type constructed contains `{integer}` due to the type of the argument passed
+  --> tests/ui/bad-item-type.rs:5:1
+   |
+5  | #[stream(item = Option<i32>)]
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+...
+13 |     yield val; //~ ERROR mismatched types
+   |           --- this argument influences the type of `{{root}}`
 note: tuple variant defined here
   --> $RUST/core/src/task/poll.rs
    |
    |     Ready(#[stable(feature = "futures_api", since = "1.36.0")] T),
    |     ^^^^^
+   = note: this error originates in the attribute macro `stream` (in Nightly builds, run with -Z macro-backtrace for more info)
 help: try wrapping the expression in `Some`
    |
 13 |     yield Some(val); //~ ERROR mismatched types
@@ -30,11 +39,20 @@ error[E0308]: mismatched types
    |
    = note: expected type `{integer}`
              found tuple `({integer}, {integer})`
+help: the type constructed contains `({integer}, {integer})` due to the type of the argument passed
+  --> tests/ui/bad-item-type.rs:27:1
+   |
+27 | #[stream(item = (i32, i32))]
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+...
+32 |     yield (1, 2) //~ ERROR mismatched types
+   |           ------ this argument influences the type of `{{root}}`
 note: tuple variant defined here
   --> $RUST/core/src/task/poll.rs
    |
    |     Ready(#[stable(feature = "futures_api", since = "1.36.0")] T),
    |     ^^^^^
+   = note: this error originates in the attribute macro `stream` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error[E0271]: type mismatch resolving `<impl Stream<Item = {integer}> as Stream>::Item == (i32, i32)`
   --> tests/ui/bad-item-type.rs:27:1
@@ -56,11 +74,20 @@ error[E0308]: mismatched types
    |
    = note: expected enum `Option<_>`
               found type `{integer}`
+help: the type constructed contains `{integer}` due to the type of the argument passed
+  --> tests/ui/bad-item-type.rs:16:1
+   |
+16 | #[stream(item = Option<i32>, boxed)]
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+...
+24 |     yield val; //~ ERROR mismatched types
+   |           --- this argument influences the type of `{{root}}`
 note: tuple variant defined here
   --> $RUST/core/src/task/poll.rs
    |
    |     Ready(#[stable(feature = "futures_api", since = "1.36.0")] T),
    |     ^^^^^
+   = note: this error originates in the attribute macro `stream` (in Nightly builds, run with -Z macro-backtrace for more info)
 help: try wrapping the expression in `Some`
    |
 24 |     yield Some(val); //~ ERROR mismatched types
@@ -77,11 +104,20 @@ error[E0308]: mismatched types
    |
    = note: expected type `{integer}`
              found tuple `({integer}, {integer})`
+help: the type constructed contains `({integer}, {integer})` due to the type of the argument passed
+  --> tests/ui/bad-item-type.rs:35:1
+   |
+35 | #[stream(item = (i32, i32), boxed)]
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+...
+40 |     yield (1, 2) //~ ERROR mismatched types
+   |           ------ this argument influences the type of `{{root}}`
 note: tuple variant defined here
   --> $RUST/core/src/task/poll.rs
    |
    |     Ready(#[stable(feature = "futures_api", since = "1.36.0")] T),
    |     ^^^^^
+   = note: this error originates in the attribute macro `stream` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error[E0271]: type mismatch resolving `<impl Stream<Item = {integer}> as Stream>::Item == (i32, i32)`
   --> tests/ui/bad-item-type.rs:35:1
