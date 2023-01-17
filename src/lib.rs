@@ -180,18 +180,17 @@ To early exit from a `#[try_stream]` function or block, use `return Ok(())`.
 
 ### `#[for_await]`
 
-You can write this by combining `while let` loop, `.await`, `pin_mut` macro,
+You can write this by combining `while let` loop, `.await`, `pin!` macro,
 and `StreamExt::next()` method:
 
 ```rust
-use futures::{
-    pin_mut,
-    stream::{Stream, StreamExt},
-};
+use std::pin::pin;
+
+use futures::stream::{Stream, StreamExt};
 
 async fn collect(stream: impl Stream<Item = i32>) -> Vec<i32> {
     let mut vec = Vec::new();
-    pin_mut!(stream);
+    let mut stream = pin!(stream);
     while let Some(value) = stream.next().await {
         vec.push(value);
     }
