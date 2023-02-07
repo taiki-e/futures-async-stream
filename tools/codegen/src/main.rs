@@ -328,7 +328,7 @@ fn gen_assert_impl() -> Result<()> {
             #tokens
         };
     });
-    write(function_name!(), &out_dir.join("assert_impl.rs"), out)?;
+    write(function_name!(), out_dir.join("assert_impl.rs"), out)?;
 
     Ok(())
 }
