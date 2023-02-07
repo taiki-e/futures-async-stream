@@ -47,6 +47,7 @@ fn gen_assert_impl() -> Result<()> {
     let mut tokens = quote! {};
     let mut visited_types = BTreeSet::new();
     let mut use_macros = false;
+    let mut use_generics_helpers = false;
     for f in &files {
         let s = fs::read_to_string(f)?;
         let mut ast = syn::parse_file(&s)?;
@@ -81,6 +82,7 @@ fn gen_assert_impl() -> Result<()> {
                 let lt = generics.lifetimes().map(|_| quote! { '_ }).collect::<Vec<_>>();
                 if has_generics {
                     use_macros = true;
+                    use_generics_helpers = true;
                     // Send & Sync & Unpin
                     let unit = generics.type_params().map(|_| quote! { () }).collect::<Vec<_>>();
                     let unit_generics = quote! { <#(#lt,)* #(#unit),*> };
@@ -258,20 +260,6 @@ fn gen_assert_impl() -> Result<()> {
 
     let mut out = quote! {
         #![allow(clippy::std_instead_of_alloc, clippy::std_instead_of_core)]
-        #[allow(unused_imports)]
-        use core::marker::PhantomPinned;
-        /// `Send` & `!Sync`
-        #[allow(dead_code)]
-        struct NotSync(core::cell::Cell<()>);
-        /// `!Send` & `!Sync`
-        #[allow(dead_code)]
-        struct NotSendSync(std::rc::Rc<()>);
-        /// `!UnwindSafe`
-        #[allow(dead_code)]
-        struct NotUnwindSafe(&'static mut ());
-        /// `!RefUnwindSafe`
-        #[allow(dead_code)]
-        struct NotRefUnwindSafe(core::cell::UnsafeCell<()>);
         #[allow(dead_code)]
         fn assert_send<T: ?Sized + Send>() {}
         #[allow(dead_code)]
@@ -283,6 +271,24 @@ fn gen_assert_impl() -> Result<()> {
         #[allow(dead_code)]
         fn assert_ref_unwind_safe<T: ?Sized + std::panic::RefUnwindSafe>() {}
     };
+    if use_generics_helpers {
+        out.extend(quote! {
+            #[allow(unused_imports)]
+            use core::marker::PhantomPinned;
+            /// `Send` & `!Sync`
+            #[allow(dead_code)]
+            struct NotSync(core::cell::Cell<()>);
+            /// `!Send` & `!Sync`
+            #[allow(dead_code)]
+            struct NotSendSync(std::rc::Rc<()>);
+            /// `!UnwindSafe`
+            #[allow(dead_code)]
+            struct NotUnwindSafe(&'static mut ());
+            /// `!RefUnwindSafe`
+            #[allow(dead_code)]
+            struct NotRefUnwindSafe(core::cell::UnsafeCell<()>);
+        });
+    }
     if use_macros {
         out.extend(quote! {
             #[allow(unused_macros)]

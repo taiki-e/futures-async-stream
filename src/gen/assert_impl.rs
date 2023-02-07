@@ -3,22 +3,7 @@
 // It is not intended for manual editing.
 
 #![cfg_attr(rustfmt, rustfmt::skip)]
-
 #![allow(clippy::std_instead_of_alloc, clippy::std_instead_of_core)]
-#[allow(unused_imports)]
-use core::marker::PhantomPinned;
-/// `Send` & `!Sync`
-#[allow(dead_code)]
-struct NotSync(core::cell::Cell<()>);
-/// `!Send` & `!Sync`
-#[allow(dead_code)]
-struct NotSendSync(std::rc::Rc<()>);
-/// `!UnwindSafe`
-#[allow(dead_code)]
-struct NotUnwindSafe(&'static mut ());
-/// `!RefUnwindSafe`
-#[allow(dead_code)]
-struct NotRefUnwindSafe(core::cell::UnsafeCell<()>);
 #[allow(dead_code)]
 fn assert_send<T: ?Sized + Send>() {}
 #[allow(dead_code)]
