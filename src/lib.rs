@@ -308,7 +308,8 @@ mod future {
 
     use pin_project::pin_project;
 
-    // Based on https://github.com/rust-lang/rust/blob/1.63.0/library/core/src/future/mod.rs.
+    // Based on https://github.com/rust-lang/rust/blob/1.66.0/library/core/src/future/mod.rs.
+    // TODO: can we avoid GenFuture? https://github.com/rust-lang/rust/commit/9f36f988ad873f5d34cd9c08e4903c597ffc9532
 
     /// This type is needed because:
     ///
