@@ -1,5 +1,6 @@
 #![warn(rust_2018_idioms, single_use_lifetimes)]
 #![allow(clippy::unused_async)]
+#![allow(clippy::extra_unused_type_parameters)] // https://github.com/rust-lang/rust-clippy/issues/10319
 #![allow(clippy::needless_lifetimes, clippy::semicolon_if_nothing_returned)] // broken
 #![feature(generators, proc_macro_hygiene, stmt_expr_attributes, gen_future)]
 

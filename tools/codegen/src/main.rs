@@ -259,7 +259,11 @@ fn gen_assert_impl() -> Result<()> {
     }
 
     let mut out = quote! {
-        #![allow(clippy::std_instead_of_alloc, clippy::std_instead_of_core)]
+        #![allow(
+            clippy::extra_unused_type_parameters, // https://github.com/rust-lang/rust-clippy/issues/10319
+            clippy::std_instead_of_alloc,
+            clippy::std_instead_of_core,
+        )]
         #[allow(dead_code)]
         fn assert_send<T: ?Sized + Send>() {}
         #[allow(dead_code)]
