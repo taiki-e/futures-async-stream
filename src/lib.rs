@@ -543,7 +543,6 @@ pub mod __private {
 
 // TODO: generate this with codegen
 #[allow(clippy::wildcard_imports)]
-#[allow(clippy::extra_unused_type_parameters)] // https://github.com/rust-lang/rust-clippy/issues/10318
 #[cfg(test)]
 mod tests {
     use core::marker::PhantomPinned;

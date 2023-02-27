@@ -260,7 +260,6 @@ fn gen_assert_impl() -> Result<()> {
 
     let mut out = quote! {
         #![allow(
-            clippy::extra_unused_type_parameters, // https://github.com/rust-lang/rust-clippy/issues/10319
             clippy::std_instead_of_alloc,
             clippy::std_instead_of_core,
         )]

@@ -3,11 +3,7 @@
 // It is not intended for manual editing.
 
 #![cfg_attr(rustfmt, rustfmt::skip)]
-#![allow(
-    clippy::extra_unused_type_parameters,
-    clippy::std_instead_of_alloc,
-    clippy::std_instead_of_core,
-)]
+#![allow(clippy::std_instead_of_alloc, clippy::std_instead_of_core)]
 #[allow(dead_code)]
 fn assert_send<T: ?Sized + Send>() {}
 #[allow(dead_code)]
