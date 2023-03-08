@@ -1,2 +1,6 @@
+# Clippy configuration
+# https://doc.rust-lang.org/nightly/clippy/lint_configuration.html
+
 avoid-breaking-exported-api = false
+disallowed-names = []
 msrv = "1.57"
