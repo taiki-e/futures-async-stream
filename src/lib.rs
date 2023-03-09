@@ -267,6 +267,7 @@ where
     clippy::std_instead_of_alloc,
     clippy::std_instead_of_core,
     // lints that help writing unsafe code
+    clippy::as_ptr_cast_mut,
     clippy::default_union_representation,
     clippy::trailing_empty_array,
     clippy::transmute_undefined_repr,
