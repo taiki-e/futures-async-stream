@@ -368,7 +368,7 @@ mod future {
     pub unsafe fn get_context<'a, 'b>(cx: ResumeTy) -> &'a mut Context<'b> {
         // SAFETY: the caller must guarantee that `cx.0` is a valid pointer
         // that fulfills all the requirements for a mutable reference.
-        unsafe { &mut *cx.0.as_ptr().cast() }
+        unsafe { &mut *cx.0.as_ptr().cast::<Context<'b>>() }
     }
 }
 
