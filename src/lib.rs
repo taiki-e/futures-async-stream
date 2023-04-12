@@ -1,8 +1,21 @@
 /*!
+<!-- tidy:crate-doc:start -->
 Async stream for Rust and the futures crate.
 
 This crate provides useful features for streams, using `async_await` and
 unstable [`generators`](https://github.com/rust-lang/rust/issues/43122).
+
+## Usage
+
+Add this to your `Cargo.toml`:
+
+```toml
+[dependencies]
+futures-async-stream = "0.2"
+futures = "0.3"
+```
+
+*Compiler support: requires rustc nightly-2021-10-11+*
 
 ## `#[for_await]`
 
@@ -241,6 +254,8 @@ where
 ```
 
 [futures-await]: https://github.com/alexcrichton/futures-await
+
+<!-- tidy:crate-doc:end -->
 */
 
 #![no_std]
@@ -278,10 +293,6 @@ where
 
 #[cfg(test)]
 extern crate std;
-
-#[cfg(doctest)]
-#[doc = include_str!("../README.md")]
-const _README: () = ();
 
 #[cfg(test)]
 #[path = "gen/assert_impl.rs"]
