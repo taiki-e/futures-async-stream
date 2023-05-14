@@ -12,7 +12,10 @@ ignore = []
 [bans]
 multiple-versions = "deny"
 wildcards = "allow" # https://github.com/EmbarkStudios/cargo-deny/issues/448
-skip = []
+skip = [
+    # TODO: update to syn 2
+    { name = "syn" }
+]
 
 # https://embarkstudios.github.io/cargo-deny/checks/licenses/cfg.html
 [licenses]
