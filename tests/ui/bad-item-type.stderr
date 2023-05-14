@@ -127,5 +127,5 @@ error[E0271]: type mismatch resolving `<impl Stream<Item = {integer}> as Stream>
    |
    = note: expected tuple `(i32, i32)`
                found type `{integer}`
-   = note: required for the cast from `impl Stream<Item = {integer}>` to the object type `dyn Stream<Item = (i32, i32)> + Send`
+   = note: required for the cast from `Pin<Box<impl Stream<Item = {integer}>>>` to `Pin<Box<(dyn Stream<Item = (i32, i32)> + Send + 'static)>>`
    = note: this error originates in the attribute macro `stream` (in Nightly builds, run with -Z macro-backtrace for more info)
