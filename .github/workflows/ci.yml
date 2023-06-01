@@ -22,6 +22,7 @@ env:
   RUSTDOCFLAGS: -D warnings
   RUSTFLAGS: -D warnings
   RUSTUP_MAX_RETRIES: 10
+  EXCLUDE: --exclude futures-async-stream-internal-codegen
 
 defaults:
   run:
@@ -66,11 +67,11 @@ jobs:
         with:
           tool: cargo-careful
         if: matrix.rust == 'nightly'
-      - run: cargo test --workspace --all-features --tests --no-run --exclude futures-async-stream-internal-codegen
+      - run: cargo test --workspace --all-features $EXCLUDE --tests --no-run
         if: matrix.rust != 'nightly'
-      - run: cargo test --workspace --all-features
+      - run: cargo test --workspace --all-features $EXCLUDE
         if: matrix.rust == 'nightly'
-      - run: cargo careful test --workspace --all-features
+      - run: cargo careful test --workspace --all-features $EXCLUDE
         env:
           RUSTDOCFLAGS: ${{ env.RUSTDOCFLAGS }} -Z randomize-layout
           RUSTFLAGS: ${{ env.RUSTFLAGS }} -Z randomize-layout
@@ -87,7 +88,7 @@ jobs:
           persist-credentials: false
       - name: Install Rust
         run: rustup toolchain add nightly --no-self-update --component miri && rustup default nightly
-      - run: cargo miri test --workspace --all-features
+      - run: cargo miri test --workspace --all-features $EXCLUDE
         env:
           MIRIFLAGS: -Zmiri-strict-provenance -Zmiri-symbolic-alignment-check -Zmiri-retag-fields
           RUSTDOCFLAGS: ${{ env.RUSTDOCFLAGS }} -Z randomize-layout
