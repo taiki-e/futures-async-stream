@@ -10,6 +10,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
+- Fix build error from dependency when built with `-Z minimal-versions`.
+
 ## [0.2.6] - 2023-01-05
 
 - Fix "generator cannot be sent between threads safely" error since nightly-2023-01-04.
