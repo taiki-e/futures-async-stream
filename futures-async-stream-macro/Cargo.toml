@@ -5,7 +5,7 @@ edition = "2021"
 license = "Apache-2.0 OR MIT"
 repository = "https://github.com/taiki-e/futures-async-stream"
 keywords = ["async", "future", "futures", "stream", "macros"]
-categories = ["asynchronous", "no-std", "rust-patterns"]
+categories = ["asynchronous", "no-std", "no-std::no-alloc", "rust-patterns"]
 description = """
 Implementation detail of the `futures-async-stream` crate.
 """
