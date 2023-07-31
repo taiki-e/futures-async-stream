@@ -128,7 +128,7 @@ impl Foo for Bar {
 A async stream function that received a `boxed` argument is converted to a
 function that returns `Pin<Box<dyn Stream<Item = item> + Send + 'lifetime>>`.
 If you passed `boxed_local` instead of `boxed`, async stream function
-returns a non-threadsafe stream (`Pin<Box<dyn Stream<Item = item> + 'lifetime>>`).
+returns a non-thread-safe stream (`Pin<Box<dyn Stream<Item = item> + 'lifetime>>`).
 
 ```rust
 #![feature(generators)]

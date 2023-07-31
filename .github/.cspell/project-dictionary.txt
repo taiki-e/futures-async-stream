@@ -3,6 +3,5 @@ constness
 elems
 HRTB
 subpat
-threadsafe
 unelide
 unparse
