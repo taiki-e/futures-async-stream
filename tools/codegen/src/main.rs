@@ -8,7 +8,7 @@ use std::{collections::BTreeSet, path::Path};
 
 use anyhow::Result;
 use fs_err as fs;
-use quote::{format_ident, quote};
+use quote::{format_ident, quote, ToTokens};
 use syn::visit_mut::{self, VisitMut};
 
 use crate::file::*;
@@ -356,13 +356,23 @@ where
     F: FnMut(&mut syn::Item, &[syn::PathSegment]),
 {
     fn visit_item_mut(&mut self, item: &mut syn::Item) {
-        if let syn::Item::Mod(item) = item {
-            self.module.push(item.ident.clone().into());
-            visit_mut::visit_item_mod_mut(self, item);
-            self.module.pop();
-            return;
+        match item {
+            syn::Item::Mod(item) => {
+                self.module.push(item.ident.clone().into());
+                visit_mut::visit_item_mod_mut(self, item);
+                self.module.pop();
+            }
+            syn::Item::Macro(item) => {
+                if let Ok(mut file) = syn::parse2::<syn::File>(item.mac.tokens.clone()) {
+                    visit_mut::visit_file_mut(self, &mut file);
+                    item.mac.tokens = file.into_token_stream();
+                }
+                visit_mut::visit_item_macro_mut(self, item);
+            }
+            _ => {
+                (self.f)(item, &self.module);
+                visit_mut::visit_item_mut(self, item);
+            }
         }
-        (self.f)(item, &self.module);
-        visit_mut::visit_item_mut(self, item);
     }
 }
