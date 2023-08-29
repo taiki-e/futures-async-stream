@@ -7,7 +7,6 @@ error[E0277]: `dyn Stream<Item = i32>` cannot be sent between threads safely
    |     required by a bound introduced by this call
    |
    = help: the trait `Send` is not implemented for `dyn Stream<Item = i32>`
-   = note: consider using `std::sync::Arc<dyn Stream<Item = i32>>`; for more information visit <https://doc.rust-lang.org/book/ch16-03-shared-state.html>
    = note: required for `Unique<dyn Stream<Item = i32>>` to implement `Send`
 note: required because it appears within the type `Box<dyn Stream<Item = i32>>`
   --> $RUST/alloc/src/boxed.rs
