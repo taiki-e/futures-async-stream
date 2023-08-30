@@ -469,9 +469,7 @@ mod try_stream {
     /// This function returns a `GenStream` underneath, but hides it in `impl Trait` to give
     /// better error messages (`impl Stream` rather than `GenStream<[closure.....]>`).
     #[doc(hidden)]
-    pub fn from_generator<G, T, E>(
-        gen: G,
-    ) -> impl Stream<Item = Result<T, E>> + FusedStream<Item = Result<T, E>>
+    pub fn from_generator<G, T, E>(gen: G) -> impl FusedStream<Item = Result<T, E>>
     where
         G: Generator<ResumeTy, Yield = Poll<T>, Return = Result<(), E>>,
     {
