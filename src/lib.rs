@@ -375,7 +375,6 @@ mod future {
         }
     }
 
-    #[allow(clippy::missing_safety_doc)] // false positive: this function is #[doc(hidden)]
     #[doc(hidden)]
     pub unsafe fn get_context<'a, 'b>(cx: ResumeTy) -> &'a mut Context<'b> {
         // SAFETY: the caller must guarantee that `cx.0` is a valid pointer
