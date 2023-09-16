@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0 OR MIT
+
 #![warn(rust_2018_idioms, single_use_lifetimes)]
 #![allow(clippy::try_err, clippy::unused_async)]
 #![allow(clippy::semicolon_if_nothing_returned)] // broken

@@ -1,82 +1,82 @@
 error[E0277]: the `?` operator can only be applied to values that implement `Try`
-  --> tests/ui/question-mark-await-type-error.rs:14:9
+  --> tests/ui/question-mark-await-type-error.rs:16:9
    |
-14 |         async {}.await?; //~ ERROR the `?` operator can only be applied to values that implement `std::ops::Try`
+16 |         async {}.await?; //~ ERROR the `?` operator can only be applied to values that implement `std::ops::Try`
    |         ^^^^^^^^^^^^^^^ the `?` operator cannot be applied to type `()`
    |
    = help: the trait `Try` is not implemented for `()`
 
 error[E0277]: the `?` operator can only be used in an async function that returns `Result` or `Option` (or another type that implements `FromResidual`)
-  --> tests/ui/question-mark-await-type-error.rs:14:23
+  --> tests/ui/question-mark-await-type-error.rs:16:23
    |
-12 |   async fn async_fn() {
+14 |   async fn async_fn() {
    |  _____________________-
-13 | |     for _i in 1..2 {
-14 | |         async {}.await?; //~ ERROR the `?` operator can only be applied to values that implement `std::ops::Try`
+15 | |     for _i in 1..2 {
+16 | |         async {}.await?; //~ ERROR the `?` operator can only be applied to values that implement `std::ops::Try`
    | |                       ^ cannot use the `?` operator in an async function that returns `()`
-15 | |     }
-16 | | }
+17 | |     }
+18 | | }
    | |_- this function should return `Result` or `Option` to accept `?`
    |
    = help: the trait `FromResidual<_>` is not implemented for `()`
 
 error[E0277]: the `?` operator can only be applied to values that implement `Try`
-  --> tests/ui/question-mark-await-type-error.rs:21:18
+  --> tests/ui/question-mark-await-type-error.rs:23:18
    |
-21 |         async {}.await?; //~ ERROR the `?` operator can only be applied to values that implement `std::ops::Try`
+23 |         async {}.await?; //~ ERROR the `?` operator can only be applied to values that implement `std::ops::Try`
    |                  ^^^^^^ the `?` operator cannot be applied to type `()`
    |
    = help: the trait `Try` is not implemented for `()`
 
 error[E0277]: the `?` operator can only be used in a generator that returns `Result` or `Option` (or another type that implements `FromResidual`)
-  --> tests/ui/question-mark-await-type-error.rs:21:23
+  --> tests/ui/question-mark-await-type-error.rs:23:23
    |
-18 | #[stream(item = i32)]
+20 | #[stream(item = i32)]
    | --------------------- this function should return `Result` or `Option` to accept `?`
 ...
-21 |         async {}.await?; //~ ERROR the `?` operator can only be applied to values that implement `std::ops::Try`
+23 |         async {}.await?; //~ ERROR the `?` operator can only be applied to values that implement `std::ops::Try`
    |                       ^ cannot use the `?` operator in a generator that returns `()`
    |
    = help: the trait `FromResidual<_>` is not implemented for `()`
 
 error[E0277]: the `?` operator can only be applied to values that implement `Try`
-  --> tests/ui/question-mark-await-type-error.rs:28:9
+  --> tests/ui/question-mark-await-type-error.rs:30:9
    |
-28 |         async {}.await?; //~ ERROR the `?` operator can only be applied to values that implement `std::ops::Try`
+30 |         async {}.await?; //~ ERROR the `?` operator can only be applied to values that implement `std::ops::Try`
    |         ^^^^^^^^^^^^^^^ the `?` operator cannot be applied to type `()`
    |
    = help: the trait `Try` is not implemented for `()`
 
 error[E0277]: the `?` operator can only be used in an async function that returns `Result` or `Option` (or another type that implements `FromResidual`)
-  --> tests/ui/question-mark-await-type-error.rs:28:23
+  --> tests/ui/question-mark-await-type-error.rs:30:23
    |
-25 |   async fn async_fn_and_for_await() {
+27 |   async fn async_fn_and_for_await() {
    |  ___________________________________-
-26 | |     #[for_await]
-27 | |     for _i in stream(2) {
-28 | |         async {}.await?; //~ ERROR the `?` operator can only be applied to values that implement `std::ops::Try`
+28 | |     #[for_await]
+29 | |     for _i in stream(2) {
+30 | |         async {}.await?; //~ ERROR the `?` operator can only be applied to values that implement `std::ops::Try`
    | |                       ^ cannot use the `?` operator in an async function that returns `()`
-29 | |     }
-30 | | }
+31 | |     }
+32 | | }
    | |_- this function should return `Result` or `Option` to accept `?`
    |
    = help: the trait `FromResidual<_>` is not implemented for `()`
 
 error[E0277]: the `?` operator can only be applied to values that implement `Try`
-  --> tests/ui/question-mark-await-type-error.rs:36:18
+  --> tests/ui/question-mark-await-type-error.rs:38:18
    |
-36 |         async {}.await?; //~ ERROR the `?` operator can only be applied to values that implement `std::ops::Try`
+38 |         async {}.await?; //~ ERROR the `?` operator can only be applied to values that implement `std::ops::Try`
    |                  ^^^^^^ the `?` operator cannot be applied to type `()`
    |
    = help: the trait `Try` is not implemented for `()`
 
 error[E0277]: the `?` operator can only be used in a generator that returns `Result` or `Option` (or another type that implements `FromResidual`)
-  --> tests/ui/question-mark-await-type-error.rs:36:23
+  --> tests/ui/question-mark-await-type-error.rs:38:23
    |
-32 | #[stream(item = i32)]
+34 | #[stream(item = i32)]
    | --------------------- this function should return `Result` or `Option` to accept `?`
 ...
-36 |         async {}.await?; //~ ERROR the `?` operator can only be applied to values that implement `std::ops::Try`
+38 |         async {}.await?; //~ ERROR the `?` operator can only be applied to values that implement `std::ops::Try`
    |                       ^ cannot use the `?` operator in a generator that returns `()`
    |
    = help: the trait `FromResidual<_>` is not implemented for `()`

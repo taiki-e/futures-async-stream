@@ -1,7 +1,7 @@
 error[E0308]: mismatched types
- --> tests/ui/type-error.rs:7:18
+ --> tests/ui/type-error.rs:9:18
   |
-7 |     let a: i32 = "a"; //~ ERROR mismatched types
+9 |     let a: i32 = "a"; //~ ERROR mismatched types
   |            ---   ^^^ expected `i32`, found `&str`
   |            |
   |            expected due to this

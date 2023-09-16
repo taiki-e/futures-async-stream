@@ -1,119 +1,119 @@
 error: async stream must be declared as async
- --> tests/ui/invalid.rs:7:11
+ --> tests/ui/invalid.rs:9:11
   |
-7 |     const fn constness() {} //~ ERROR async stream must be declared as async
+9 |     const fn constness() {} //~ ERROR async stream must be declared as async
   |           ^^
 
 error: async stream must be declared as async
-  --> tests/ui/invalid.rs:10:5
+  --> tests/ui/invalid.rs:12:5
    |
-10 |     fn variadic(_: ...) {} //~ ERROR only foreign functions are allowed to be C-variadic
+12 |     fn variadic(_: ...) {} //~ ERROR only foreign functions are allowed to be C-variadic
    |     ^^
 
 error: async stream must be declared as async
-  --> tests/ui/invalid.rs:13:5
+  --> tests/ui/invalid.rs:15:5
    |
-13 |     fn asyncness() {} //~ ERROR async stream must be declared as async
+15 |     fn asyncness() {} //~ ERROR async stream must be declared as async
    |     ^^
 
 error: async stream must return the unit type
-  --> tests/ui/invalid.rs:16:26
+  --> tests/ui/invalid.rs:18:26
    |
-16 |     async fn output() -> i32 {} //~ ERROR async stream must return the unit type
+18 |     async fn output() -> i32 {} //~ ERROR async stream must return the unit type
    |                          ^^^
 
 error: async stream may not be const
-  --> tests/ui/invalid.rs:22:5
+  --> tests/ui/invalid.rs:24:5
    |
-22 |     const async unsafe extern "C" fn f() {} //~ ERROR async stream may not be const
+24 |     const async unsafe extern "C" fn f() {} //~ ERROR async stream may not be const
    |     ^^^^^
 
 error: duplicate #[stream] attribute
-  --> tests/ui/invalid.rs:32:5
+  --> tests/ui/invalid.rs:34:5
    |
-32 |     #[stream(item = ())] //~ ERROR duplicate #[stream] attribute
+34 |     #[stream(item = ())] //~ ERROR duplicate #[stream] attribute
    |     ^^^^^^^^^^^^^^^^^^^^
 
 error: duplicate #[try_stream] attribute
-  --> tests/ui/invalid.rs:36:5
+  --> tests/ui/invalid.rs:38:5
    |
-36 |     #[try_stream(ok = (), error = ())] //~ ERROR duplicate #[try_stream] attribute
+38 |     #[try_stream(ok = (), error = ())] //~ ERROR duplicate #[try_stream] attribute
    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 error: #[stream] and #[try_stream] may not be used at the same time
-  --> tests/ui/invalid.rs:40:5
+  --> tests/ui/invalid.rs:42:5
    |
-40 |     #[try_stream(ok = (), error = ())] //~ ERROR may not be used at the same time
+42 |     #[try_stream(ok = (), error = ())] //~ ERROR may not be used at the same time
    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 error: duplicate #[stream] attribute
-  --> tests/ui/invalid.rs:46:13
+  --> tests/ui/invalid.rs:48:13
    |
-46 |             #[stream] //~ ERROR duplicate #[stream] attribute
+48 |             #[stream] //~ ERROR duplicate #[stream] attribute
    |             ^^^^^^^^^
 
 error: duplicate #[try_stream] attribute
-  --> tests/ui/invalid.rs:54:13
+  --> tests/ui/invalid.rs:56:13
    |
-54 |             #[try_stream] //~ ERROR duplicate #[try_stream] attribute
+56 |             #[try_stream] //~ ERROR duplicate #[try_stream] attribute
    |             ^^^^^^^^^^^^^
 
 error: duplicate #[for_await] attribute
-  --> tests/ui/invalid.rs:61:9
+  --> tests/ui/invalid.rs:63:9
    |
-61 |         #[for_await] //~ ERROR duplicate #[for_await] attribute
+63 |         #[for_await] //~ ERROR duplicate #[for_await] attribute
    |         ^^^^^^^^^^^^
 
 error: #[stream] and #[try_stream] may not be used at the same time
-  --> tests/ui/invalid.rs:68:13
+  --> tests/ui/invalid.rs:70:13
    |
-68 |             #[try_stream] //~ ERROR may not be used at the same time
+70 |             #[try_stream] //~ ERROR may not be used at the same time
    |             ^^^^^^^^^^^^^
 
 error: duplicate #[stream] attribute
-  --> tests/ui/invalid.rs:77:13
+  --> tests/ui/invalid.rs:79:13
    |
-77 |             #[stream] //~ ERROR duplicate #[stream] attribute
+79 |             #[stream] //~ ERROR duplicate #[stream] attribute
    |             ^^^^^^^^^
 
 error: duplicate #[try_stream] attribute
-  --> tests/ui/invalid.rs:86:13
+  --> tests/ui/invalid.rs:88:13
    |
-86 |             #[try_stream] //~ ERROR duplicate #[try_stream] attribute
+88 |             #[try_stream] //~ ERROR duplicate #[try_stream] attribute
    |             ^^^^^^^^^^^^^
 
 error: duplicate #[for_await] attribute
-  --> tests/ui/invalid.rs:94:9
+  --> tests/ui/invalid.rs:96:9
    |
-94 |         #[for_await] //~ ERROR duplicate #[for_await] attribute
+96 |         #[for_await] //~ ERROR duplicate #[for_await] attribute
    |         ^^^^^^^^^^^^
 
 error: #[stream] and #[try_stream] may not be used at the same time
-   --> tests/ui/invalid.rs:102:13
+   --> tests/ui/invalid.rs:104:13
     |
-102 |             #[try_stream] //~ ERROR may not be used at the same time
+104 |             #[try_stream] //~ ERROR may not be used at the same time
     |             ^^^^^^^^^^^^^
 
 error: #[stream] attribute may only be used on async functions or async blocks
-   --> tests/ui/invalid.rs:111:5
+   --> tests/ui/invalid.rs:113:5
     |
-111 |     #[stream(item = ())] //~ ERROR #[stream] attribute may only be used on async functions or async blocks
+113 |     #[stream(item = ())] //~ ERROR #[stream] attribute may only be used on async functions or async blocks
     |     ^^^^^^^^^^^^^^^^^^^^
     |
     = note: this error originates in the attribute macro `stream` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: #[stream] attribute may only be used on async functions or async blocks
-   --> tests/ui/invalid.rs:114:5
+   --> tests/ui/invalid.rs:116:5
     |
-114 |     #[stream(item = ())] //~ ERROR #[stream] attribute may only be used on async functions or async blocks
+116 |     #[stream(item = ())] //~ ERROR #[stream] attribute may only be used on async functions or async blocks
     |     ^^^^^^^^^^^^^^^^^^^^
     |
     = note: this error originates in the attribute macro `stream` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: #[stream] attribute may only be used on async functions or async blocks
-   --> tests/ui/invalid.rs:117:5
+   --> tests/ui/invalid.rs:119:5
     |
-117 |     #[stream(item = ())] //~ ERROR #[stream] attribute may only be used on async functions or async blocks
+119 |     #[stream(item = ())] //~ ERROR #[stream] attribute may only be used on async functions or async blocks
     |     ^^^^^^^^^^^^^^^^^^^^
     |
     = note: this error originates in the attribute macro `stream` (in Nightly builds, run with -Z macro-backtrace for more info)

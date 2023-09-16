@@ -1,205 +1,205 @@
 error: unexpected token: `bar`
-  --> tests/ui/invalid-argument.rs:10:21
+  --> tests/ui/invalid-argument.rs:12:21
    |
-10 |         #[for_await(bar)] //~ ERROR unexpected token
+12 |         #[for_await(bar)] //~ ERROR unexpected token
    |                     ^^^
 
 error: unexpected token: `(bar)`
-  --> tests/ui/invalid-argument.rs:21:20
+  --> tests/ui/invalid-argument.rs:23:20
    |
-21 |         #[for_await(bar)] //~ ERROR unexpected token
+23 |         #[for_await(bar)] //~ ERROR unexpected token
    |                    ^^^^^
 
 error: unexpected token: `()`
-  --> tests/ui/invalid-argument.rs:27:20
+  --> tests/ui/invalid-argument.rs:29:20
    |
-27 |         #[for_await()] //~ ERROR unexpected token
+29 |         #[for_await()] //~ ERROR unexpected token
    |                    ^^
 
 error: unexpected end of input, expected `item`
-  --> tests/ui/invalid-argument.rs:35:5
+  --> tests/ui/invalid-argument.rs:37:5
    |
-35 |     #[stream] //~ ERROR unexpected end of input, expected `item`
+37 |     #[stream] //~ ERROR unexpected end of input, expected `item`
    |     ^^^^^^^^^
    |
    = note: this error originates in the attribute macro `stream` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: expected `item = <type>`, found `item`
-  --> tests/ui/invalid-argument.rs:38:14
+  --> tests/ui/invalid-argument.rs:40:14
    |
-38 |     #[stream(item)] //~ ERROR expected `=`
+40 |     #[stream(item)] //~ ERROR expected `=`
    |              ^^^^
 
 error: expected `item = <type>`, found `item =`
-  --> tests/ui/invalid-argument.rs:41:14
+  --> tests/ui/invalid-argument.rs:43:14
    |
-41 |     #[stream(item = )] //~ ERROR unexpected end of input, expected one of
+43 |     #[stream(item = )] //~ ERROR unexpected end of input, expected one of
    |              ^^^^^^
 
 error: expected `item`
-  --> tests/ui/invalid-argument.rs:44:14
+  --> tests/ui/invalid-argument.rs:46:14
    |
-44 |     #[stream(baz, item = i32)] //~ ERROR expected `item`
+46 |     #[stream(baz, item = i32)] //~ ERROR expected `item`
    |              ^^^
 
 error: unexpected argument: baz
-  --> tests/ui/invalid-argument.rs:47:26
+  --> tests/ui/invalid-argument.rs:49:26
    |
-47 |     #[stream(item = i32, baz)] //~ ERROR unexpected argument
+49 |     #[stream(item = i32, baz)] //~ ERROR unexpected argument
    |                          ^^^
 
 error: expected `item`
-  --> tests/ui/invalid-argument.rs:53:14
+  --> tests/ui/invalid-argument.rs:55:14
    |
-53 |     #[stream(,item = i32)] //~ ERROR expected `item`
+55 |     #[stream(,item = i32)] //~ ERROR expected `item`
    |              ^
 
 error: expected `,`
-  --> tests/ui/invalid-argument.rs:56:25
+  --> tests/ui/invalid-argument.rs:58:25
    |
-56 |     #[stream(item = i32 item = i32)] //~ ERROR expected `,`
+58 |     #[stream(item = i32 item = i32)] //~ ERROR expected `,`
    |                         ^^^^
 
 error: duplicate `item` argument
-  --> tests/ui/invalid-argument.rs:59:26
+  --> tests/ui/invalid-argument.rs:61:26
    |
-59 |     #[stream(item = i32, item = i32)] //~ ERROR duplicate `item` argument
+61 |     #[stream(item = i32, item = i32)] //~ ERROR duplicate `item` argument
    |                          ^^^^^^^^^^
 
 error: duplicate `boxed` argument
-  --> tests/ui/invalid-argument.rs:62:33
+  --> tests/ui/invalid-argument.rs:64:33
    |
-62 |     #[stream(item = i32, boxed, boxed)] //~ ERROR duplicate `boxed` argument
+64 |     #[stream(item = i32, boxed, boxed)] //~ ERROR duplicate `boxed` argument
    |                                 ^^^^^
 
 error: duplicate `boxed_local` argument
-  --> tests/ui/invalid-argument.rs:65:39
+  --> tests/ui/invalid-argument.rs:67:39
    |
-65 |     #[stream(item = i32, boxed_local, boxed_local)] //~ ERROR duplicate `boxed_local` argument
+67 |     #[stream(item = i32, boxed_local, boxed_local)] //~ ERROR duplicate `boxed_local` argument
    |                                       ^^^^^^^^^^^
 
 error: `boxed` and `boxed_local` may not be used at the same time
-  --> tests/ui/invalid-argument.rs:68:39
+  --> tests/ui/invalid-argument.rs:70:39
    |
-68 |     #[stream(item = i32, boxed_local, boxed)] //~ ERROR `boxed` and `boxed_local` cannot be used at the same time.
+70 |     #[stream(item = i32, boxed_local, boxed)] //~ ERROR `boxed` and `boxed_local` cannot be used at the same time.
    |                                       ^^^^^
 
 error: unexpected end of input, expected `ok`
-  --> tests/ui/invalid-argument.rs:75:5
+  --> tests/ui/invalid-argument.rs:77:5
    |
-75 |     #[try_stream] //~ ERROR unexpected end of input, expected `ok`
+77 |     #[try_stream] //~ ERROR unexpected end of input, expected `ok`
    |     ^^^^^^^^^^^^^
    |
    = note: this error originates in the attribute macro `try_stream` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: unexpected end of input, expected `ok`
-  --> tests/ui/invalid-argument.rs:78:5
+  --> tests/ui/invalid-argument.rs:80:5
    |
-78 |     #[try_stream(error = ())] //~ ERROR unexpected end of input, expected `ok`
+80 |     #[try_stream(error = ())] //~ ERROR unexpected end of input, expected `ok`
    |     ^^^^^^^^^^^^^^^^^^^^^^^^^
    |
    = note: this error originates in the attribute macro `try_stream` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: expected `ok = <type>`, found `ok`
-  --> tests/ui/invalid-argument.rs:81:18
+  --> tests/ui/invalid-argument.rs:83:18
    |
-81 |     #[try_stream(ok)] //~ ERROR expected `=`
+83 |     #[try_stream(ok)] //~ ERROR expected `=`
    |                  ^^
 
 error: expected `ok = <type>`, found `ok =`
-  --> tests/ui/invalid-argument.rs:84:18
+  --> tests/ui/invalid-argument.rs:86:18
    |
-84 |     #[try_stream(ok = )] //~ ERROR unexpected end of input, expected one of
+86 |     #[try_stream(ok = )] //~ ERROR unexpected end of input, expected one of
    |                  ^^^^
 
 error: unexpected end of input, expected `error`
-  --> tests/ui/invalid-argument.rs:87:5
+  --> tests/ui/invalid-argument.rs:89:5
    |
-87 |     #[try_stream(ok = ())] //~ ERROR unexpected end of input, expected `error`
+89 |     #[try_stream(ok = ())] //~ ERROR unexpected end of input, expected `error`
    |     ^^^^^^^^^^^^^^^^^^^^^^
    |
    = note: this error originates in the attribute macro `try_stream` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: expected `error = <type>`, found `error`
-  --> tests/ui/invalid-argument.rs:90:18
+  --> tests/ui/invalid-argument.rs:92:18
    |
-90 |     #[try_stream(error)] //~ ERROR expected `=`
+92 |     #[try_stream(error)] //~ ERROR expected `=`
    |                  ^^^^^
 
 error: expected `error = <type>`, found `error =`
-  --> tests/ui/invalid-argument.rs:93:18
+  --> tests/ui/invalid-argument.rs:95:18
    |
-93 |     #[try_stream(error = )] //~ ERROR unexpected end of input, expected one of
+95 |     #[try_stream(error = )] //~ ERROR unexpected end of input, expected one of
    |                  ^^^^^^^
 
 error: expected `ok`
-  --> tests/ui/invalid-argument.rs:96:18
+  --> tests/ui/invalid-argument.rs:98:18
    |
-96 |     #[try_stream(baz, ok = (), error = ())] //~ ERROR expected `ok`
+98 |     #[try_stream(baz, ok = (), error = ())] //~ ERROR expected `ok`
    |                  ^^^
 
 error: expected `error`
-  --> tests/ui/invalid-argument.rs:99:27
-   |
-99 |     #[try_stream(ok = (), baz, error = ())] //~ ERROR expected `error`
-   |                           ^^^
+   --> tests/ui/invalid-argument.rs:101:27
+    |
+101 |     #[try_stream(ok = (), baz, error = ())] //~ ERROR expected `error`
+    |                           ^^^
 
 error: unexpected argument: baz
-   --> tests/ui/invalid-argument.rs:102:39
+   --> tests/ui/invalid-argument.rs:104:39
     |
-102 |     #[try_stream(ok = (), error = (), baz)] //~ ERROR unexpected argument
+104 |     #[try_stream(ok = (), error = (), baz)] //~ ERROR unexpected argument
     |                                       ^^^
 
 error: expected `ok`
-   --> tests/ui/invalid-argument.rs:108:18
+   --> tests/ui/invalid-argument.rs:110:18
     |
-108 |     #[try_stream(,ok = () error = ())] //~ ERROR expected `ok`
+110 |     #[try_stream(,ok = () error = ())] //~ ERROR expected `ok`
     |                  ^
 
 error: expected `,`
-   --> tests/ui/invalid-argument.rs:111:26
+   --> tests/ui/invalid-argument.rs:113:26
     |
-111 |     #[try_stream(ok = () error = ())] //~ ERROR expected `,`
+113 |     #[try_stream(ok = () error = ())] //~ ERROR expected `,`
     |                          ^^^^^
 
 error: expected `,`
-   --> tests/ui/invalid-argument.rs:114:38
+   --> tests/ui/invalid-argument.rs:116:38
     |
-114 |     #[try_stream(ok = (), error = () error = ())] //~ ERROR expected `,`
+116 |     #[try_stream(ok = (), error = () error = ())] //~ ERROR expected `,`
     |                                      ^^^^^
 
 error: duplicate `ok` argument
-   --> tests/ui/invalid-argument.rs:117:27
+   --> tests/ui/invalid-argument.rs:119:27
     |
-117 |     #[try_stream(ok = (), ok = (), error = ())] //~ ERROR duplicate `ok` argument
+119 |     #[try_stream(ok = (), ok = (), error = ())] //~ ERROR duplicate `ok` argument
     |                           ^^^^^^^
 
 error: duplicate `ok` argument
-   --> tests/ui/invalid-argument.rs:120:39
+   --> tests/ui/invalid-argument.rs:122:39
     |
-120 |     #[try_stream(ok = (), error = (), ok = (), error = ())] //~ ERROR duplicate `ok` argument
+122 |     #[try_stream(ok = (), error = (), ok = (), error = ())] //~ ERROR duplicate `ok` argument
     |                                       ^^^^^^^
 
 error: duplicate `error` argument
-   --> tests/ui/invalid-argument.rs:123:39
+   --> tests/ui/invalid-argument.rs:125:39
     |
-123 |     #[try_stream(ok = (), error = (), error = ())] //~ ERROR duplicate `error` argument
+125 |     #[try_stream(ok = (), error = (), error = ())] //~ ERROR duplicate `error` argument
     |                                       ^^^^^^^^^^
 
 error: duplicate `boxed` argument
-   --> tests/ui/invalid-argument.rs:126:46
+   --> tests/ui/invalid-argument.rs:128:46
     |
-126 |     #[try_stream(ok = (), error = (), boxed, boxed)] //~ ERROR duplicate `boxed` argument
+128 |     #[try_stream(ok = (), error = (), boxed, boxed)] //~ ERROR duplicate `boxed` argument
     |                                              ^^^^^
 
 error: duplicate `boxed_local` argument
-   --> tests/ui/invalid-argument.rs:129:52
+   --> tests/ui/invalid-argument.rs:131:52
     |
-129 |     #[try_stream(ok = (), error = (), boxed_local, boxed_local)] //~ ERROR duplicate `boxed_local` argument
+131 |     #[try_stream(ok = (), error = (), boxed_local, boxed_local)] //~ ERROR duplicate `boxed_local` argument
     |                                                    ^^^^^^^^^^^
 
 error: `boxed` and `boxed_local` may not be used at the same time
-   --> tests/ui/invalid-argument.rs:132:52
+   --> tests/ui/invalid-argument.rs:134:52
     |
-132 |     #[try_stream(ok = (), error = (), boxed_local, boxed)] //~ ERROR `boxed` and `boxed_local` cannot be used at the same time.
+134 |     #[try_stream(ok = (), error = (), boxed_local, boxed)] //~ ERROR `boxed` and `boxed_local` cannot be used at the same time.
     |                                                    ^^^^^

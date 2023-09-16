@@ -1,21 +1,21 @@
 error[E0308]: mismatched types
-  --> tests/ui/bad-item-type.rs:13:11
+  --> tests/ui/bad-item-type.rs:15:11
    |
-5  | #[stream(item = Option<i32>)]
+7  | #[stream(item = Option<i32>)]
    | ----------------------------- arguments to this enum variant are incorrect
 ...
-13 |     yield val; //~ ERROR mismatched types
+15 |     yield val; //~ ERROR mismatched types
    |           ^^^ expected `Option<_>`, found integer
    |
    = note: expected enum `Option<_>`
               found type `{integer}`
 help: the type constructed contains `{integer}` due to the type of the argument passed
-  --> tests/ui/bad-item-type.rs:5:1
+  --> tests/ui/bad-item-type.rs:7:1
    |
-5  | #[stream(item = Option<i32>)]
+7  | #[stream(item = Option<i32>)]
    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ...
-13 |     yield val; //~ ERROR mismatched types
+15 |     yield val; //~ ERROR mismatched types
    |           --- this argument influences the type of `{{root}}`
 note: tuple variant defined here
   --> $RUST/core/src/task/poll.rs
@@ -25,27 +25,27 @@ note: tuple variant defined here
    = note: this error originates in the attribute macro `stream` (in Nightly builds, run with -Z macro-backtrace for more info)
 help: try wrapping the expression in `Some`
    |
-13 |     yield Some(val); //~ ERROR mismatched types
+15 |     yield Some(val); //~ ERROR mismatched types
    |           +++++   +
 
 error[E0308]: mismatched types
-  --> tests/ui/bad-item-type.rs:32:11
+  --> tests/ui/bad-item-type.rs:34:11
    |
-27 | #[stream(item = (i32, i32))]
+29 | #[stream(item = (i32, i32))]
    | ---------------------------- arguments to this enum variant are incorrect
 ...
-32 |     yield (1, 2) //~ ERROR mismatched types
+34 |     yield (1, 2) //~ ERROR mismatched types
    |           ^^^^^^ expected integer, found `({integer}, {integer})`
    |
    = note: expected type `{integer}`
              found tuple `({integer}, {integer})`
 help: the type constructed contains `({integer}, {integer})` due to the type of the argument passed
-  --> tests/ui/bad-item-type.rs:27:1
+  --> tests/ui/bad-item-type.rs:29:1
    |
-27 | #[stream(item = (i32, i32))]
+29 | #[stream(item = (i32, i32))]
    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ...
-32 |     yield (1, 2) //~ ERROR mismatched types
+34 |     yield (1, 2) //~ ERROR mismatched types
    |           ------ this argument influences the type of `{{root}}`
 note: tuple variant defined here
   --> $RUST/core/src/task/poll.rs
@@ -55,32 +55,32 @@ note: tuple variant defined here
    = note: this error originates in the attribute macro `stream` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error[E0271]: type mismatch resolving `<impl Stream<Item = {integer}> as Stream>::Item == (i32, i32)`
-  --> tests/ui/bad-item-type.rs:27:1
+  --> tests/ui/bad-item-type.rs:29:1
    |
-27 | #[stream(item = (i32, i32))]
+29 | #[stream(item = (i32, i32))]
    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected integer, found `(i32, i32)`
    |
    = note: expected type `{integer}`
              found tuple `(i32, i32)`
 
 error[E0308]: mismatched types
-  --> tests/ui/bad-item-type.rs:24:11
+  --> tests/ui/bad-item-type.rs:26:11
    |
-16 | #[stream(item = Option<i32>, boxed)]
+18 | #[stream(item = Option<i32>, boxed)]
    | ------------------------------------ arguments to this enum variant are incorrect
 ...
-24 |     yield val; //~ ERROR mismatched types
+26 |     yield val; //~ ERROR mismatched types
    |           ^^^ expected `Option<_>`, found integer
    |
    = note: expected enum `Option<_>`
               found type `{integer}`
 help: the type constructed contains `{integer}` due to the type of the argument passed
-  --> tests/ui/bad-item-type.rs:16:1
+  --> tests/ui/bad-item-type.rs:18:1
    |
-16 | #[stream(item = Option<i32>, boxed)]
+18 | #[stream(item = Option<i32>, boxed)]
    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ...
-24 |     yield val; //~ ERROR mismatched types
+26 |     yield val; //~ ERROR mismatched types
    |           --- this argument influences the type of `{{root}}`
 note: tuple variant defined here
   --> $RUST/core/src/task/poll.rs
@@ -90,27 +90,27 @@ note: tuple variant defined here
    = note: this error originates in the attribute macro `stream` (in Nightly builds, run with -Z macro-backtrace for more info)
 help: try wrapping the expression in `Some`
    |
-24 |     yield Some(val); //~ ERROR mismatched types
+26 |     yield Some(val); //~ ERROR mismatched types
    |           +++++   +
 
 error[E0308]: mismatched types
-  --> tests/ui/bad-item-type.rs:40:11
+  --> tests/ui/bad-item-type.rs:42:11
    |
-35 | #[stream(item = (i32, i32), boxed)]
+37 | #[stream(item = (i32, i32), boxed)]
    | ----------------------------------- arguments to this enum variant are incorrect
 ...
-40 |     yield (1, 2) //~ ERROR mismatched types
+42 |     yield (1, 2) //~ ERROR mismatched types
    |           ^^^^^^ expected integer, found `({integer}, {integer})`
    |
    = note: expected type `{integer}`
              found tuple `({integer}, {integer})`
 help: the type constructed contains `({integer}, {integer})` due to the type of the argument passed
-  --> tests/ui/bad-item-type.rs:35:1
+  --> tests/ui/bad-item-type.rs:37:1
    |
-35 | #[stream(item = (i32, i32), boxed)]
+37 | #[stream(item = (i32, i32), boxed)]
    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ...
-40 |     yield (1, 2) //~ ERROR mismatched types
+42 |     yield (1, 2) //~ ERROR mismatched types
    |           ------ this argument influences the type of `{{root}}`
 note: tuple variant defined here
   --> $RUST/core/src/task/poll.rs
@@ -120,9 +120,9 @@ note: tuple variant defined here
    = note: this error originates in the attribute macro `stream` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error[E0271]: type mismatch resolving `<impl Stream<Item = {integer}> as Stream>::Item == (i32, i32)`
-  --> tests/ui/bad-item-type.rs:35:1
+  --> tests/ui/bad-item-type.rs:37:1
    |
-35 | #[stream(item = (i32, i32), boxed)]
+37 | #[stream(item = (i32, i32), boxed)]
    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `(i32, i32)`, found integer
    |
    = note: expected tuple `(i32, i32)`
