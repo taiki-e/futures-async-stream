@@ -269,23 +269,27 @@ where
     )
 ))]
 #![warn(
-    missing_docs,
     rust_2018_idioms,
     single_use_lifetimes,
     unreachable_pub,
-    unsafe_op_in_unsafe_fn
-)]
-#![warn(
     clippy::pedantic,
-    // lints for public library
+    // Lints that may help when writing public library.
+    missing_debug_implementations,
+    missing_docs,
     clippy::alloc_instead_of_core,
     clippy::exhaustive_enums,
     clippy::exhaustive_structs,
+    clippy::impl_trait_in_params,
+    clippy::missing_inline_in_public_items,
     clippy::std_instead_of_alloc,
     clippy::std_instead_of_core,
-    // lints that help writing unsafe code
+    // Lints that may help when writing unsafe code.
+    improper_ctypes,
+    improper_ctypes_definitions,
+    unsafe_op_in_unsafe_fn,
     clippy::as_ptr_cast_mut,
     clippy::default_union_representation,
+    clippy::inline_asm_x86_att_syntax,
     clippy::trailing_empty_array,
     clippy::transmute_undefined_repr,
     clippy::undocumented_unsafe_blocks,
@@ -350,6 +354,7 @@ mod future {
     /// This function returns a `GenFuture` underneath, but hides it in `impl Trait` to give
     /// better error messages (`impl Future` rather than `GenFuture<[closure.....]>`).
     #[doc(hidden)]
+    #[inline]
     pub fn from_generator<G>(gen: G) -> impl Future<Output = G::Return>
     where
         G: Generator<ResumeTy, Yield = ()>,
@@ -366,6 +371,7 @@ mod future {
     {
         type Output = G::Return;
 
+        #[inline]
         fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
             let this = self.project();
             // Resume the generator, turning the `&mut Context` into a `NonNull` raw pointer. The
@@ -378,6 +384,7 @@ mod future {
     }
 
     #[doc(hidden)]
+    #[inline]
     pub unsafe fn get_context<'a, 'b>(cx: ResumeTy) -> &'a mut Context<'b> {
         // SAFETY: the caller must guarantee that `cx.0` is a valid pointer
         // that fulfills all the requirements for a mutable reference.
@@ -404,6 +411,7 @@ mod stream {
     /// This function returns a `GenStream` underneath, but hides it in `impl Trait` to give
     /// better error messages (`impl Stream` rather than `GenStream<[closure.....]>`).
     #[doc(hidden)]
+    #[inline]
     pub fn from_generator<G, T>(gen: G) -> impl Stream<Item = T>
     where
         G: Generator<ResumeTy, Yield = Poll<T>, Return = ()>,
@@ -420,6 +428,7 @@ mod stream {
     {
         type Item = T;
 
+        #[inline]
         fn poll_next(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
             let this = self.project();
             match this.0.resume(ResumeTy(NonNull::from(cx).cast::<Context<'static>>())) {
@@ -432,6 +441,7 @@ mod stream {
     // This is equivalent to the `futures::stream::StreamExt::next` method.
     // But we want to make this crate dependency as small as possible, so we define our `next` function.
     #[doc(hidden)]
+    #[inline]
     pub fn next<S>(stream: &mut S) -> impl Future<Output = Option<S::Item>> + '_
     where
         S: Stream + Unpin,
@@ -447,6 +457,7 @@ mod stream {
     {
         type Output = Option<S::Item>;
 
+        #[inline]
         fn poll(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
             Pin::new(&mut self.0).poll_next(cx)
         }
@@ -471,6 +482,7 @@ mod try_stream {
     /// This function returns a `GenStream` underneath, but hides it in `impl Trait` to give
     /// better error messages (`impl Stream` rather than `GenStream<[closure.....]>`).
     #[doc(hidden)]
+    #[inline]
     pub fn from_generator<G, T, E>(gen: G) -> impl FusedStream<Item = Result<T, E>>
     where
         G: Generator<ResumeTy, Yield = Poll<T>, Return = Result<(), E>>,
@@ -487,6 +499,7 @@ mod try_stream {
     {
         type Item = Result<T, E>;
 
+        #[inline]
         fn poll_next(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
             let mut this = self.project();
             if let Some(gen) = this.0.as_mut().as_pin_mut() {
@@ -509,6 +522,7 @@ mod try_stream {
     where
         G: Generator<ResumeTy, Yield = Poll<T>, Return = Result<(), E>>,
     {
+        #[inline]
         fn is_terminated(&self) -> bool {
             self.0.is_none()
         }
