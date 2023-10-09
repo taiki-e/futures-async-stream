@@ -4,7 +4,7 @@ use proc_macro2::Span;
 use syn::{
     punctuated::Punctuated,
     visit_mut::{self, VisitMut},
-    FnArg, GenericArgument, GenericParam, Generics, Lifetime, LifetimeDef, Receiver, Token,
+    FnArg, GenericArgument, GenericParam, Generics, Lifetime, LifetimeParam, Receiver, Token,
     TypeReference,
 };
 
@@ -45,7 +45,7 @@ impl<'a> UnelideLifetimes<'a> {
         let lifetime = Lifetime::new(&lifetime_name, Span::call_site());
 
         let idx = self.lifetime_index + self.count as usize;
-        self.generics.insert(idx, LifetimeDef::new(lifetime.clone()).into());
+        self.generics.insert(idx, LifetimeParam::new(lifetime.clone()).into());
         self.count += 1;
 
         lifetime
@@ -56,6 +56,8 @@ impl VisitMut for UnelideLifetimes<'_> {
     fn visit_receiver_mut(&mut self, receiver: &mut Receiver) {
         if let Some((_, lifetime)) = &mut receiver.reference {
             self.visit_opt_lifetime(lifetime);
+        } else {
+            visit_mut::visit_type_mut(self, &mut receiver.ty);
         }
     }
 
@@ -78,7 +80,7 @@ fn determine_lifetime_name(generics: &mut Generics) -> String {
     struct CollectLifetimes(Vec<String>);
 
     impl VisitMut for CollectLifetimes {
-        fn visit_lifetime_def_mut(&mut self, def: &mut LifetimeDef) {
+        fn visit_lifetime_param_mut(&mut self, def: &mut LifetimeParam) {
             self.0.push(def.lifetime.to_string());
         }
     }

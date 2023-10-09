@@ -69,11 +69,11 @@ impl SliceExt for [Attribute] {
     fn position_exact(&self, ident: &str) -> Result<Option<usize>> {
         self.iter()
             .try_fold((0, None), |(i, mut prev), attr| {
-                if attr.path.is_ident(ident) {
+                if attr.path().is_ident(ident) {
                     if prev.replace(i).is_some() {
                         bail!(attr, "duplicate #[{}] attribute", ident);
                     }
-                    parse_as_empty(&attr.tokens)?;
+                    attr.meta.require_path_only()?;
                 }
                 Ok((i + 1, prev))
             })
@@ -81,6 +81,6 @@ impl SliceExt for [Attribute] {
     }
 
     fn find(&self, ident: &str) -> Option<&Attribute> {
-        self.iter().position(|attr| attr.path.is_ident(ident)).map(|i| &self[i])
+        self.iter().position(|attr| attr.path().is_ident(ident)).map(|i| &self[i])
     }
 }

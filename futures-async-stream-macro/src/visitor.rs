@@ -280,7 +280,7 @@ impl VisitMut for Visitor {
         match expr {
             Expr::Async(expr)
                 if expr.attrs.iter().any(|attr| {
-                    attr.path.is_ident("stream") || attr.path.is_ident("try_stream")
+                    attr.path().is_ident("stream") || attr.path().is_ident("try_stream")
                 }) =>
             {
                 self.scope = Scope::Other;

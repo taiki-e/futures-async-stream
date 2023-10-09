@@ -4,17 +4,17 @@ error: unexpected token: `bar`
 12 |         #[for_await(bar)] //~ ERROR unexpected token
    |                     ^^^
 
-error: unexpected token: `(bar)`
+error: unexpected token in attribute
   --> tests/ui/invalid-argument.rs:23:20
    |
 23 |         #[for_await(bar)] //~ ERROR unexpected token
-   |                    ^^^^^
+   |                    ^
 
-error: unexpected token: `()`
+error: unexpected token in attribute
   --> tests/ui/invalid-argument.rs:29:20
    |
 29 |         #[for_await()] //~ ERROR unexpected token
-   |                    ^^
+   |                    ^
 
 error: unexpected end of input, expected `item`
   --> tests/ui/invalid-argument.rs:37:5
