@@ -14,6 +14,9 @@
 #![feature(proc_macro_def_site)]
 
 #[macro_use]
+mod error;
+
+#[macro_use]
 mod utils;
 
 mod elision;
