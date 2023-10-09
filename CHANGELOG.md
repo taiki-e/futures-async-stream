@@ -10,6 +10,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
+- Update to syn 2.0. ([#92](https://github.com/taiki-e/futures-async-stream/pull/92))
+
 ## [0.2.7] - 2023-06-29
 
 - Fix build error from dependency when built with `-Z minimal-versions`.
@@ -44,13 +46,13 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [0.2.0] - 2020-05-10
 
-- [Renamed `#[async_stream]` to `#[stream]`.](https://github.com/taiki-e/futures-async-stream/pull/45)
+- Rename `#[async_stream]` to `#[stream]`. ([#45](https://github.com/taiki-e/futures-async-stream/pull/45))
 
-- [Renamed `#[async_try_stream]` to `#[stream]`.](https://github.com/taiki-e/futures-async-stream/pull/45)
+- Rename `#[async_try_stream]` to `#[stream]`. ([#45](https://github.com/taiki-e/futures-async-stream/pull/45))
 
-- [Renamed `async_stream_block!` to `stream_block!`.](https://github.com/taiki-e/futures-async-stream/pull/45)
+- Rename `async_stream_block!` to `stream_block!`. ([#45](https://github.com/taiki-e/futures-async-stream/pull/45))
 
-- [Renamed `async_try_stream_block!` to `try_stream_block!`.](https://github.com/taiki-e/futures-async-stream/pull/45)
+- Rename `async_try_stream_block!` to `try_stream_block!`. ([#45](https://github.com/taiki-e/futures-async-stream/pull/45))
 
 - Bug fixes.
 
@@ -58,35 +60,37 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [0.1.5] - 2020-05-04
 
-- [`#[async_stream]` and `#[async_try_stream]` attributes can now be used on async blocks.](https://github.com/taiki-e/futures-async-stream/pull/44)
+- `#[async_stream]` and `#[async_try_stream]` attributes can now be used on async blocks. ([#44](https://github.com/taiki-e/futures-async-stream/pull/44))
 
 ## [0.1.4] - 2020-04-22
 
-- [futures-async-stream now works on no-std environment.](https://github.com/taiki-e/futures-async-stream/pull/34)
+- futures-async-stream now works on no-std environment. ([#34](https://github.com/taiki-e/futures-async-stream/pull/34))
 
 ## [0.1.3] - 2020-02-20
 
-- [Fixed build failure on latest nightly.](https://github.com/taiki-e/futures-async-stream/pull/33)
+- Fix build failure on latest nightly. ([#33](https://github.com/taiki-e/futures-async-stream/pull/33))
 
 ## [0.1.2] - 2019-12-10
 
-- [Fixed build failure on latest nightly.](https://github.com/taiki-e/futures-async-stream/pull/31)
+- Fix build failure on latest nightly. ([#31](https://github.com/taiki-e/futures-async-stream/pull/31))
 
 ## [0.1.1] - 2019-11-13
 
-- Fixed duplicate documentation.
+- Fix duplicate documentation.
 
 ## [0.1.0] - 2019-11-13
 
-- Updated `futures` to 0.3.0.
+- Update `futures` to 0.3.0.
 
 ## [0.1.0-alpha.7] - 2019-09-25
 
-- Updated `pin-project` to 0.4.
+- Update `pin-project` to 0.4.
 
 ## [0.1.0-alpha.6] - 2019-09-06
 
-- [Added `async_try_stream` to support `?` operator in async stream.](https://github.com/taiki-e/futures-async-stream/pull/15) e.g. You can write the following:
+- Add `async_try_stream` to support `?` operator in async stream. ([#15](https://github.com/taiki-e/futures-async-stream/pull/15))
+
+  For example, you can write the following:
 
   ```rust
   #![feature(generators)]
@@ -102,25 +106,27 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
   }
   ```
 
-- Updated `pin-project` to 0.4.0-alpha.9.
+- Update `pin-project` to 0.4.0-alpha.9.
 
 ## [0.1.0-alpha.5] - 2019-08-29
 
-- Pinned the version of pin-project dependency.
+- Pin the version of pin-project dependency.
 
 ## [0.1.0-alpha.4] - 2019-08-23
 
-- Removed usage of some feature gates.
+- Remove usage of some feature gates.
 
-- Updated `pin-project` to 0.4.0-alpha.4.
+- Update `pin-project` to 0.4.0-alpha.4.
 
 ## [0.1.0-alpha.3] - 2019-08-14
 
-- Updated `proc-macro2`, `syn`, and `quote` to 1.0.
+- Update `proc-macro2`, `syn`, and `quote` to 1.0.
 
 ## [0.1.0-alpha.2] - 2019-08-07
 
-- [You can now use async stream functions in traits.](https://github.com/taiki-e/futures-async-stream/pull/12) e.g. You can write the following:
+- You can now use async stream functions in traits. ([#12](https://github.com/taiki-e/futures-async-stream/pull/12))
+
+  For example, you can write the following:
 
   ```rust
   #![feature(async_await, generators)]
