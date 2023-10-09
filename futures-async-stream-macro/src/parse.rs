@@ -3,7 +3,7 @@
 use proc_macro2::TokenStream;
 use syn::{
     parse::{Parse, ParseStream},
-    token, Abi, Attribute, Block, ExprAsync, Result, ReturnType, Signature, Token, TraitItemMethod,
+    token, Abi, Attribute, Block, ExprAsync, Result, ReturnType, Signature, Token, TraitItemFn,
     Type, Visibility,
 };
 
@@ -108,7 +108,7 @@ impl Parse for FnOrAsync {
 
         if peek_signature(input) {
             let vis: Visibility = input.parse()?;
-            let method: TraitItemMethod = input.parse()?;
+            let method: TraitItemFn = input.parse()?;
 
             let mut fn_sig: FnSig = method.into();
             attrs.append(&mut fn_sig.attrs);
@@ -137,8 +137,8 @@ pub(crate) struct FnSig {
     pub(crate) semi: Option<Token![;]>,
 }
 
-impl From<TraitItemMethod> for FnSig {
-    fn from(item: TraitItemMethod) -> Self {
+impl From<TraitItemFn> for FnSig {
+    fn from(item: TraitItemFn) -> Self {
         if let Some(block) = item.default {
             Self { attrs: item.attrs, vis: Visibility::Inherited, sig: item.sig, block, semi: None }
         } else {
