@@ -8,21 +8,6 @@ use syn::{
     Token,
 };
 
-macro_rules! format_err {
-    ($span:expr, $msg:expr $(,)?) => {
-        syn::Error::new_spanned(&$span as &dyn quote::ToTokens, &$msg as &dyn std::fmt::Display)
-    };
-    ($span:expr, $($tt:tt)*) => {
-        format_err!($span, format!($($tt)*))
-    };
-}
-
-macro_rules! bail {
-    ($($tt:tt)*) => {
-        return Err(format_err!($($tt)*))
-    };
-}
-
 macro_rules! def_site_ident {
     ($s:expr) => {
         syn::Ident::new($s, proc_macro::Span::def_site().into())
