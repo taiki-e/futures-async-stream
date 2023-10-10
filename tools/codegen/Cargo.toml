@@ -7,8 +7,7 @@ publish = false
 [dependencies]
 anyhow = "1"
 fs-err = "2"
-globset = "0.4"
-ignore = "0.4"
+globset = { version = "0.4", default-features = false }
 prettyplease = "0.2"
 proc-macro2 = "1"
 quote = "1"

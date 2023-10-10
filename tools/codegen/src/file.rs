@@ -2,10 +2,12 @@
 
 use std::{
     path::{Path, PathBuf},
+    process::Command,
+    str,
     sync::OnceLock,
 };
 
-use anyhow::{format_err, Result};
+use anyhow::{bail, format_err, Context as _, Result};
 use fs_err as fs;
 use proc_macro2::TokenStream;
 
@@ -144,4 +146,30 @@ pub fn write_raw(function_name: &str, path: &Path, contents: impl AsRef<[u8]>) -
     fs::write(path, out)?;
     eprintln!("updated {}", p.display());
     Ok(())
+}
+
+pub fn git_ls_files(dir: &Path, filters: &[&str]) -> Result<Vec<(String, PathBuf)>> {
+    let output = Command::new("git")
+        .arg("ls-files")
+        .args(filters)
+        .current_dir(dir)
+        .output()
+        .with_context(|| format!("failed to run `git ls-files {filters:?}`"))?;
+    if !output.status.success() {
+        bail!("failed to run `git ls-files {filters:?}`");
+    }
+    Ok(str::from_utf8(&output.stdout)?
+        .lines()
+        .map(str::trim)
+        .filter_map(|f| {
+            if f.is_empty() {
+                return None;
+            }
+            let p = dir.join(f);
+            if !p.exists() {
+                return None;
+            }
+            Some((f.to_owned(), p))
+        })
+        .collect())
 }

@@ -31,15 +31,11 @@ fn gen_assert_impl() -> Result<()> {
     let out_dir = &workspace_root.join("src/gen");
     fs::create_dir_all(out_dir)?;
 
-    let files: BTreeSet<String> = ignore::Walk::new(workspace_root.join("src"))
-        .filter_map(Result::ok)
-        .filter_map(|e| {
-            let path = e.path();
-            if !path.is_file() || path.extension() != Some("rs".as_ref()) {
-                return None;
-            }
+    let files: BTreeSet<String> = git_ls_files(&workspace_root.join("src"), &["*.rs"])?
+        .into_iter()
+        .filter_map(|(file_name, path)| {
             // Assertions are only needed for the library's public APIs.
-            if path.ends_with("main.rs") {
+            if file_name == "main.rs" || file_name.starts_with("bin/") {
                 return None;
             }
             Some(path.to_string_lossy().into_owned())
