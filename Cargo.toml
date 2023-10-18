@@ -14,6 +14,12 @@ Async stream for Rust and the futures crate.
 [package.metadata.docs.rs]
 targets = ["x86_64-unknown-linux-gnu"]
 
+[package.metadata.cargo_check_external_types]
+# The following are external types that are allowed to be exposed in our public API.
+allowed_external_types = [
+    "futures_async_stream_macro::*",
+]
+
 [workspace]
 resolver = "2"
 members = ["futures-async-stream-macro", "tests/no-std", "tools/codegen"]
