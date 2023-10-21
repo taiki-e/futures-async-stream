@@ -15,7 +15,7 @@ use crate::{
 
 /// The scope in which `#[for_await]`, `.await`, or `yield` was called.
 ///
-/// The type of generator depends on which scope is called.
+/// The type of coroutine depends on which scope is called.
 #[derive(Clone, Copy, PartialEq)]
 pub(crate) enum Scope {
     /// `async fn`, `async {}`, or `async ||`
@@ -93,8 +93,8 @@ impl Visitor {
 
             let pinned = def_site_ident!("__pinned");
 
-            // It needs to adjust the type yielded by the macro because generators used internally by
-            // async fn yield `()` type, but generators used internally by `stream` yield
+            // It needs to adjust the type yielded by the macro because coroutines used internally by
+            // async fn yield `()` type, but coroutines used internally by `stream` yield
             // `Poll<U>` type.
             let match_next = match self.scope {
                 Scope::Future => {
@@ -226,8 +226,8 @@ impl Visitor {
 
     /// Visits `<base>.await`.
     ///
-    /// It needs to adjust the type yielded by the macro because generators used internally by
-    /// async fn yield `()` type, but generators used internally by `stream` yield
+    /// It needs to adjust the type yielded by the macro because coroutines used internally by
+    /// async fn yield `()` type, but coroutines used internally by `stream` yield
     /// `Poll<U>` type.
     fn visit_await(&self, expr: &mut Expr) {
         if !self.scope.is_stream() {

@@ -50,7 +50,7 @@ jobs:
           # This is the minimum supported Rust version of this crate.
           # When updating this, the reminder to update the minimum supported
           # Rust version in README.md and .clippy.toml.
-          - nightly-2021-10-11
+          - nightly-2023-10-21
           - nightly
     runs-on: ubuntu-latest
     timeout-minutes: 60

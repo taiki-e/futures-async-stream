@@ -9,7 +9,7 @@ error[E0507]: cannot move out of `a`, a captured variable in an `FnMut` closure
 13 | |             yield a
    | |                   -
    | |                   |
-   | |                   variable moved due to use in generator
+   | |                   variable moved due to use in coroutine
    | |                   move occurs because `a` has type `String`, which does not implement the `Copy` trait
 14 | |         };
    | |_________^ `a` is moved here

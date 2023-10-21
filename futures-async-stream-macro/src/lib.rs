@@ -48,7 +48,7 @@ pub fn for_await(args: TokenStream, input: TokenStream) -> TokenStream {
     expr.into_token_stream().into()
 }
 
-/// Creates streams via generators.
+/// Creates streams via coroutines.
 ///
 /// See crate level documentation for details.
 #[proc_macro_attribute]
@@ -58,7 +58,7 @@ pub fn stream(args: TokenStream, input: TokenStream) -> TokenStream {
         .into()
 }
 
-/// Creates streams via generators. This is equivalent to `#[stream]` on async blocks.
+/// Creates streams via coroutines. This is equivalent to `#[stream]` on async blocks.
 #[proc_macro]
 pub fn stream_block(input: TokenStream) -> TokenStream {
     let input = TokenStream::from(TokenTree::Group(Group::new(Delimiter::Brace, input)));
@@ -68,7 +68,7 @@ pub fn stream_block(input: TokenStream) -> TokenStream {
     stream::parse_async(&mut expr, parse::Context::Stream).into()
 }
 
-/// Creates streams via generators.
+/// Creates streams via coroutines.
 ///
 /// See crate level documentation for details.
 #[proc_macro_attribute]
@@ -78,7 +78,7 @@ pub fn try_stream(args: TokenStream, input: TokenStream) -> TokenStream {
         .into()
 }
 
-/// Creates streams via generators. This is equivalent to `#[try_stream]` on async blocks.
+/// Creates streams via coroutines. This is equivalent to `#[try_stream]` on async blocks.
 #[proc_macro]
 pub fn try_stream_block(input: TokenStream) -> TokenStream {
     let input = TokenStream::from(TokenTree::Group(Group::new(Delimiter::Brace, input)));

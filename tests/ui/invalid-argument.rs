@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-#![feature(generators, proc_macro_hygiene, stmt_expr_attributes)]
+#![feature(coroutines, proc_macro_hygiene, stmt_expr_attributes)]
 
 mod for_await {
     use futures_async_stream::{for_await, stream};

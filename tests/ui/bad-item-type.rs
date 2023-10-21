@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-#![feature(generators)]
+#![feature(coroutines)]
 
 use futures_async_stream::stream;
 

@@ -10,6 +10,15 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
+- Update to [new coroutine API since nightly-2023-10-21](https://github.com/rust-lang/rust/pull/116958).
+
+  On the user side of this crate, the only changes required are the following:
+
+  ```diff
+  - #![feature(generators)]
+  + #![feature(coroutines)]
+  ```
+
 ## [0.2.8] - 2023-10-09
 
 - Update to syn 2.0. ([#92](https://github.com/taiki-e/futures-async-stream/pull/92))

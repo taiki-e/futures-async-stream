@@ -3,4 +3,4 @@
 
 avoid-breaking-exported-api = false
 disallowed-names = []
-msrv = "1.57"
+msrv = "1.74"

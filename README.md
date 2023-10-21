@@ -10,7 +10,7 @@
 Async stream for Rust and the futures crate.
 
 This crate provides useful features for streams, using `async_await` and
-unstable [`generators`](https://github.com/rust-lang/rust/issues/43122).
+unstable [`coroutines`](https://github.com/rust-lang/rust/issues/43122).
 
 ## Usage
 
@@ -22,7 +22,7 @@ futures-async-stream = "0.2"
 futures = "0.3"
 ```
 
-*Compiler support: requires rustc nightly-2021-10-11+*
+*Compiler support: requires rustc nightly-2023-10-21+*
 
 ## `#[for_await]`
 
@@ -54,14 +54,14 @@ loops can only be used inside of `async` functions, closures, blocks,
 
 ## `#[stream]`
 
-Creates streams via generators.
+Creates streams via coroutines.
 
 This is a reimplement of [futures-await]'s `#[stream]` for futures 0.3 and
 is an experimental implementation of [the idea listed as the next step of
 async/await](https://github.com/rust-lang/rfcs/blob/HEAD/text/2394-async_await.md#generators-and-streams).
 
 ```rust
-#![feature(generators)]
+#![feature(coroutines)]
 
 use futures::stream::Stream;
 use futures_async_stream::stream;
@@ -86,7 +86,7 @@ via the `yield` expression.
 `#[stream]` can also be used on async blocks:
 
 ```rust
-#![feature(generators, proc_macro_hygiene, stmt_expr_attributes)]
+#![feature(coroutines, proc_macro_hygiene, stmt_expr_attributes)]
 
 use futures::stream::Stream;
 use futures_async_stream::stream;
@@ -110,7 +110,7 @@ You can use async stream functions in traits by passing `boxed` or
 `boxed_local` as an argument.
 
 ```rust
-#![feature(generators)]
+#![feature(coroutines)]
 
 use futures_async_stream::stream;
 
@@ -138,7 +138,7 @@ If you passed `boxed_local` instead of `boxed`, async stream function
 returns a non-thread-safe stream (`Pin<Box<dyn Stream<Item = item> + 'lifetime>>`).
 
 ```rust
-#![feature(generators)]
+#![feature(coroutines)]
 
 use std::pin::Pin;
 
@@ -170,7 +170,7 @@ returned stream is `Result` with `Ok` being the value yielded and `Err` the
 error type returned by `?` operator or `return Err(...)`.
 
 ```rust
-#![feature(generators)]
+#![feature(coroutines)]
 
 use futures::stream::Stream;
 use futures_async_stream::try_stream;

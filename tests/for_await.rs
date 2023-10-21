@@ -2,7 +2,7 @@
 
 #![warn(rust_2018_idioms, single_use_lifetimes)]
 #![allow(clippy::semicolon_if_nothing_returned)] // broken
-#![feature(generators, proc_macro_hygiene, stmt_expr_attributes)]
+#![feature(coroutines, proc_macro_hygiene, stmt_expr_attributes)]
 
 use futures::{
     future::Future,

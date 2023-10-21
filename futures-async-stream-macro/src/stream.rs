@@ -304,7 +304,7 @@ fn expand_async_body(inputs: Punctuated<FnArg, Token![,]>) -> (Vec<FnArg>, Vec<S
     // into:
     //
     //      fn foo(self: <ty>, mut __arg1: <ty>) -> impl Stream<Item = u32> {
-    //          from_generator(static move || {
+    //          from_coroutine(static move || {
     //              let ref <ident> = __arg1;
     //
     //              // ...
@@ -358,14 +358,14 @@ fn make_gen_body(
 ) -> TokenStream {
     let (gen_function, ret_value, ret_ty) = match cx {
         Context::Stream => (
-            quote!(::futures_async_stream::__private::stream::from_generator),
+            quote!(::futures_async_stream::__private::stream::from_coroutine),
             TokenStream::new(),
             quote!(()),
         ),
         Context::TryStream => {
             let error = error.map_or_else(|| quote!(_), ToTokens::to_token_stream);
             (
-                quote!(::futures_async_stream::__private::try_stream::from_generator),
+                quote!(::futures_async_stream::__private::try_stream::from_coroutine),
                 quote!(::futures_async_stream::__private::Ok(())),
                 quote!(::futures_async_stream::__private::Result<(), #error>),
             )
@@ -380,7 +380,7 @@ fn make_gen_body(
             | -> #ret_ty {
                 let (): () = #block;
 
-                // Ensure that this closure is a generator, even if it doesn't
+                // Ensure that this closure is a coroutine, even if it doesn't
                 // have any `yield` statements.
                 #[allow(unreachable_code)]
                 {

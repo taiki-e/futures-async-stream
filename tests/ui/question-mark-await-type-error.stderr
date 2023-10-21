@@ -28,14 +28,14 @@ error[E0277]: the `?` operator can only be applied to values that implement `Try
    |
    = help: the trait `Try` is not implemented for `()`
 
-error[E0277]: the `?` operator can only be used in a generator that returns `Result` or `Option` (or another type that implements `FromResidual`)
+error[E0277]: the `?` operator can only be used in a coroutine that returns `Result` or `Option` (or another type that implements `FromResidual`)
   --> tests/ui/question-mark-await-type-error.rs:23:23
    |
 20 | #[stream(item = i32)]
    | --------------------- this function should return `Result` or `Option` to accept `?`
 ...
 23 |         async {}.await?; //~ ERROR the `?` operator can only be applied to values that implement `std::ops::Try`
-   |                       ^ cannot use the `?` operator in a generator that returns `()`
+   |                       ^ cannot use the `?` operator in a coroutine that returns `()`
    |
    = help: the trait `FromResidual<_>` is not implemented for `()`
 
@@ -70,13 +70,13 @@ error[E0277]: the `?` operator can only be applied to values that implement `Try
    |
    = help: the trait `Try` is not implemented for `()`
 
-error[E0277]: the `?` operator can only be used in a generator that returns `Result` or `Option` (or another type that implements `FromResidual`)
+error[E0277]: the `?` operator can only be used in a coroutine that returns `Result` or `Option` (or another type that implements `FromResidual`)
   --> tests/ui/question-mark-await-type-error.rs:38:23
    |
 34 | #[stream(item = i32)]
    | --------------------- this function should return `Result` or `Option` to accept `?`
 ...
 38 |         async {}.await?; //~ ERROR the `?` operator can only be applied to values that implement `std::ops::Try`
-   |                       ^ cannot use the `?` operator in a generator that returns `()`
+   |                       ^ cannot use the `?` operator in a coroutine that returns `()`
    |
    = help: the trait `FromResidual<_>` is not implemented for `()`

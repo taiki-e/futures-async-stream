@@ -5,7 +5,7 @@
 Async stream for Rust and the futures crate.
 
 This crate provides useful features for streams, using `async_await` and
-unstable [`generators`](https://github.com/rust-lang/rust/issues/43122).
+unstable [`coroutines`](https://github.com/rust-lang/rust/issues/43122).
 
 ## Usage
 
@@ -17,7 +17,7 @@ futures-async-stream = "0.2"
 futures = "0.3"
 ```
 
-*Compiler support: requires rustc nightly-2021-10-11+*
+*Compiler support: requires rustc nightly-2023-10-21+*
 
 ## `#[for_await]`
 
@@ -49,14 +49,14 @@ loops can only be used inside of `async` functions, closures, blocks,
 
 ## `#[stream]`
 
-Creates streams via generators.
+Creates streams via coroutines.
 
 This is a reimplement of [futures-await]'s `#[stream]` for futures 0.3 and
 is an experimental implementation of [the idea listed as the next step of
 async/await](https://github.com/rust-lang/rfcs/blob/HEAD/text/2394-async_await.md#generators-and-streams).
 
 ```rust
-#![feature(generators)]
+#![feature(coroutines)]
 
 use futures::stream::Stream;
 use futures_async_stream::stream;
@@ -81,7 +81,7 @@ via the `yield` expression.
 `#[stream]` can also be used on async blocks:
 
 ```rust
-#![feature(generators, proc_macro_hygiene, stmt_expr_attributes)]
+#![feature(coroutines, proc_macro_hygiene, stmt_expr_attributes)]
 
 use futures::stream::Stream;
 use futures_async_stream::stream;
@@ -105,7 +105,7 @@ You can use async stream functions in traits by passing `boxed` or
 `boxed_local` as an argument.
 
 ```rust
-#![feature(generators)]
+#![feature(coroutines)]
 
 use futures_async_stream::stream;
 
@@ -133,7 +133,7 @@ If you passed `boxed_local` instead of `boxed`, async stream function
 returns a non-thread-safe stream (`Pin<Box<dyn Stream<Item = item> + 'lifetime>>`).
 
 ```rust
-#![feature(generators)]
+#![feature(coroutines)]
 
 use std::pin::Pin;
 
@@ -165,7 +165,7 @@ returned stream is `Result` with `Ok` being the value yielded and `Err` the
 error type returned by `?` operator or `return Err(...)`.
 
 ```rust
-#![feature(generators)]
+#![feature(coroutines)]
 
 use futures::stream::Stream;
 use futures_async_stream::try_stream;
@@ -295,7 +295,7 @@ where
     clippy::undocumented_unsafe_blocks,
 )]
 #![allow(clippy::must_use_candidate)]
-#![feature(generator_trait)]
+#![feature(coroutine_trait)]
 
 #[cfg(test)]
 extern crate std;
@@ -318,7 +318,7 @@ pub use futures_async_stream_macro::try_stream_block;
 mod future {
     use core::{
         future::Future,
-        ops::{Generator, GeneratorState},
+        ops::{Coroutine, CoroutineState},
         pin::Pin,
         ptr::NonNull,
         task::{Context, Poll},
@@ -331,7 +331,7 @@ mod future {
 
     /// This type is needed because:
     ///
-    /// a) Generators cannot implement `for<'a, 'b> Generator<&'a mut Context<'b>>`, so we need to pass
+    /// a) Coroutines cannot implement `for<'a, 'b> Coroutine<&'a mut Context<'b>>`, so we need to pass
     ///    a raw pointer (see <https://github.com/rust-lang/rust/issues/68923>).
     /// b) Raw pointers and `NonNull` aren't `Send` or `Sync`, so that would make every single future
     ///    non-Send/Sync as well, and we don't want that.
@@ -349,15 +349,15 @@ mod future {
     // SAFETY: see `Send` impl
     unsafe impl Sync for ResumeTy {}
 
-    /// Wrap a generator in a future.
+    /// Wrap a coroutine in a future.
     ///
     /// This function returns a `GenFuture` underneath, but hides it in `impl Trait` to give
     /// better error messages (`impl Future` rather than `GenFuture<[closure.....]>`).
     #[doc(hidden)]
     #[inline]
-    pub fn from_generator<G>(gen: G) -> impl Future<Output = G::Return>
+    pub fn from_coroutine<G>(gen: G) -> impl Future<Output = G::Return>
     where
-        G: Generator<ResumeTy, Yield = ()>,
+        G: Coroutine<ResumeTy, Yield = ()>,
     {
         GenFuture(gen)
     }
@@ -367,18 +367,18 @@ mod future {
 
     impl<G> Future for GenFuture<G>
     where
-        G: Generator<ResumeTy, Yield = ()>,
+        G: Coroutine<ResumeTy, Yield = ()>,
     {
         type Output = G::Return;
 
         #[inline]
         fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
             let this = self.project();
-            // Resume the generator, turning the `&mut Context` into a `NonNull` raw pointer. The
+            // Resume the coroutine, turning the `&mut Context` into a `NonNull` raw pointer. The
             // `.await` lowering will safely cast that back to a `&mut Context`.
             match this.0.resume(ResumeTy(NonNull::from(cx).cast::<Context<'static>>())) {
-                GeneratorState::Yielded(()) => Poll::Pending,
-                GeneratorState::Complete(x) => Poll::Ready(x),
+                CoroutineState::Yielded(()) => Poll::Pending,
+                CoroutineState::Complete(x) => Poll::Ready(x),
             }
         }
     }
@@ -395,7 +395,7 @@ mod future {
 mod stream {
     use core::{
         future::Future,
-        ops::{Generator, GeneratorState},
+        ops::{Coroutine, CoroutineState},
         pin::Pin,
         ptr::NonNull,
         task::{Context, Poll},
@@ -406,15 +406,15 @@ mod stream {
 
     use crate::future::ResumeTy;
 
-    /// Wrap a generator in a stream.
+    /// Wrap a coroutine in a stream.
     ///
     /// This function returns a `GenStream` underneath, but hides it in `impl Trait` to give
     /// better error messages (`impl Stream` rather than `GenStream<[closure.....]>`).
     #[doc(hidden)]
     #[inline]
-    pub fn from_generator<G, T>(gen: G) -> impl Stream<Item = T>
+    pub fn from_coroutine<G, T>(gen: G) -> impl Stream<Item = T>
     where
-        G: Generator<ResumeTy, Yield = Poll<T>, Return = ()>,
+        G: Coroutine<ResumeTy, Yield = Poll<T>, Return = ()>,
     {
         GenStream(gen)
     }
@@ -424,7 +424,7 @@ mod stream {
 
     impl<G, T> Stream for GenStream<G>
     where
-        G: Generator<ResumeTy, Yield = Poll<T>, Return = ()>,
+        G: Coroutine<ResumeTy, Yield = Poll<T>, Return = ()>,
     {
         type Item = T;
 
@@ -432,8 +432,8 @@ mod stream {
         fn poll_next(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
             let this = self.project();
             match this.0.resume(ResumeTy(NonNull::from(cx).cast::<Context<'static>>())) {
-                GeneratorState::Yielded(x) => x.map(Some),
-                GeneratorState::Complete(()) => Poll::Ready(None),
+                CoroutineState::Yielded(x) => x.map(Some),
+                CoroutineState::Complete(()) => Poll::Ready(None),
             }
         }
     }
@@ -466,7 +466,7 @@ mod stream {
 
 mod try_stream {
     use core::{
-        ops::{Generator, GeneratorState},
+        ops::{Coroutine, CoroutineState},
         pin::Pin,
         ptr::NonNull,
         task::{Context, Poll},
@@ -477,15 +477,15 @@ mod try_stream {
 
     use crate::future::ResumeTy;
 
-    /// Wrap a generator in a stream.
+    /// Wrap a coroutine in a stream.
     ///
     /// This function returns a `GenStream` underneath, but hides it in `impl Trait` to give
     /// better error messages (`impl Stream` rather than `GenStream<[closure.....]>`).
     #[doc(hidden)]
     #[inline]
-    pub fn from_generator<G, T, E>(gen: G) -> impl FusedStream<Item = Result<T, E>>
+    pub fn from_coroutine<G, T, E>(gen: G) -> impl FusedStream<Item = Result<T, E>>
     where
-        G: Generator<ResumeTy, Yield = Poll<T>, Return = Result<(), E>>,
+        G: Coroutine<ResumeTy, Yield = Poll<T>, Return = Result<(), E>>,
     {
         GenTryStream(Some(gen))
     }
@@ -495,7 +495,7 @@ mod try_stream {
 
     impl<G, T, E> Stream for GenTryStream<G>
     where
-        G: Generator<ResumeTy, Yield = Poll<T>, Return = Result<(), E>>,
+        G: Coroutine<ResumeTy, Yield = Poll<T>, Return = Result<(), E>>,
     {
         type Item = Result<T, E>;
 
@@ -504,9 +504,9 @@ mod try_stream {
             let mut this = self.project();
             if let Some(gen) = this.0.as_mut().as_pin_mut() {
                 let res = match gen.resume(ResumeTy(NonNull::from(cx).cast::<Context<'static>>())) {
-                    GeneratorState::Yielded(x) => x.map(|x| Some(Ok(x))),
-                    GeneratorState::Complete(Err(e)) => Poll::Ready(Some(Err(e))),
-                    GeneratorState::Complete(Ok(())) => Poll::Ready(None),
+                    CoroutineState::Yielded(x) => x.map(|x| Some(Ok(x))),
+                    CoroutineState::Complete(Err(e)) => Poll::Ready(Some(Err(e))),
+                    CoroutineState::Complete(Ok(())) => Poll::Ready(None),
                 };
                 if let Poll::Ready(Some(Err(_)) | None) = &res {
                     this.0.set(None);
@@ -520,7 +520,7 @@ mod try_stream {
 
     impl<G, T, E> FusedStream for GenTryStream<G>
     where
-        G: Generator<ResumeTy, Yield = Poll<T>, Return = Result<(), E>>,
+        G: Coroutine<ResumeTy, Yield = Poll<T>, Return = Result<(), E>>,
     {
         #[inline]
         fn is_terminated(&self) -> bool {
@@ -548,7 +548,7 @@ pub mod __private {
 
         #[doc(hidden)]
         #[allow(unreachable_pub)] // https://github.com/rust-lang/rust/issues/102352
-        pub use crate::future::{from_generator, get_context, ResumeTy};
+        pub use crate::future::{from_coroutine, get_context, ResumeTy};
     }
 
     #[doc(hidden)]
@@ -557,13 +557,13 @@ pub mod __private {
         pub use futures_core::stream::Stream;
 
         #[doc(hidden)]
-        pub use crate::stream::{from_generator, next};
+        pub use crate::stream::{from_coroutine, next};
     }
 
     #[doc(hidden)]
     pub mod try_stream {
         #[doc(hidden)]
-        pub use crate::try_stream::from_generator;
+        pub use crate::try_stream::from_coroutine;
     }
 }
 

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-#![feature(generators)]
+#![feature(coroutines)]
 
 use futures_async_stream::stream;
 
@@ -16,7 +16,7 @@ async fn _stream1() {
     async {
         #[for_await]
         for i in stream(2) {
-            yield i * i; //~ ERROR `async` generators are not yet supported [E0727]
+            yield i * i; //~ ERROR `async` coroutines are not yet supported [E0727]
         }
     }
     .await;
