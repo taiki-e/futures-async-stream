@@ -10,6 +10,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
+## [0.2.9] - 2023-10-21
+
 - Update to [new coroutine API since nightly-2023-10-21](https://github.com/rust-lang/rust/pull/116958). ([5860296](https://github.com/taiki-e/futures-async-stream/commit/5860296c2b0252d389dd5646f05febc524caddb5))
 
   On this crate's user side, the only change required is the following:
@@ -165,7 +167,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 Initial release
 
-[Unreleased]: https://github.com/taiki-e/futures-async-stream/compare/v0.2.8...HEAD
+[Unreleased]: https://github.com/taiki-e/futures-async-stream/compare/v0.2.9...HEAD
+[0.2.9]: https://github.com/taiki-e/futures-async-stream/compare/v0.2.8...v0.2.9
 [0.2.8]: https://github.com/taiki-e/futures-async-stream/compare/v0.2.7...v0.2.8
 [0.2.7]: https://github.com/taiki-e/futures-async-stream/compare/v0.2.6...v0.2.7
 [0.2.6]: https://github.com/taiki-e/futures-async-stream/compare/v0.2.5...v0.2.6

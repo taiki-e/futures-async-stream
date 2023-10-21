@@ -1,6 +1,6 @@
 [package]
 name = "futures-async-stream-macro"
-version = "0.2.8"
+version = "0.2.9"
 edition = "2021"
 license = "Apache-2.0 OR MIT"
 repository = "https://github.com/taiki-e/futures-async-stream"

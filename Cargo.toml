@@ -1,6 +1,6 @@
 [package]
 name = "futures-async-stream"
-version = "0.2.8"
+version = "0.2.9"
 edition = "2021"
 license = "Apache-2.0 OR MIT"
 repository = "https://github.com/taiki-e/futures-async-stream"
@@ -29,7 +29,7 @@ doc-scrape-examples = false
 
 # Note: futures-core is public dependency.
 [dependencies]
-futures-async-stream-macro = { version = "=0.2.8", path = "futures-async-stream-macro" }
+futures-async-stream-macro = { version = "=0.2.9", path = "futures-async-stream-macro" }
 futures-core = { version = "0.3", default-features = false }
 pin-project = "1.0.11"
 
