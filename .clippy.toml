@@ -3,4 +3,4 @@
 
 avoid-breaking-exported-api = false
 disallowed-names = []
-msrv = "1.74"
+msrv = "1.74" # nightly-2023-10-21 is 1.75 but not full 1.75 since it is nightly.
