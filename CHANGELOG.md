@@ -10,9 +10,9 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
-- Update to [new coroutine API since nightly-2023-10-21](https://github.com/rust-lang/rust/pull/116958).
+- Update to [new coroutine API since nightly-2023-10-21](https://github.com/rust-lang/rust/pull/116958). ([5860296](https://github.com/taiki-e/futures-async-stream/commit/5860296c2b0252d389dd5646f05febc524caddb5))
 
-  On the user side of this crate, the only changes required are the following:
+  On this crate's user side, the only change required is the following:
 
   ```diff
   - #![feature(generators)]
