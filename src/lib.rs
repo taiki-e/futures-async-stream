@@ -269,10 +269,6 @@ where
     )
 ))]
 #![warn(
-    rust_2018_idioms,
-    single_use_lifetimes,
-    unreachable_pub,
-    clippy::pedantic,
     // Lints that may help when writing public library.
     missing_debug_implementations,
     missing_docs,
@@ -283,16 +279,6 @@ where
     clippy::missing_inline_in_public_items,
     clippy::std_instead_of_alloc,
     clippy::std_instead_of_core,
-    // Lints that may help when writing unsafe code.
-    improper_ctypes,
-    improper_ctypes_definitions,
-    unsafe_op_in_unsafe_fn,
-    clippy::as_ptr_cast_mut,
-    clippy::default_union_representation,
-    clippy::inline_asm_x86_att_syntax,
-    clippy::trailing_empty_array,
-    clippy::transmute_undefined_repr,
-    clippy::undocumented_unsafe_blocks,
 )]
 #![allow(clippy::must_use_candidate)]
 #![feature(coroutine_trait)]
@@ -547,7 +533,6 @@ pub mod __private {
         pub use core::future::Future;
 
         #[doc(hidden)]
-        #[allow(unreachable_pub)] // https://github.com/rust-lang/rust/issues/102352
         pub use crate::future::{from_coroutine, get_context, ResumeTy};
     }
 

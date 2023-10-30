@@ -10,3 +10,6 @@ path = "lib.rs"
 [dependencies]
 futures-async-stream = { path = "../.." }
 futures-core = { version = "0.3", default-features = false }
+
+[lints]
+workspace = true

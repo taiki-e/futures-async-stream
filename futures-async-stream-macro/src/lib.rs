@@ -10,7 +10,6 @@
     )
 ))]
 #![forbid(unsafe_code)]
-#![warn(rust_2018_idioms, single_use_lifetimes, unreachable_pub, clippy::pedantic)]
 #![feature(proc_macro_def_site)]
 
 #[macro_use]

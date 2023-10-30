@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-#![warn(rust_2018_idioms, single_use_lifetimes)]
-#![allow(clippy::match_on_vec_items, clippy::needless_pass_by_value)]
+#![allow(clippy::match_on_vec_items, clippy::needless_pass_by_value, clippy::wildcard_imports)]
 
 #[macro_use]
 mod file;
@@ -69,13 +68,11 @@ fn gen_assert_impl() -> Result<()> {
                 visited_types.insert(path_string.clone());
 
                 let has_generics = generics.type_params().count() != 0;
-                if generics.const_params().count() != 0 {
-                    panic!(
-                        "gen_assert_impl doesn't support const generics yet; \
-                        skipped `{}`",
-                        path_string
-                    );
-                }
+                assert_eq!(
+                    generics.const_params().count(),
+                    0,
+                    "gen_assert_impl doesn't support const generics yet; skipped `{path_string}`"
+                );
 
                 let lt = generics.lifetimes().map(|_| quote! { '_ }).collect::<Vec<_>>();
                 if has_generics {
@@ -170,10 +167,10 @@ fn gen_assert_impl() -> Result<()> {
                         });
                     }
                 } else {
-                    let lt = if !lt.is_empty() {
-                        quote! { <#(#lt),*> }
-                    } else {
+                    let lt = if lt.is_empty() {
                         quote! {}
+                    } else {
+                        quote! { <#(#lt),*> }
                     };
                     if NOT_SEND.contains(&path_string.as_str()) {
                         use_macros = true;
@@ -233,26 +230,24 @@ fn gen_assert_impl() -> Result<()> {
     }
 
     for &t in NOT_SEND {
-        assert!(visited_types.contains(t), "unknown type `{}` specified in NOT_SEND constant", t);
+        assert!(visited_types.contains(t), "unknown type `{t}` specified in NOT_SEND constant");
     }
     for &t in NOT_SYNC {
-        assert!(visited_types.contains(t), "unknown type `{}` specified in NOT_SYNC constant", t);
+        assert!(visited_types.contains(t), "unknown type `{t}` specified in NOT_SYNC constant");
     }
     for &t in NOT_UNPIN {
-        assert!(visited_types.contains(t), "unknown type `{}` specified in NOT_UNPIN constant", t);
+        assert!(visited_types.contains(t), "unknown type `{t}` specified in NOT_UNPIN constant");
     }
     for &t in NOT_UNWIND_SAFE {
         assert!(
             visited_types.contains(t),
-            "unknown type `{}` specified in NOT_UNWIND_SAFE constant",
-            t
+            "unknown type `{t}` specified in NOT_UNWIND_SAFE constant"
         );
     }
     for &t in NOT_REF_UNWIND_SAFE {
         assert!(
             visited_types.contains(t),
-            "unknown type `{}` specified in NOT_REF_UNWIND_SAFE constant",
-            t
+            "unknown type `{t}` specified in NOT_REF_UNWIND_SAFE constant"
         );
     }
 
