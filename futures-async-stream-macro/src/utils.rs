@@ -23,7 +23,7 @@ pub(crate) fn expr_compile_error(e: &Error) -> Expr {
 
 pub(crate) fn expr_async(block: Block) -> ExprAsync {
     ExprAsync {
-        attrs: Vec::new(),
+        attrs: vec![],
         async_token: <Token![async]>::default(),
         capture: Some(<Token![move]>::default()),
         block,
@@ -32,7 +32,7 @@ pub(crate) fn expr_async(block: Block) -> ExprAsync {
 
 pub(crate) fn unit() -> Expr {
     Expr::Tuple(ExprTuple {
-        attrs: Vec::new(),
+        attrs: vec![],
         paren_token: token::Paren::default(),
         elems: Punctuated::new(),
     })

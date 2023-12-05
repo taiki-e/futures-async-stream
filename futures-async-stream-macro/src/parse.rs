@@ -146,7 +146,7 @@ impl From<TraitItemFn> for FnSig {
                 attrs: item.attrs,
                 vis: Visibility::Inherited,
                 sig: item.sig,
-                block: Block { brace_token: token::Brace::default(), stmts: Vec::new() },
+                block: Block { brace_token: token::Brace::default(), stmts: vec![] },
                 semi: item.semi_token,
             }
         }

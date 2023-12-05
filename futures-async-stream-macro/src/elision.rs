@@ -87,7 +87,7 @@ fn determine_lifetime_name(generics: &mut Generics) -> String {
 
     let mut lifetime_name = String::from("'_async");
 
-    let mut lifetimes = CollectLifetimes(Vec::new());
+    let mut lifetimes = CollectLifetimes(vec![]);
     lifetimes.visit_generics_mut(generics);
 
     while lifetimes.0.iter().any(|name| name.starts_with(&lifetime_name)) {

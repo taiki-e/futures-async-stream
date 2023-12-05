@@ -34,7 +34,7 @@ use futures::stream::Stream;
 use futures_async_stream::for_await;
 
 async fn collect(stream: impl Stream<Item = i32>) -> Vec<i32> {
-    let mut vec = Vec::new();
+    let mut vec = vec![];
     #[for_await]
     for value in stream {
         vec.push(value);
@@ -204,7 +204,7 @@ use std::pin::pin;
 use futures::stream::{Stream, StreamExt};
 
 async fn collect(stream: impl Stream<Item = i32>) -> Vec<i32> {
-    let mut vec = Vec::new();
+    let mut vec = vec![];
     let mut stream = pin!(stream);
     while let Some(value) = stream.next().await {
         vec.push(value);

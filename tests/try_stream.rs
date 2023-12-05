@@ -165,7 +165,7 @@ fn test() {
         }
 
         #[for_await]
-        for x in stream3(Vec::new()) {
+        for x in stream3(vec![]) {
             assert_eq!(Err(0), x);
         }
     });

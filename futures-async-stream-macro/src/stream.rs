@@ -290,8 +290,8 @@ fn parse_fn_inner(
 }
 
 fn expand_async_body(inputs: Punctuated<FnArg, Token![,]>) -> (Vec<FnArg>, Vec<Stmt>) {
-    let mut arguments = Vec::new();
-    let mut statements = Vec::new();
+    let mut arguments = Vec::with_capacity(inputs.len());
+    let mut statements = vec![];
 
     // Desugar `async fn`
     // from:
@@ -334,7 +334,7 @@ fn expand_async_body(inputs: Punctuated<FnArg, Token![,]>) -> (Vec<FnArg>, Vec<S
             statements.push(parse_quote!(let #pat = #ident;));
 
             let pat = Box::new(Pat::Ident(PatIdent {
-                attrs: Vec::new(),
+                attrs: vec![],
                 by_ref: None,
                 mutability: Some(<Token![mut]>::default()),
                 ident,
