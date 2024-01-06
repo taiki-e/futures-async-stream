@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-#![allow(clippy::unused_async)]
+#![allow(missing_debug_implementations, clippy::unused_async)]
 #![allow(
     clippy::must_use_candidate,
     clippy::needless_lifetimes,

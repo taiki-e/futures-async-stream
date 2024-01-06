@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-#![allow(clippy::needless_pass_by_value)]
+#![allow(missing_debug_implementations, clippy::needless_pass_by_value)]
 #![allow(clippy::needless_lifetimes)] // broken
 #![feature(coroutines)]
 
