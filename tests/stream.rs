@@ -261,7 +261,7 @@ pub trait Trait {
     async fn stream4(&self);
 }
 
-pub struct A(i32);
+struct A;
 
 impl Trait for A {
     #[stream(boxed, item = i32)]
@@ -325,7 +325,7 @@ fn test_early_exit() {
         }
     }
 
-    #[stream(item=i32)]
+    #[stream(item = i32)]
     async fn early_exit_block() {
         let s = {
             #[stream]
