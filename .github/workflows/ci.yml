@@ -22,6 +22,7 @@ env:
   RUSTDOCFLAGS: -D warnings
   RUSTFLAGS: -D warnings
   RUSTUP_MAX_RETRIES: 10
+  # NB: sync with miri job's --exclude option
   EXCLUDE: --exclude futures-async-stream-internal-codegen
 
 defaults:
@@ -39,6 +40,11 @@ jobs:
     uses: taiki-e/github-actions/.github/workflows/deny.yml@main
   docs:
     uses: taiki-e/github-actions/.github/workflows/docs.yml@main
+  miri:
+    uses: taiki-e/github-actions/.github/workflows/miri.yml@main
+    with:
+      # NB: sync with env.EXCLUDE
+      args: --exclude futures-async-stream-internal-codegen
   tidy:
     uses: taiki-e/github-actions/.github/workflows/tidy.yml@main
 
@@ -75,19 +81,6 @@ jobs:
       - run: cargo hack build --workspace --no-private --feature-powerset --no-dev-deps
       - run: cargo build --manifest-path tests/no-std/Cargo.toml --target thumbv6m-none-eabi
       - run: cargo minimal-versions build --workspace --no-private --detach-path-deps=skip-exact --all-features
-
-  miri:
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
-    steps:
-      - uses: taiki-e/github-actions/checkout@main
-      - name: Install Rust
-        run: rustup toolchain add nightly --no-self-update --component miri && rustup default nightly
-      - run: cargo miri test --workspace --all-features $EXCLUDE
-        env:
-          MIRIFLAGS: -Zmiri-strict-provenance -Zmiri-symbolic-alignment-check -Zmiri-disable-isolation
-          RUSTDOCFLAGS: ${{ env.RUSTDOCFLAGS }} -Z randomize-layout
-          RUSTFLAGS: ${{ env.RUSTFLAGS }} -Z randomize-layout
 
   codegen:
     runs-on: ubuntu-latest
