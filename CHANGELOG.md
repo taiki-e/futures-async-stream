@@ -10,6 +10,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
+## [0.2.10] - 2024-01-12
+
 - Fix "unexpected token" error on the comma following the async block. ([#94](https://github.com/taiki-e/futures-async-stream/pull/94), thanks @ethe)
 
 ## [0.2.9] - 2023-10-21
@@ -169,7 +171,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 Initial release
 
-[Unreleased]: https://github.com/taiki-e/futures-async-stream/compare/v0.2.9...HEAD
+[Unreleased]: https://github.com/taiki-e/futures-async-stream/compare/v0.2.10...HEAD
+[0.2.10]: https://github.com/taiki-e/futures-async-stream/compare/v0.2.9...v0.2.10
 [0.2.9]: https://github.com/taiki-e/futures-async-stream/compare/v0.2.8...v0.2.9
 [0.2.8]: https://github.com/taiki-e/futures-async-stream/compare/v0.2.7...v0.2.8
 [0.2.7]: https://github.com/taiki-e/futures-async-stream/compare/v0.2.6...v0.2.7
