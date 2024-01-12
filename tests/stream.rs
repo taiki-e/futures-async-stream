@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-#![allow(missing_debug_implementations, clippy::unused_async)]
+#![allow(missing_debug_implementations, clippy::unused_async, clippy::unnecessary_wraps)]
 #![allow(
     clippy::must_use_candidate,
     clippy::needless_lifetimes,
@@ -180,7 +180,6 @@ pub async fn array() {
     yield [1, 2, 3, 4];
 }
 
-#[allow(clippy::unnecessary_wraps)]
 pub fn some_stream() -> Option<impl Stream> {
     Some(
         #[stream]
@@ -190,7 +189,16 @@ pub fn some_stream() -> Option<impl Stream> {
     )
 }
 
-pub fn stream_tuple() -> (impl Stream, impl Stream, impl Stream) {
+pub fn stream_tuple1() -> (impl Stream,) {
+    (
+        #[stream]
+        async {
+            yield 1;
+        },
+    )
+}
+
+pub fn stream_tuple3() -> (impl Stream, impl Stream, impl Stream) {
     (
         #[stream]
         async {
