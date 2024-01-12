@@ -10,6 +10,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
+- Fix "unexpected token" error on the comma following the async block. ([#94](https://github.com/taiki-e/futures-async-stream/pull/94), thanks @ethe)
+
 ## [0.2.9] - 2023-10-21
 
 - Update to [new coroutine API since nightly-2023-10-21](https://github.com/rust-lang/rust/pull/116958). ([5860296](https://github.com/taiki-e/futures-async-stream/commit/5860296c2b0252d389dd5646f05febc524caddb5))
