@@ -180,6 +180,33 @@ pub async fn array() {
     yield [1, 2, 3, 4];
 }
 
+#[allow(clippy::unnecessary_wraps)]
+pub fn some_stream() -> Option<impl Stream> {
+    Some(
+        #[stream]
+        async {
+            yield 1;
+        },
+    )
+}
+
+pub fn stream_tuple() -> (impl Stream, impl Stream, impl Stream) {
+    (
+        #[stream]
+        async {
+            yield 1;
+        },
+        #[stream]
+        async {
+            yield 1;
+        },
+        #[stream]
+        async {
+            yield 1;
+        },
+    )
+}
+
 #[allow(clippy::toplevel_ref_arg)]
 pub mod arguments {
     use super::*;

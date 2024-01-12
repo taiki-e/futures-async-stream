@@ -121,6 +121,10 @@ impl Parse for FnOrAsync {
             attrs.append(&mut expr.attrs);
             expr.attrs = attrs;
 
+            if input.peek(Token![,]) {
+                let _: Token![,] = input.parse()?;
+            }
+
             Ok(Self::Async(expr, input.parse()?))
         } else {
             input.parse::<TokenStream>()?; // ignore all inputs
