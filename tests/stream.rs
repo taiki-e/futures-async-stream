@@ -189,16 +189,19 @@ pub fn some_stream() -> Option<impl Stream> {
     )
 }
 
-pub fn stream_tuple1() -> (impl Stream,) {
-    (
-        #[stream]
+#[allow(clippy::match_bool)]
+#[rustfmt::skip]
+pub fn stream_match() -> impl Stream {
+    match true {
+        true => #[stream]
         async {
             yield 1;
         },
-    )
+        false => unreachable!()
+    }
 }
 
-pub fn stream_tuple3() -> (impl Stream, impl Stream, impl Stream) {
+pub fn stream_tuple() -> (impl Stream, impl Stream, impl Stream) {
     (
         #[stream]
         async {
