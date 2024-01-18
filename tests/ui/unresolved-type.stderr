@@ -1,18 +1,10 @@
 error[E0412]: cannot find type `L` in this scope
  --> tests/ui/unresolved-type.rs:7:17
   |
-7 | #[stream(item = L)] //~ ERROR cannot find type `Left` in this scope
+7 | #[stream(item = L)] //~ ERROR cannot find type `L` in this scope
   |                 ^ not found in this scope
   |
 help: you might be missing a type parameter
   |
 8 | async fn foo<L>() {}
   |             +++
-
-error[E0282]: type annotations needed
- --> tests/ui/unresolved-type.rs:7:1
-  |
-7 | #[stream(item = L)] //~ ERROR cannot find type `Left` in this scope
-  | ^^^^^^^^^^^^^^^^^^^ cannot infer type
-  |
-  = note: this error originates in the attribute macro `stream` (in Nightly builds, run with -Z macro-backtrace for more info)
