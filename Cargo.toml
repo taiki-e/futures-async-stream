@@ -42,7 +42,7 @@ workspace = true
 resolver = "2"
 members = ["futures-async-stream-macro", "tests/no-std", "tools/codegen"]
 
-# This table is shared by projects under https://github.com/taiki-e.
+# This table is shared by projects under github.com/taiki-e.
 # It is not intended for manual editing.
 [workspace.lints.rust]
 improper_ctypes = "warn"
