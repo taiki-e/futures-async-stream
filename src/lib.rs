@@ -17,7 +17,7 @@ futures-async-stream = "0.2"
 futures = "0.3"
 ```
 
-*Compiler support: requires rustc nightly-2023-10-21+*
+*Compiler support: requires rustc nightly-2023-10-29+*
 
 ## `#[for_await]`
 
