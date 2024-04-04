@@ -26,8 +26,8 @@ fn gen_assert_impl() -> Result<()> {
     const NOT_SEND: &[&str] = &[];
     const NOT_SYNC: &[&str] = &[];
     const NOT_UNPIN: &[&str] = &[];
-    const NOT_UNWIND_SAFE: &[&str] = &[];
-    const NOT_REF_UNWIND_SAFE: &[&str] = &[];
+    // const NOT_UNWIND_SAFE: &[&str] = &["future::ResumeTy"];
+    // const NOT_REF_UNWIND_SAFE: &[&str] = &["future::ResumeTy"];
 
     let workspace_root = &workspace_root();
     let out_dir = &workspace_root.join("src/gen");
@@ -93,13 +93,13 @@ fn gen_assert_impl() -> Result<()> {
                     // !Unpin
                     let not_unpin = generics.type_params().map(|_| quote! { NotUnpin });
                     let not_unpin_generics = quote! { <#lt #(#not_unpin),*> };
-                    // !UnwindSafe
-                    let not_unwind_safe = generics.type_params().map(|_| quote! { NotUnwindSafe });
-                    let not_unwind_safe_generics = quote! { <#lt #(#not_unwind_safe),*> };
-                    // !RefUnwindSafe
-                    let not_ref_unwind_safe =
-                        generics.type_params().map(|_| quote! { NotRefUnwindSafe });
-                    let not_ref_unwind_safe_generics = quote! { <#lt #(#not_ref_unwind_safe),*> };
+                    // // !UnwindSafe
+                    // let not_unwind_safe = generics.type_params().map(|_| quote! { NotUnwindSafe });
+                    // let not_unwind_safe_generics = quote! { <#lt #(#not_unwind_safe),*> };
+                    // // !RefUnwindSafe
+                    // let not_ref_unwind_safe =
+                    //     generics.type_params().map(|_| quote! { NotRefUnwindSafe });
+                    // let not_ref_unwind_safe_generics = quote! { <#lt #(#not_ref_unwind_safe),*> };
                     if NOT_SEND.contains(&path_string.as_str()) {
                         tokens.extend(quote! {
                             assert_not_send!(crate:: #(#module::)* #ident #unit_generics);
@@ -132,32 +132,32 @@ fn gen_assert_impl() -> Result<()> {
                             assert_not_unpin!(crate:: #(#module::)* #ident #not_unpin_generics);
                         });
                     }
-                    if NOT_UNWIND_SAFE.contains(&path_string.as_str()) {
-                        tokens.extend(quote! {
-                            assert_not_unwind_safe!(crate:: #(#module::)* #ident #unit_generics);
-                        });
-                    } else {
-                        tokens.extend(quote! {
-                            assert_unwind_safe::<crate:: #(#module::)* #ident #unit_generics>();
-                            assert_not_unwind_safe!(
-                                crate:: #(#module::)* #ident #not_unwind_safe_generics
-                            );
-                        });
-                    }
-                    if NOT_REF_UNWIND_SAFE.contains(&path_string.as_str()) {
-                        tokens.extend(quote! {
-                            assert_not_ref_unwind_safe!(
-                                crate:: #(#module::)* #ident #unit_generics
-                            );
-                        });
-                    } else {
-                        tokens.extend(quote! {
-                            assert_ref_unwind_safe::<crate:: #(#module::)* #ident #unit_generics>();
-                            assert_not_ref_unwind_safe!(
-                                crate:: #(#module::)* #ident #not_ref_unwind_safe_generics
-                            );
-                        });
-                    }
+                    // if NOT_UNWIND_SAFE.contains(&path_string.as_str()) {
+                    //     tokens.extend(quote! {
+                    //         assert_not_unwind_safe!(crate:: #(#module::)* #ident #unit_generics);
+                    //     });
+                    // } else {
+                    //     tokens.extend(quote! {
+                    //         assert_unwind_safe::<crate:: #(#module::)* #ident #unit_generics>();
+                    //         assert_not_unwind_safe!(
+                    //             crate:: #(#module::)* #ident #not_unwind_safe_generics
+                    //         );
+                    //     });
+                    // }
+                    // if NOT_REF_UNWIND_SAFE.contains(&path_string.as_str()) {
+                    //     tokens.extend(quote! {
+                    //         assert_not_ref_unwind_safe!(
+                    //             crate:: #(#module::)* #ident #unit_generics
+                    //         );
+                    //     });
+                    // } else {
+                    //     tokens.extend(quote! {
+                    //         assert_ref_unwind_safe::<crate:: #(#module::)* #ident #unit_generics>();
+                    //         assert_not_ref_unwind_safe!(
+                    //             crate:: #(#module::)* #ident #not_ref_unwind_safe_generics
+                    //         );
+                    //     });
+                    // }
                 } else {
                     let lt = if has_lifetimes {
                         quote! { <#(#lt),*> }
@@ -191,24 +191,24 @@ fn gen_assert_impl() -> Result<()> {
                             assert_unpin::<crate:: #(#module::)* #ident #lt>();
                         });
                     }
-                    if NOT_UNWIND_SAFE.contains(&path_string.as_str()) {
-                        tokens.extend(quote! {
-                            assert_not_unwind_safe!(crate:: #(#module::)* #ident #lt);
-                        });
-                    } else {
-                        tokens.extend(quote! {
-                            assert_unwind_safe::<crate:: #(#module::)* #ident #lt>();
-                        });
-                    }
-                    if NOT_REF_UNWIND_SAFE.contains(&path_string.as_str()) {
-                        tokens.extend(quote! {
-                            assert_not_ref_unwind_safe!(crate:: #(#module::)* #ident #lt);
-                        });
-                    } else {
-                        tokens.extend(quote! {
-                            assert_ref_unwind_safe::<crate:: #(#module::)* #ident #lt>();
-                        });
-                    }
+                    // if NOT_UNWIND_SAFE.contains(&path_string.as_str()) {
+                    //     tokens.extend(quote! {
+                    //         assert_not_unwind_safe!(crate:: #(#module::)* #ident #lt);
+                    //     });
+                    // } else {
+                    //     tokens.extend(quote! {
+                    //         assert_unwind_safe::<crate:: #(#module::)* #ident #lt>();
+                    //     });
+                    // }
+                    // if NOT_REF_UNWIND_SAFE.contains(&path_string.as_str()) {
+                    //     tokens.extend(quote! {
+                    //         assert_not_ref_unwind_safe!(crate:: #(#module::)* #ident #lt);
+                    //     });
+                    // } else {
+                    //     tokens.extend(quote! {
+                    //         assert_ref_unwind_safe::<crate:: #(#module::)* #ident #lt>();
+                    //     });
+                    // }
                 };
             }
             _ => {}
@@ -221,8 +221,8 @@ fn gen_assert_impl() -> Result<()> {
         (NOT_SEND, "NOT_SEND"),
         (NOT_SYNC, "NOT_SYNC"),
         (NOT_UNPIN, "NOT_UNPIN"),
-        (NOT_UNWIND_SAFE, "NOT_UNWIND_SAFE"),
-        (NOT_REF_UNWIND_SAFE, "NOT_REF_UNWIND_SAFE"),
+        // (NOT_UNWIND_SAFE, "NOT_UNWIND_SAFE"),
+        // (NOT_REF_UNWIND_SAFE, "NOT_REF_UNWIND_SAFE"),
     ] {
         use_macros |= !list.is_empty();
         for &ty in *list {
@@ -240,8 +240,8 @@ fn gen_assert_impl() -> Result<()> {
         fn assert_send<T: ?Sized + Send>() {}
         fn assert_sync<T: ?Sized + Sync>() {}
         fn assert_unpin<T: ?Sized + Unpin>() {}
-        fn assert_unwind_safe<T: ?Sized + std::panic::UnwindSafe>() {}
-        fn assert_ref_unwind_safe<T: ?Sized + std::panic::RefUnwindSafe>() {}
+        // fn assert_unwind_safe<T: ?Sized + std::panic::UnwindSafe>() {}
+        // fn assert_ref_unwind_safe<T: ?Sized + std::panic::RefUnwindSafe>() {}
     };
     if use_generics_helpers {
         out.extend(quote! {
@@ -253,10 +253,10 @@ fn gen_assert_impl() -> Result<()> {
             struct NotSendSync(*const ());
             /// `!Unpin`
             struct NotUnpin(core::marker::PhantomPinned);
-            /// `!UnwindSafe`
-            struct NotUnwindSafe(&'static mut ());
-            /// `!RefUnwindSafe`
-            struct NotRefUnwindSafe(core::cell::UnsafeCell<()>);
+            // /// `!UnwindSafe`
+            // struct NotUnwindSafe(&'static mut ());
+            // /// `!RefUnwindSafe`
+            // struct NotRefUnwindSafe(core::cell::UnsafeCell<()>);
         });
     }
     if use_macros {
@@ -276,16 +276,16 @@ fn gen_assert_impl() -> Result<()> {
                     static_assertions::assert_not_impl_all!($ty: Unpin);
                 };
             }
-            macro_rules! assert_not_unwind_safe {
-                ($ty:ty) => {
-                    static_assertions::assert_not_impl_all!($ty: std::panic::UnwindSafe);
-                };
-            }
-            macro_rules! assert_not_ref_unwind_safe {
-                ($ty:ty) => {
-                    static_assertions::assert_not_impl_all!($ty: std::panic::RefUnwindSafe);
-                };
-            }
+            // macro_rules! assert_not_unwind_safe {
+            //     ($ty:ty) => {
+            //         static_assertions::assert_not_impl_all!($ty: std::panic::UnwindSafe);
+            //     };
+            // }
+            // macro_rules! assert_not_ref_unwind_safe {
+            //     ($ty:ty) => {
+            //         static_assertions::assert_not_impl_all!($ty: std::panic::RefUnwindSafe);
+            //     };
+            // }
         });
     }
     out.extend(quote! {

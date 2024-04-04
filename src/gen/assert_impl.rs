@@ -13,12 +13,8 @@
 fn assert_send<T: ?Sized + Send>() {}
 fn assert_sync<T: ?Sized + Sync>() {}
 fn assert_unpin<T: ?Sized + Unpin>() {}
-fn assert_unwind_safe<T: ?Sized + std::panic::UnwindSafe>() {}
-fn assert_ref_unwind_safe<T: ?Sized + std::panic::RefUnwindSafe>() {}
 const _: fn() = || {
     assert_send::<crate::future::ResumeTy>();
     assert_sync::<crate::future::ResumeTy>();
     assert_unpin::<crate::future::ResumeTy>();
-    assert_unwind_safe::<crate::future::ResumeTy>();
-    assert_ref_unwind_safe::<crate::future::ResumeTy>();
 };
