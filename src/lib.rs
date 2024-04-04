@@ -280,7 +280,6 @@ where
     clippy::std_instead_of_alloc,
     clippy::std_instead_of_core,
 )]
-#![allow(clippy::must_use_candidate)]
 #![feature(coroutine_trait)]
 
 #[cfg(test)]
@@ -370,6 +369,7 @@ mod future {
     }
 
     #[doc(hidden)]
+    #[must_use]
     #[inline]
     pub unsafe fn get_context<'a, 'b>(cx: ResumeTy) -> &'a mut Context<'b> {
         // SAFETY: the caller must guarantee that `cx.0` is a valid pointer
