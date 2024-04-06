@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-#![allow(clippy::semicolon_if_nothing_returned)] // broken
 #![feature(coroutines, proc_macro_hygiene, stmt_expr_attributes)]
 
 use futures::{

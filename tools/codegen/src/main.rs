@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-#![allow(clippy::match_on_vec_items, clippy::needless_pass_by_value, clippy::wildcard_imports)]
+#![allow(clippy::needless_pass_by_value, clippy::wildcard_imports)]
 
 #[macro_use]
 mod file;

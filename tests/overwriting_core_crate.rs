@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
 #![feature(coroutines)]
-#![allow(clippy::no_effect_underscore_binding)] // broken
 
 // See https://github.com/rust-lang/pin-utils/pull/26#discussion_r344491597
 //

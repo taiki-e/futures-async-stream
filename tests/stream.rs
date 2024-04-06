@@ -1,12 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-#![allow(dead_code, clippy::unused_async, clippy::unnecessary_wraps)]
-#![allow(
-    clippy::must_use_candidate,
-    clippy::needless_lifetimes,
-    clippy::no_effect_underscore_binding,
-    clippy::semicolon_if_nothing_returned
-)] // broken
+#![allow(dead_code, clippy::must_use_candidate, clippy::unused_async, clippy::unnecessary_wraps)]
 #![feature(coroutines, proc_macro_hygiene, stmt_expr_attributes, gen_future)]
 
 use std::{pin::Pin, rc::Rc, sync::Arc};

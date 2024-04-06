@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
 #![allow(unreachable_pub, clippy::try_err, clippy::unused_async)]
-#![allow(clippy::semicolon_if_nothing_returned, clippy::no_effect_underscore_binding)] // broken
 #![feature(coroutines, proc_macro_hygiene, stmt_expr_attributes)]
 
 use futures::{
