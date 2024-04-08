@@ -3,11 +3,14 @@
 #![allow(dead_code, clippy::must_use_candidate, clippy::unused_async, clippy::unnecessary_wraps)]
 #![feature(coroutines, proc_macro_hygiene, stmt_expr_attributes, gen_future)]
 
-use std::{pin::Pin, rc::Rc, sync::Arc};
+use std::{
+    pin::{pin, Pin},
+    rc::Rc,
+    sync::Arc,
+};
 
 use futures::{
     future::Future,
-    pin_mut,
     stream::Stream,
     task::{noop_waker, Context, Poll},
 };
@@ -16,7 +19,7 @@ use futures_async_stream::{for_await, stream, stream_block};
 fn run<F: Future>(f: F) -> F::Output {
     let w = noop_waker();
     let cx = &mut Context::from_waker(&w);
-    pin_mut!(f);
+    let mut f = pin!(f);
     loop {
         if let Poll::Ready(x) = f.as_mut().poll(cx) {
             return x;
