@@ -10,6 +10,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
+## [0.2.11] - 2024-04-27
+
 - Fix build failure on latest nightly (nightly-2024-04-25+). ([#97](https://github.com/taiki-e/futures-async-stream/issues/97))
 
 ## [0.2.10] - 2024-01-12
@@ -173,7 +175,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 Initial release
 
-[Unreleased]: https://github.com/taiki-e/futures-async-stream/compare/v0.2.10...HEAD
+[Unreleased]: https://github.com/taiki-e/futures-async-stream/compare/v0.2.11...HEAD
+[0.2.11]: https://github.com/taiki-e/futures-async-stream/compare/v0.2.10...v0.2.11
 [0.2.10]: https://github.com/taiki-e/futures-async-stream/compare/v0.2.9...v0.2.10
 [0.2.9]: https://github.com/taiki-e/futures-async-stream/compare/v0.2.8...v0.2.9
 [0.2.8]: https://github.com/taiki-e/futures-async-stream/compare/v0.2.7...v0.2.8
