@@ -17,6 +17,7 @@ jobs:
     if: github.repository_owner == 'taiki-e'
     uses: taiki-e/github-actions/.github/workflows/create-release.yml@main
     with:
+      rust: nightly
       crates: futures-async-stream-macro,.
     permissions:
       contents: write
