@@ -10,6 +10,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
+- Fix build failure on latest nightly (nightly-2024-04-25+). ([#97](https://github.com/taiki-e/futures-async-stream/issues/97))
+
 ## [0.2.10] - 2024-01-12
 
 - Fix "unexpected token" error on the comma following the async block. ([#94](https://github.com/taiki-e/futures-async-stream/pull/94), thanks @ethe)

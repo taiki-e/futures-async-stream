@@ -304,7 +304,7 @@ fn expand_async_body(inputs: Punctuated<FnArg, Token![,]>) -> (Vec<FnArg>, Vec<S
     // into:
     //
     //      fn foo(self: <ty>, mut __arg1: <ty>) -> impl Stream<Item = u32> {
-    //          from_coroutine(static move || {
+    //          from_coroutine(#[coroutine] static move || {
     //              let ref <ident> = __arg1;
     //
     //              // ...
@@ -375,6 +375,7 @@ fn make_gen_body(
     let task_context = def_site_ident!("__task_context");
     let body = quote! {
         #gen_function(
+            #[coroutine]
             static #capture |
                 mut #task_context: ::futures_async_stream::__private::future::ResumeTy,
             | -> #ret_ty {
