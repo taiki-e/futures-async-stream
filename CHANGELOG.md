@@ -12,7 +12,7 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [0.2.11] - 2024-04-27
 
-- Fix build failure on latest nightly (nightly-2024-04-25+). ([#97](https://github.com/taiki-e/futures-async-stream/issues/97))
+- Fix build failure on the latest nightly (nightly-2024-04-25+). ([#97](https://github.com/taiki-e/futures-async-stream/issues/97))
 
 ## [0.2.10] - 2024-01-12
 
@@ -89,11 +89,11 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [0.1.3] - 2020-02-20
 
-- Fix build failure on latest nightly. ([#33](https://github.com/taiki-e/futures-async-stream/pull/33))
+- Fix build failure on the latest nightly. ([#33](https://github.com/taiki-e/futures-async-stream/pull/33))
 
 ## [0.1.2] - 2019-12-10
 
-- Fix build failure on latest nightly. ([#31](https://github.com/taiki-e/futures-async-stream/pull/31))
+- Fix build failure on the latest nightly. ([#31](https://github.com/taiki-e/futures-async-stream/pull/31))
 
 ## [0.1.1] - 2019-11-13
 
