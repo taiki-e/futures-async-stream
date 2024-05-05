@@ -281,6 +281,7 @@ where
     clippy::std_instead_of_core,
 )]
 #![feature(coroutine_trait)]
+#![cfg_attr(test, allow(unexpected_cfgs))] // https://github.com/rust-lang/rust/issues/124735
 
 #[cfg(test)]
 extern crate std;
