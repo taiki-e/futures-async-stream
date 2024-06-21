@@ -10,5 +10,6 @@ disallowed-methods = [
     { path = "std::env::remove_var", reason = "this is not thread-safe and inherently unsafe; see <https://github.com/rust-lang/rust/issues/27970> for more" },
     { path = "std::env::set_var", reason = "this is not thread-safe and inherently unsafe; see <https://github.com/rust-lang/rust/issues/27970> for more" },
 ]
-disallowed-types = []
+disallowed-types = [
+]
 msrv = "1.78" # nightly-2024-04-25 is 1.79 but not full 1.79 since it is nightly.
