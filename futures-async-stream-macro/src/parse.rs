@@ -69,7 +69,7 @@ fn validate_signature(item: Option<&FnSig>, attrs: &[Attribute], cx: Context) ->
         if item.sig.asyncness.is_none() {
             bail!(item.sig.fn_token, "async stream must be declared as async");
         }
-        if let Some(constness) = item.sig.constness {
+        if let Some(constness) = &item.sig.constness {
             bail!(constness, "async stream may not be const");
         }
         if let Some(variadic) = &item.sig.variadic {

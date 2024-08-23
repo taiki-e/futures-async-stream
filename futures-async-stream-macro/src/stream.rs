@@ -43,7 +43,7 @@ pub(crate) fn attribute(args: TokenStream, input: TokenStream, cx: Context) -> R
 
 pub(crate) fn parse_async(expr: &mut ExprAsync, cx: Context) -> TokenStream {
     Visitor::new(cx.into()).visit_expr_async_mut(expr);
-    make_gen_body(expr.capture, &expr.block, cx, None, false)
+    make_gen_body(expr.capture.as_ref(), &expr.block, cx, None, false)
 }
 
 #[derive(Clone, Copy)]
@@ -269,7 +269,7 @@ fn parse_fn_inner(
     statements.append(&mut block.stmts);
     block.stmts = statements;
 
-    let body_inner = make_gen_body(Some(<Token![move]>::default()), &block, cx, error, boxed);
+    let body_inner = make_gen_body(Some(&<Token![move]>::default()), &block, cx, error, boxed);
     let mut body = TokenStream::new();
     block.brace_token.surround(&mut body, |tokens| {
         body_inner.to_tokens(tokens);
@@ -350,7 +350,7 @@ fn expand_async_body(inputs: Punctuated<FnArg, Token![,]>) -> (Vec<FnArg>, Vec<S
 }
 
 fn make_gen_body(
-    capture: Option<Token![move]>,
+    capture: Option<&Token![move]>,
     block: &Block,
     cx: Context,
     error: Option<&Type>,
