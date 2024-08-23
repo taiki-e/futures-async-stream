@@ -10,6 +10,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
+- Disable `derive` and `clone-impls` features of `syn` dependency.
+
 ## [0.2.11] - 2024-04-27
 
 - Fix build failure on the latest nightly (nightly-2024-04-25+). ([#97](https://github.com/taiki-e/futures-async-stream/issues/97))
