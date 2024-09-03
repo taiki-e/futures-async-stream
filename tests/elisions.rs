@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-#![allow(dead_code, clippy::needless_pass_by_value)]
+#![allow(dead_code, unknown_lints, elided_named_lifetimes, clippy::needless_pass_by_value)]
 #![feature(coroutines)]
 
 use futures_async_stream::stream;
