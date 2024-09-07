@@ -27,7 +27,7 @@ env:
 
 defaults:
   run:
-    shell: bash
+    shell: bash --noprofile --norc -CeEuxo pipefail {0}
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
@@ -63,17 +63,17 @@ jobs:
     steps:
       - uses: taiki-e/checkout-action@v1
       - name: Install Rust
-        run: rustup toolchain add ${{ matrix.rust }} --no-self-update --component rust-src && rustup default ${{ matrix.rust }}
+        run: rustup toolchain add "${{ matrix.rust }}" --no-self-update --component rust-src && rustup default "${{ matrix.rust }}"
       - run: rustup target add thumbv6m-none-eabi
       - uses: taiki-e/install-action@cargo-hack
       - uses: taiki-e/install-action@cargo-minimal-versions
       - uses: taiki-e/install-action@cargo-careful
         if: matrix.rust == 'nightly'
-      - run: cargo test --workspace --all-features $EXCLUDE --tests --no-run
+      - run: cargo test --workspace --all-features ${EXCLUDE} --tests --no-run
         if: matrix.rust != 'nightly'
-      - run: cargo test --workspace --all-features $EXCLUDE
+      - run: cargo test --workspace --all-features ${EXCLUDE}
         if: matrix.rust == 'nightly'
-      - run: cargo careful test --workspace --all-features $EXCLUDE
+      - run: cargo careful test --workspace --all-features ${EXCLUDE}
         env:
           RUSTDOCFLAGS: ${{ env.RUSTDOCFLAGS }} -Z randomize-layout
           RUSTFLAGS: ${{ env.RUSTFLAGS }} -Z randomize-layout
