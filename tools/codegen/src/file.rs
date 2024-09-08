@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
 use std::{
+    io,
     path::{Path, PathBuf},
     process::Command,
     str,
     sync::LazyLock,
 };
 
-use anyhow::{bail, format_err, Context as _, Result};
 use fs_err as fs;
 use proc_macro2::TokenStream;
 
@@ -53,17 +53,18 @@ pub(crate) fn write(
     function_name: &str,
     path: impl AsRef<Path>,
     contents: TokenStream,
-) -> Result<()> {
-    write_raw(function_name, path.as_ref(), format_tokens(contents)?)
+) -> io::Result<()> {
+    write_raw(function_name, path.as_ref(), format_tokens(contents))
 }
 
-fn format_tokens(contents: TokenStream) -> Result<Vec<u8>> {
+#[track_caller]
+fn format_tokens(contents: TokenStream) -> Vec<u8> {
     let mut out = prettyplease::unparse(
-        &syn::parse2(contents.clone()).map_err(|e| format_err!("{e} in:\n---\n{contents}\n---"))?,
+        &syn::parse2(contents.clone()).unwrap_or_else(|e| panic!("{e} in:\n---\n{contents}\n---")),
     )
     .into_bytes();
     format_macros(&mut out);
-    Ok(out)
+    out
 }
 
 // Roughly format the code inside macro calls.
@@ -129,7 +130,7 @@ pub(crate) fn write_raw(
     function_name: &str,
     path: &Path,
     contents: impl AsRef<[u8]>,
-) -> Result<()> {
+) -> io::Result<()> {
     static LINGUIST_GENERATED: LazyLock<Vec<globset::GlobMatcher>> = LazyLock::new(|| {
         let gitattributes = fs::read_to_string(workspace_root().join(".gitattributes")).unwrap();
         let mut linguist_generated = vec![];
@@ -157,19 +158,21 @@ pub(crate) fn write_raw(
     Ok(())
 }
 
-pub(crate) fn git_ls_files(dir: &Path, filters: &[&str]) -> Result<Vec<(String, PathBuf)>> {
+#[track_caller]
+pub(crate) fn git_ls_files(dir: &Path, filters: &[&str]) -> Vec<(String, PathBuf)> {
     let mut cmd = Command::new("git");
     cmd.arg("ls-files").args(filters).current_dir(dir);
-    let output = cmd.output().with_context(|| format!("could not execute process `{cmd:?}`"))?;
-    if !output.status.success() {
-        bail!(
-            "process didn't exit successfully: `{cmd:?}`:\n\nSTDOUT:\n{0}\n{1}\n{0}\n\nSTDERR:\n{0}\n{2}\n{0}\n",
-            "-".repeat(60),
-            String::from_utf8_lossy(&output.stdout),
-            String::from_utf8_lossy(&output.stderr),
-        );
-    }
-    Ok(str::from_utf8(&output.stdout)?
+    let output =
+        cmd.output().unwrap_or_else(|e| panic!("could not execute process `{cmd:?}`: {e}"));
+    assert!(
+        output.status.success(),
+        "process didn't exit successfully: `{cmd:?}`:\n\nSTDOUT:\n{0}\n{1}\n{0}\n\nSTDERR:\n{0}\n{2}\n{0}\n",
+        "-".repeat(60),
+        String::from_utf8_lossy(&output.stdout),
+        String::from_utf8_lossy(&output.stderr),
+    );
+    str::from_utf8(&output.stdout)
+        .unwrap()
         .lines()
         .map(str::trim)
         .filter_map(|f| {
@@ -182,5 +185,5 @@ pub(crate) fn git_ls_files(dir: &Path, filters: &[&str]) -> Result<Vec<(String, 
             }
             Some((f.to_owned(), p))
         })
-        .collect())
+        .collect()
 }

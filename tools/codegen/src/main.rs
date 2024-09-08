@@ -10,19 +10,17 @@ use std::{
     path::Path,
 };
 
-use anyhow::Result;
 use fs_err as fs;
 use quote::{format_ident, quote, ToTokens};
 use syn::visit_mut::{self, VisitMut};
 
 use crate::file::*;
 
-fn main() -> Result<()> {
-    gen_assert_impl()?;
-    Ok(())
+fn main() {
+    gen_assert_impl();
 }
 
-fn gen_assert_impl() -> Result<()> {
+fn gen_assert_impl() {
     const NOT_SEND: &[&str] = &[];
     const NOT_SYNC: &[&str] = &[];
     const NOT_UNPIN: &[&str] = &[];
@@ -31,9 +29,9 @@ fn gen_assert_impl() -> Result<()> {
 
     let workspace_root = &workspace_root();
     let out_dir = &workspace_root.join("src/gen");
-    fs::create_dir_all(out_dir)?;
+    fs::create_dir_all(out_dir).unwrap();
 
-    let files: BTreeSet<String> = git_ls_files(&workspace_root.join("src"), &["*.rs"])?
+    let files: BTreeSet<String> = git_ls_files(&workspace_root.join("src"), &["*.rs"])
         .into_iter()
         .filter_map(|(file_name, path)| {
             // Assertions are only needed for the library's public APIs.
@@ -48,8 +46,8 @@ fn gen_assert_impl() -> Result<()> {
     let mut visited_types = HashSet::new();
     let mut use_generics_helpers = false;
     for f in &files {
-        let s = fs::read_to_string(f)?;
-        let mut ast = syn::parse_file(&s)?;
+        let s = fs::read_to_string(f).unwrap();
+        let mut ast = syn::parse_file(&s).unwrap();
 
         let module = if f.ends_with("lib.rs") {
             vec![]
@@ -293,9 +291,7 @@ fn gen_assert_impl() -> Result<()> {
             #tokens
         };
     });
-    write(function_name!(), out_dir.join("assert_impl.rs"), out)?;
-
-    Ok(())
+    write(function_name!(), out_dir.join("assert_impl.rs"), out).unwrap();
 }
 
 #[must_use]
