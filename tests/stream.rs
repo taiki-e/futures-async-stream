@@ -136,33 +136,33 @@ async fn stream3() {
 }
 
 mod foo {
-    pub struct _Foo(pub i32);
+    pub struct Foo(pub i32);
 }
 
-#[stream(boxed, item = foo::_Foo)]
+#[stream(boxed, item = foo::Foo)]
 pub async fn stream5() {
-    yield foo::_Foo(0);
-    yield foo::_Foo(1);
+    yield foo::Foo(0);
+    yield foo::Foo(1);
 }
 
 #[stream(item = i32, boxed)]
 pub async fn stream6() {
     #[for_await]
-    for foo::_Foo(i) in stream5() {
+    for foo::Foo(i) in stream5() {
         yield i * i;
     }
 }
 
-#[stream(boxed_local, item = foo::_Foo)]
+#[stream(boxed_local, item = foo::Foo)]
 pub async fn stream7() {
-    yield foo::_Foo(0);
-    yield foo::_Foo(1);
+    yield foo::Foo(0);
+    yield foo::Foo(1);
 }
 
 #[stream(item = i32, boxed_local)]
 pub async fn stream8() {
     #[for_await]
-    for foo::_Foo(i) in stream5() {
+    for foo::Foo(i) in stream5() {
         yield i * i;
     }
 }
