@@ -136,6 +136,7 @@ async fn stream3() {
 }
 
 mod foo {
+    #[allow(unknown_lints, unnameable_types)] // unnameable_types is available on Rust 1.79+
     pub struct Foo(pub i32);
 }
 
