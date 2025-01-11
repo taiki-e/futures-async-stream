@@ -43,6 +43,7 @@ jobs:
   miri:
     uses: taiki-e/github-actions/.github/workflows/miri.yml@main
     with:
+      event_name: ${{ github.event_name }}
       # NB: sync with env.EXCLUDE
       args: --exclude futures-async-stream-internal-codegen
   tidy:
