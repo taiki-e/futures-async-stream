@@ -3,14 +3,14 @@
 use quote::quote;
 use syn::{
     parse_quote, parse_quote_spanned,
-    spanned::Spanned,
+    spanned::Spanned as _,
     visit_mut::{self, VisitMut},
     Expr, ExprAwait, ExprCall, ExprForLoop, ExprYield, Item, Token,
 };
 
 use crate::{
     parse, stream, stream_block, try_stream_block,
-    utils::{expr_compile_error, replace_expr, unit, SliceExt},
+    utils::{expr_compile_error, replace_expr, unit, SliceExt as _},
 };
 
 /// The scope in which `#[for_await]`, `.await`, or `yield` was called.

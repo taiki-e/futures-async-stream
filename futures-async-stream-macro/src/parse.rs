@@ -7,7 +7,7 @@ use syn::{
     Type, Visibility,
 };
 
-use crate::{utils::SliceExt, visitor::Scope};
+use crate::{utils::SliceExt as _, visitor::Scope};
 
 #[derive(Copy, Clone)]
 pub(crate) enum Context {

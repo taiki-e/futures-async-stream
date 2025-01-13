@@ -7,7 +7,7 @@ use syn::{
     parse_quote,
     punctuated::Punctuated,
     token,
-    visit_mut::VisitMut,
+    visit_mut::VisitMut as _,
     Block, ExprAsync, FnArg, Pat, PatIdent, PatType, Result, Signature, Stmt, Token, Type,
 };
 

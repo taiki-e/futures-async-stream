@@ -11,7 +11,7 @@ use std::{
 };
 
 use fs_err as fs;
-use quote::{format_ident, quote, ToTokens};
+use quote::{format_ident, quote, ToTokens as _};
 use syn::visit_mut::{self, VisitMut};
 
 use crate::file::*;

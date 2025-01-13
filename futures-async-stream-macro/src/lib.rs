@@ -24,7 +24,7 @@ mod stream;
 mod visitor;
 
 use proc_macro::{Delimiter, Group, TokenStream, TokenTree};
-use quote::ToTokens;
+use quote::ToTokens as _;
 use syn::{parse_quote, Error, Expr, ExprForLoop};
 
 use crate::utils::{expr_async, parse_as_empty};
