@@ -340,11 +340,11 @@ mod future {
     /// better error messages (`impl Future` rather than `GenFuture<[closure.....]>`).
     #[doc(hidden)]
     #[inline]
-    pub fn from_coroutine<G>(gen: G) -> impl Future<Output = G::Return>
+    pub fn from_coroutine<G>(g: G) -> impl Future<Output = G::Return>
     where
         G: Coroutine<ResumeTy, Yield = ()>,
     {
-        GenFuture(gen)
+        GenFuture(g)
     }
 
     #[pin_project]
@@ -398,11 +398,11 @@ mod stream {
     /// better error messages (`impl Stream` rather than `GenStream<[closure.....]>`).
     #[doc(hidden)]
     #[inline]
-    pub fn from_coroutine<G, T>(gen: G) -> impl Stream<Item = T>
+    pub fn from_coroutine<G, T>(g: G) -> impl Stream<Item = T>
     where
         G: Coroutine<ResumeTy, Yield = Poll<T>, Return = ()>,
     {
-        GenStream(gen)
+        GenStream(g)
     }
 
     #[pin_project]
@@ -469,11 +469,11 @@ mod try_stream {
     /// better error messages (`impl Stream` rather than `GenStream<[closure.....]>`).
     #[doc(hidden)]
     #[inline]
-    pub fn from_coroutine<G, T, E>(gen: G) -> impl FusedStream<Item = Result<T, E>>
+    pub fn from_coroutine<G, T, E>(g: G) -> impl FusedStream<Item = Result<T, E>>
     where
         G: Coroutine<ResumeTy, Yield = Poll<T>, Return = Result<(), E>>,
     {
-        GenTryStream(Some(gen))
+        GenTryStream(Some(g))
     }
 
     #[pin_project]
@@ -488,8 +488,8 @@ mod try_stream {
         #[inline]
         fn poll_next(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
             let mut this = self.project();
-            if let Some(gen) = this.0.as_mut().as_pin_mut() {
-                let res = match gen.resume(ResumeTy(NonNull::from(cx).cast::<Context<'static>>())) {
+            if let Some(g) = this.0.as_mut().as_pin_mut() {
+                let res = match g.resume(ResumeTy(NonNull::from(cx).cast::<Context<'static>>())) {
                     CoroutineState::Yielded(x) => x.map(|x| Some(Ok(x))),
                     CoroutineState::Complete(Err(e)) => Poll::Ready(Some(Err(e))),
                     CoroutineState::Complete(Ok(())) => Poll::Ready(None),

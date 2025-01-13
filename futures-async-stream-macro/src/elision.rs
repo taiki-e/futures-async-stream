@@ -66,11 +66,11 @@ impl VisitMut for UnelideLifetimes<'_> {
         visit_mut::visit_type_reference_mut(self, ty);
     }
 
-    fn visit_generic_argument_mut(&mut self, gen: &mut GenericArgument) {
-        if let GenericArgument::Lifetime(lifetime) = gen {
+    fn visit_generic_argument_mut(&mut self, arg: &mut GenericArgument) {
+        if let GenericArgument::Lifetime(lifetime) = arg {
             self.visit_lifetime(lifetime);
         }
-        visit_mut::visit_generic_argument_mut(self, gen);
+        visit_mut::visit_generic_argument_mut(self, arg);
     }
 }
 
