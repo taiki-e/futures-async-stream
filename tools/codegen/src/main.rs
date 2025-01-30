@@ -31,7 +31,7 @@ fn gen_assert_impl() {
     let out_dir = &workspace_root.join("src/gen/tests");
     fs::create_dir_all(out_dir).unwrap();
 
-    let files: BTreeSet<String> = git_ls_files(&workspace_root.join("src"), &["*.rs"])
+    let files: BTreeSet<String> = test_helper::git::ls_files(workspace_root.join("src"), &["*.rs"])
         .into_iter()
         .filter_map(|(file_name, path)| {
             // Assertions are only needed for the library's public APIs.

@@ -3,7 +3,6 @@
 use std::{
     io,
     path::{Path, PathBuf},
-    process::Command,
     str,
     sync::LazyLock,
 };
@@ -156,34 +155,4 @@ pub(crate) fn write_raw(
     fs::write(path, out)?;
     eprintln!("updated {}", p.display());
     Ok(())
-}
-
-#[track_caller]
-pub(crate) fn git_ls_files(dir: &Path, filters: &[&str]) -> Vec<(String, PathBuf)> {
-    let mut cmd = Command::new("git");
-    cmd.arg("ls-files").args(filters).current_dir(dir);
-    let output =
-        cmd.output().unwrap_or_else(|e| panic!("could not execute process `{cmd:?}`: {e}"));
-    assert!(
-        output.status.success(),
-        "process didn't exit successfully: `{cmd:?}`:\n\nSTDOUT:\n{0}\n{1}\n{0}\n\nSTDERR:\n{0}\n{2}\n{0}\n",
-        "-".repeat(60),
-        String::from_utf8_lossy(&output.stdout),
-        String::from_utf8_lossy(&output.stderr),
-    );
-    str::from_utf8(&output.stdout)
-        .unwrap()
-        .lines()
-        .map(str::trim)
-        .filter_map(|f| {
-            if f.is_empty() {
-                return None;
-            }
-            let p = dir.join(f);
-            if !p.exists() {
-                return None;
-            }
-            Some((f.to_owned(), p))
-        })
-        .collect()
 }
