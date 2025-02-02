@@ -28,7 +28,7 @@ Processes streams using a for loop.
 
 This is a reimplement of [futures-await]'s `#[async]` for loops for
 futures 0.3 and is an experimental implementation of [the idea listed as the
-next step of async/await](https://github.com/rust-lang/rfcs/blob/HEAD/text/2394-async_await.md#for-await-and-processing-streams).
+next step of async/await](https://rust-lang.github.io/rfcs/2394-async_await.html#for-await-and-processing-streams).
 
 ```
 #![feature(proc_macro_hygiene, stmt_expr_attributes)]
@@ -56,7 +56,7 @@ Creates streams via coroutines.
 
 This is a reimplement of [futures-await]'s `#[stream]` for futures 0.3 and
 is an experimental implementation of [the idea listed as the next step of
-async/await](https://github.com/rust-lang/rfcs/blob/HEAD/text/2394-async_await.md#generators-and-streams).
+async/await](https://rust-lang.github.io/rfcs/2394-async_await.html#generators-and-streams).
 
 ```
 #![feature(coroutines)]
