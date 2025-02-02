@@ -1,7 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
 /*!
-<!-- tidy:crate-doc:start -->
+<!-- Note: Document from sync-markdown-to-rustdoc:start through sync-markdown-to-rustdoc:end
+     is synchronized from README.md. Any changes to that range are not preserved. -->
+<!-- tidy:sync-markdown-to-rustdoc:start -->
+
 Async stream for Rust and the futures crate.
 
 This crate provides useful features for streams, using `async_await` and
@@ -27,7 +30,7 @@ This is a reimplement of [futures-await]'s `#[async]` for loops for
 futures 0.3 and is an experimental implementation of [the idea listed as the
 next step of async/await](https://github.com/rust-lang/rfcs/blob/HEAD/text/2394-async_await.md#for-await-and-processing-streams).
 
-```rust
+```
 #![feature(proc_macro_hygiene, stmt_expr_attributes)]
 
 use futures::stream::Stream;
@@ -55,7 +58,7 @@ This is a reimplement of [futures-await]'s `#[stream]` for futures 0.3 and
 is an experimental implementation of [the idea listed as the next step of
 async/await](https://github.com/rust-lang/rfcs/blob/HEAD/text/2394-async_await.md#generators-and-streams).
 
-```rust
+```
 #![feature(coroutines)]
 
 use futures::stream::Stream;
@@ -80,7 +83,7 @@ via the `yield` expression.
 
 `#[stream]` can also be used on async blocks:
 
-```rust
+```
 #![feature(coroutines, proc_macro_hygiene, stmt_expr_attributes)]
 
 use futures::stream::Stream;
@@ -104,7 +107,7 @@ but it may require additional type annotations.
 You can use async stream functions in traits by passing `boxed` or
 `boxed_local` as an argument.
 
-```rust
+```
 #![feature(coroutines)]
 
 use futures_async_stream::stream;
@@ -132,7 +135,7 @@ function that returns `Pin<Box<dyn Stream<Item = item> + Send + 'lifetime>>`.
 If you passed `boxed_local` instead of `boxed`, async stream function
 returns a non-thread-safe stream (`Pin<Box<dyn Stream<Item = item> + 'lifetime>>`).
 
-```rust
+```
 #![feature(coroutines)]
 
 use std::pin::Pin;
@@ -164,7 +167,7 @@ impl Foo for Bar {
 returned stream is `Result` with `Ok` being the value yielded and `Err` the
 error type returned by `?` operator or `return Err(...)`.
 
-```rust
+```
 #![feature(coroutines)]
 
 use futures::stream::Stream;
@@ -198,7 +201,7 @@ To early exit from a `#[try_stream]` function or block, use `return Ok(())`.
 You can write this by combining `while let` loop, `.await`, `pin!` macro,
 and `StreamExt::next()` method:
 
-```rust
+```
 use std::pin::pin;
 
 use futures::stream::{Stream, StreamExt};
@@ -217,7 +220,7 @@ async fn collect(stream: impl Stream<Item = i32>) -> Vec<i32> {
 
 You can write this by manually implementing the combinator:
 
-```rust
+```
 use std::{
     pin::Pin,
     task::{ready, Context, Poll},
@@ -257,7 +260,7 @@ where
 
 [futures-await]: https://github.com/alexcrichton/futures-await
 
-<!-- tidy:crate-doc:end -->
+<!-- tidy:sync-markdown-to-rustdoc:end -->
 */
 
 #![no_std]

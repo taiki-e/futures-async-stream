@@ -5,7 +5,8 @@
 [![license](https://img.shields.io/badge/license-Apache--2.0_OR_MIT-blue?style=flat-square)](#license)
 [![github actions](https://img.shields.io/github/actions/workflow/status/taiki-e/futures-async-stream/ci.yml?branch=main&style=flat-square&logo=github)](https://github.com/taiki-e/futures-async-stream/actions)
 
-<!-- tidy:crate-doc:start -->
+<!-- tidy:sync-markdown-to-rustdoc:start:src/lib.rs -->
+
 Async stream for Rust and the futures crate.
 
 This crate provides useful features for streams, using `async_await` and
@@ -261,7 +262,7 @@ where
 
 [futures-await]: https://github.com/alexcrichton/futures-await
 
-<!-- tidy:crate-doc:end -->
+<!-- tidy:sync-markdown-to-rustdoc:end -->
 
 ## License
 
