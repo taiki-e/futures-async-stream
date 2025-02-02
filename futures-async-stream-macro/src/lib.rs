@@ -31,7 +31,7 @@ use crate::utils::{expr_async, parse_as_empty};
 
 /// Processes streams using a for loop.
 ///
-/// See crate level documentation for details.
+/// See the crate-level documentation for details.
 #[proc_macro_attribute]
 pub fn for_await(args: TokenStream, input: TokenStream) -> TokenStream {
     if let Err(e) = parse_as_empty(&args.into()) {
@@ -49,7 +49,7 @@ pub fn for_await(args: TokenStream, input: TokenStream) -> TokenStream {
 
 /// Creates streams via coroutines.
 ///
-/// See crate level documentation for details.
+/// See the crate-level documentation for details.
 #[proc_macro_attribute]
 pub fn stream(args: TokenStream, input: TokenStream) -> TokenStream {
     stream::attribute(args.into(), input.into(), parse::Context::Stream)
@@ -69,7 +69,7 @@ pub fn stream_block(input: TokenStream) -> TokenStream {
 
 /// Creates streams via coroutines.
 ///
-/// See crate level documentation for details.
+/// See the crate-level documentation for details.
 #[proc_macro_attribute]
 pub fn try_stream(args: TokenStream, input: TokenStream) -> TokenStream {
     stream::attribute(args.into(), input.into(), parse::Context::TryStream)
