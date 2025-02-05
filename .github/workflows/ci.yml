@@ -70,8 +70,7 @@ jobs:
       - uses: taiki-e/install-action@cargo-minimal-versions
       - uses: taiki-e/install-action@cargo-careful
         if: matrix.rust == 'nightly'
-      - run: cargo test --workspace --all-features ${EXCLUDE} --tests --no-run
-        if: matrix.rust != 'nightly'
+      - run: cargo test --workspace --all-features ${EXCLUDE} --no-run
       - run: cargo test --workspace --all-features ${EXCLUDE}
         if: matrix.rust == 'nightly'
       - run: cargo careful test --workspace --all-features ${EXCLUDE}

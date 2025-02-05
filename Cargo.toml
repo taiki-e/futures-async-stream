@@ -33,6 +33,7 @@ pin-project = "1.0.11"
 futures = { package = "futures-util", version = "0.3", default-features = false }
 rustversion = "1"
 static_assertions = "1"
+test-helper = { features = ["git"], git = "https://github.com/taiki-e/test-helper.git", rev = "e8333e1" }
 trybuild = { git = "https://github.com/taiki-e/trybuild.git", branch = "dev" } # adjust overwrite behavior
 
 [lints]
@@ -52,6 +53,7 @@ non_ascii_idents = "warn"
 rust_2018_idioms = "warn"
 single_use_lifetimes = "warn"
 unexpected_cfgs = { level = "warn", check-cfg = [
+    'cfg(careful)',
 ] }
 unnameable_types = "warn"
 unreachable_pub = "warn"

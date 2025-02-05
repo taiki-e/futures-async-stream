@@ -294,6 +294,9 @@ mod tests;
 #[cfg(test)]
 #[path = "gen/tests/assert_impl.rs"]
 mod assert_impl;
+#[cfg(test)]
+#[path = "gen/tests/track_size.rs"]
+mod track_size;
 
 #[doc(inline)]
 pub use futures_async_stream_macro::for_await;
@@ -339,6 +342,10 @@ mod future {
     unsafe impl Send for ResumeTy {}
     // SAFETY: see `Send` impl
     unsafe impl Sync for ResumeTy {}
+
+    // Needed to work around old nightly bug (fixed in nightly-2024-05-24 by https://github.com/rust-lang/rust/pull/125392)
+    impl core::panic::UnwindSafe for ResumeTy {}
+    impl core::panic::RefUnwindSafe for ResumeTy {}
 
     /// Wrap a coroutine in a future.
     ///
