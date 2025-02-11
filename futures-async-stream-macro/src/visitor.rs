@@ -179,13 +179,16 @@ impl Visitor {
 
         replace_expr(expr, |expr| {
             if let Expr::Macro(mut expr) = expr {
-                let mut e: ExprCall = if expr.mac.path.is_ident("stream_block") {
-                    syn::parse(stream_block(expr.mac.tokens.into())).unwrap()
-                } else if expr.mac.path.is_ident("try_stream_block") {
-                    syn::parse(try_stream_block(expr.mac.tokens.into())).unwrap()
-                } else {
-                    return Expr::Macro(expr);
-                };
+                let mut e: ExprCall =
+                    if path_eq(&expr.mac.path, &["futures_async_stream"], &["stream_block"]) {
+                        syn::parse(stream_block(expr.mac.tokens.into())).unwrap()
+                    } else if path_eq(&expr.mac.path, &["futures_async_stream"], &[
+                        "try_stream_block",
+                    ]) {
+                        syn::parse(try_stream_block(expr.mac.tokens.into())).unwrap()
+                    } else {
+                        return Expr::Macro(expr);
+                    };
                 e.attrs.append(&mut expr.attrs);
                 Expr::Call(e)
             } else {
@@ -201,6 +204,7 @@ impl Visitor {
         }
 
         if let Expr::Async(e) = expr {
+            // TODO: accept futures_async_stream::{stream,try_stream}
             match (e.attrs.position_exact("stream"), e.attrs.position_exact("try_stream")) {
                 (Err(e), _) | (_, Err(e)) => {
                     *expr = expr_compile_error(&e);
@@ -280,7 +284,8 @@ impl VisitMut for Visitor {
         match expr {
             Expr::Async(expr)
                 if expr.attrs.iter().any(|attr| {
-                    attr.path().is_ident("stream") || attr.path().is_ident("try_stream")
+                    path_eq(attr.path(), &["futures_async_stream"], &["stream"])
+                        || path_eq(attr.path(), &["futures_async_stream"], &["try_stream"])
                 }) =>
             {
                 self.scope = Scope::Other;
@@ -292,8 +297,10 @@ impl VisitMut for Visitor {
                 self.scope = if expr.asyncness.is_some() { Scope::Future } else { Scope::Closure };
             }
             Expr::Macro(expr)
-                if expr.mac.path.is_ident("stream_block")
-                    || expr.mac.path.is_ident("try_stream_block") =>
+                if path_eq(&expr.mac.path, &["futures_async_stream"], &["stream_block"])
+                    || path_eq(&expr.mac.path, &["futures_async_stream"], &[
+                        "try_stream_block",
+                    ]) =>
             {
                 self.scope = Scope::Other;
             }
@@ -319,4 +326,22 @@ impl VisitMut for Visitor {
     fn visit_item_mut(&mut self, _: &mut Item) {
         // Do not recurse into nested items.
     }
+}
+
+fn path_eq(path: &syn::Path, expected_crates: &[&str], expected_path: &[&str]) -> bool {
+    if path.segments.len() == 1 && path.segments[0].ident == expected_path.last().unwrap() {
+        return true;
+    }
+    if path.segments.len() == expected_path.len() + 1 {
+        if !expected_crates.iter().any(|&c| path.segments[0].ident == c) {
+            return false;
+        }
+        for i in 1..path.segments.len() {
+            if path.segments[i].ident != expected_path[i - 1] {
+                return false;
+            }
+        }
+        return true;
+    }
+    false
 }

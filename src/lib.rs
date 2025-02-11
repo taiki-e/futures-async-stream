@@ -285,6 +285,8 @@ where
 )]
 #![feature(coroutine_trait)]
 
+// TODO: accept for-await syntax? https://github.com/dtolnay/syn/issues/1631
+
 #[cfg(test)]
 extern crate std;
 

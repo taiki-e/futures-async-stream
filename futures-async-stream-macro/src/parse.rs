@@ -53,7 +53,7 @@ pub(crate) fn parse(input: TokenStream, cx: Context) -> Result<FnOrAsync> {
     }
 }
 
-// Based on https://github.com/dtolnay/syn/blob/1.0.30/src/item.rs#L1625-L1632
+// Based on https://github.com/dtolnay/syn/blob/2.0.95/src/item.rs#L1497-L1507
 fn peek_signature(input: ParseStream<'_>) -> bool {
     let fork = input.fork();
     fork.parse::<Visibility>().is_ok()
