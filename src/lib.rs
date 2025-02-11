@@ -263,7 +263,7 @@
     clippy::undocumented_unsafe_blocks,
 )]
 #![allow(clippy::must_use_candidate)]
-#![feature(generator_trait)]
+#![feature(generator_trait, gen_future)]
 
 #[cfg(doctest)]
 #[doc = include_str!("../README.md")]
@@ -305,13 +305,19 @@ mod future {
     #[derive(Debug, Copy, Clone)]
     pub struct ResumeTy(pub(crate) NonNull<Context<'static>>);
 
+    // HACK: this is a hack to avoid trait bound error.
+    // https://github.com/taiki-e/pin-project/issues/102#issuecomment-540472282
+    #[doc(hidden)]
+    pub struct Wrapper<'a, T>(core::marker::PhantomData<&'a ()>, T);
+
     // SAFETY: the caller of the `get_context` function that dereferences a
     // pointer must guarantee that no data races will occur.
     // Note: Since https://github.com/rust-lang/rust/pull/95985, `Context` is
-    // `!Send` and `!Sync`.
-    unsafe impl Send for ResumeTy {}
+    // `!Send` and `!Sync`, so implementing `Send` and `Sync` unconditionally here
+    // is a bit subtle.
+    unsafe impl<'a> Send for ResumeTy where Wrapper<'a, core::future::ResumeTy>: Send {}
     // SAFETY: see `Send` impl
-    unsafe impl Sync for ResumeTy {}
+    unsafe impl<'a> Sync for ResumeTy where Wrapper<'a, core::future::ResumeTy>: Sync {}
 
     /// Wrap a generator in a future.
     ///
