@@ -546,7 +546,7 @@ pub mod __private {
         pub use core::future::Future;
 
         #[doc(hidden)]
-        pub use crate::future::{from_coroutine, get_context, ResumeTy};
+        pub use crate::future::{ResumeTy, from_coroutine, get_context};
     }
 
     #[doc(hidden)]

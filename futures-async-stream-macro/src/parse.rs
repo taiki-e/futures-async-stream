@@ -2,9 +2,10 @@
 
 use proc_macro2::TokenStream;
 use syn::{
+    Abi, Attribute, Block, ExprAsync, Result, ReturnType, Signature, Token, TraitItemFn, Type,
+    Visibility,
     parse::{Parse, ParseStream},
-    token, Abi, Attribute, Block, ExprAsync, Result, ReturnType, Signature, Token, TraitItemFn,
-    Type, Visibility,
+    token,
 };
 
 use crate::{utils::SliceExt as _, visitor::Scope};

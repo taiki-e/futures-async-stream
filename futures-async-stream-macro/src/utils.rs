@@ -4,8 +4,8 @@ use std::mem;
 
 use proc_macro2::TokenStream;
 use syn::{
-    punctuated::Punctuated, token, Attribute, Block, Error, Expr, ExprAsync, ExprTuple, Result,
-    Token,
+    Attribute, Block, Error, Expr, ExprAsync, ExprTuple, Result, Token, punctuated::Punctuated,
+    token,
 };
 
 macro_rules! def_site_ident {
@@ -50,11 +50,7 @@ where
 /// This is almost equivalent to `syn::parse2::<Nothing>()`, but produces
 /// a better error message and does not require ownership of `tokens`.
 pub(crate) fn parse_as_empty(tokens: &TokenStream) -> Result<()> {
-    if tokens.is_empty() {
-        Ok(())
-    } else {
-        bail!(tokens, "unexpected token: `{}`", tokens)
-    }
+    if tokens.is_empty() { Ok(()) } else { bail!(tokens, "unexpected token: `{}`", tokens) }
 }
 
 // -----------------------------------------------------------------------------

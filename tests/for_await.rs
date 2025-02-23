@@ -7,7 +7,7 @@ use std::pin::pin;
 use futures::{
     future::Future,
     stream::{self, Stream},
-    task::{noop_waker, Context, Poll},
+    task::{Context, Poll, noop_waker},
 };
 use futures_async_stream::{for_await, stream, stream_block};
 

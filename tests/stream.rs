@@ -4,7 +4,7 @@
 #![feature(coroutines, proc_macro_hygiene, stmt_expr_attributes, gen_future)]
 
 use std::{
-    pin::{pin, Pin},
+    pin::{Pin, pin},
     rc::Rc,
     sync::Arc,
 };
@@ -12,7 +12,7 @@ use std::{
 use futures::{
     future::Future,
     stream::Stream,
-    task::{noop_waker, Context, Poll},
+    task::{Context, Poll, noop_waker},
 };
 use futures_async_stream::{for_await, stream, stream_block};
 

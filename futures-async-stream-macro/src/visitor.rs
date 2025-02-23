@@ -2,15 +2,15 @@
 
 use quote::quote;
 use syn::{
-    parse_quote, parse_quote_spanned,
+    Expr, ExprAwait, ExprCall, ExprForLoop, ExprYield, Item, Token, parse_quote,
+    parse_quote_spanned,
     spanned::Spanned as _,
     visit_mut::{self, VisitMut},
-    Expr, ExprAwait, ExprCall, ExprForLoop, ExprYield, Item, Token,
 };
 
 use crate::{
     parse, stream, stream_block, try_stream_block,
-    utils::{expr_compile_error, replace_expr, unit, SliceExt as _},
+    utils::{SliceExt as _, expr_compile_error, replace_expr, unit},
 };
 
 /// The scope in which `#[for_await]`, `.await`, or `yield` was called.

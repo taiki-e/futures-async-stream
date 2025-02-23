@@ -2,10 +2,10 @@
 
 use proc_macro2::Span;
 use syn::{
-    punctuated::Punctuated,
-    visit_mut::{self, VisitMut},
     FnArg, GenericArgument, GenericParam, Generics, Lifetime, LifetimeParam, Receiver, Token,
     TypeReference,
+    punctuated::Punctuated,
+    visit_mut::{self, VisitMut},
 };
 
 pub(crate) fn unelide_lifetimes(generics: &mut Generics, args: &mut [FnArg]) {

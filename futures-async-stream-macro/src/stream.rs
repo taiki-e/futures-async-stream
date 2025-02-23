@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
 use proc_macro2::TokenStream;
-use quote::{quote, ToTokens};
+use quote::{ToTokens, quote};
 use syn::{
+    Block, ExprAsync, FnArg, Pat, PatIdent, PatType, Result, Signature, Stmt, Token, Type,
     parse::{Parse, ParseStream},
     parse_quote,
     punctuated::Punctuated,
     token,
     visit_mut::VisitMut as _,
-    Block, ExprAsync, FnArg, Pat, PatIdent, PatType, Result, Signature, Stmt, Token, Type,
 };
 
 use crate::{
@@ -394,9 +394,5 @@ fn make_gen_body(
         )
     };
 
-    if boxed {
-        quote!(Box::pin(#body))
-    } else {
-        body
-    }
+    if boxed { quote!(Box::pin(#body)) } else { body }
 }
