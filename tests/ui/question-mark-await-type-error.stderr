@@ -17,8 +17,6 @@ error[E0277]: the `?` operator can only be used in an async function that return
 17 | |     }
 18 | | }
    | |_- this function should return `Result` or `Option` to accept `?`
-   |
-   = help: the trait `FromResidual<_>` is not implemented for `()`
 
 error[E0277]: the `?` operator can only be applied to values that implement `Try`
   --> tests/ui/question-mark-await-type-error.rs:23:18
@@ -36,8 +34,6 @@ error[E0277]: the `?` operator can only be used in a coroutine that returns `Res
 ...
 23 |         async {}.await?; //~ ERROR the `?` operator can only be applied to values that implement `std::ops::Try`
    |                       ^ cannot use the `?` operator in a coroutine that returns `()`
-   |
-   = help: the trait `FromResidual<_>` is not implemented for `()`
 
 error[E0277]: the `?` operator can only be applied to values that implement `Try`
   --> tests/ui/question-mark-await-type-error.rs:30:9
@@ -59,8 +55,6 @@ error[E0277]: the `?` operator can only be used in an async function that return
 31 | |     }
 32 | | }
    | |_- this function should return `Result` or `Option` to accept `?`
-   |
-   = help: the trait `FromResidual<_>` is not implemented for `()`
 
 error[E0277]: the `?` operator can only be applied to values that implement `Try`
   --> tests/ui/question-mark-await-type-error.rs:38:18
@@ -78,5 +72,3 @@ error[E0277]: the `?` operator can only be used in a coroutine that returns `Res
 ...
 38 |         async {}.await?; //~ ERROR the `?` operator can only be applied to values that implement `std::ops::Try`
    |                       ^ cannot use the `?` operator in a coroutine that returns `()`
-   |
-   = help: the trait `FromResidual<_>` is not implemented for `()`
