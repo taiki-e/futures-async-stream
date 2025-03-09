@@ -98,7 +98,7 @@ fn validate_signature(item: Option<&FnSig>, attrs: &[Attribute], cx: Context) ->
 }
 
 pub(crate) enum FnOrAsync {
-    Fn(FnSig),
+    Fn(Box<FnSig>),
     Async(ExprAsync, Option<Token![;]>),
     NotAsync,
 }
@@ -116,7 +116,7 @@ impl Parse for FnOrAsync {
             fn_sig.attrs = attrs;
             fn_sig.vis = vis;
 
-            Ok(Self::Fn(fn_sig))
+            Ok(Self::Fn(Box::new(fn_sig)))
         } else if input.peek(Token![async]) {
             let mut expr: ExprAsync = input.parse()?;
             attrs.append(&mut expr.attrs);

@@ -189,7 +189,7 @@ impl Parse for TryStreamArg {
     }
 }
 
-fn parse_fn(args: TokenStream, sig: FnSig, cx: Context) -> Result<TokenStream> {
+fn parse_fn(args: TokenStream, sig: Box<FnSig>, cx: Context) -> Result<TokenStream> {
     Ok(match cx {
         Context::Stream => {
             let StreamArg { item_ty, boxed } = syn::parse2(args)?;
@@ -253,13 +253,13 @@ fn parse_fn(args: TokenStream, sig: FnSig, cx: Context) -> Result<TokenStream> {
 }
 
 fn parse_fn_inner(
-    sig: FnSig,
+    sig: Box<FnSig>,
     cx: Context,
     error: Option<&Type>,
     boxed: bool,
     return_ty: impl FnOnce(TokenStream) -> TokenStream,
 ) -> TokenStream {
-    let FnSig { attrs, vis, sig, mut block, semi } = sig;
+    let FnSig { attrs, vis, sig, mut block, semi } = *sig;
     let Signature { unsafety, abi, fn_token, ident, mut generics, inputs, .. } = sig;
 
     // Visit `#[for_await]`, `.await`, and `yield`.
