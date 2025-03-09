@@ -16,7 +16,7 @@ help: the type constructed contains `{integer}` due to the type of the argument 
    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ...
 15 |     yield val; //~ ERROR mismatched types
-   |           --- this argument influences the type of `{{root}}`
+   |           --- this argument influences the type of `Ready`
 note: tuple variant defined here
   --> $RUST/core/src/task/poll.rs
    |
@@ -46,7 +46,7 @@ help: the type constructed contains `({integer}, {integer})` due to the type of 
    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ...
 34 |     yield (1, 2) //~ ERROR mismatched types
-   |           ------ this argument influences the type of `{{root}}`
+   |           ------ this argument influences the type of `Ready`
 note: tuple variant defined here
   --> $RUST/core/src/task/poll.rs
    |
@@ -81,7 +81,7 @@ help: the type constructed contains `{integer}` due to the type of the argument 
    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ...
 26 |     yield val; //~ ERROR mismatched types
-   |           --- this argument influences the type of `{{root}}`
+   |           --- this argument influences the type of `Ready`
 note: tuple variant defined here
   --> $RUST/core/src/task/poll.rs
    |
@@ -111,7 +111,7 @@ help: the type constructed contains `({integer}, {integer})` due to the type of 
    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ...
 42 |     yield (1, 2) //~ ERROR mismatched types
-   |           ------ this argument influences the type of `{{root}}`
+   |           ------ this argument influences the type of `Ready`
 note: tuple variant defined here
   --> $RUST/core/src/task/poll.rs
    |
