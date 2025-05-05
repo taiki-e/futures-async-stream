@@ -1,4 +1,4 @@
-error[E0596]: cannot borrow `a` as mutable, as it is not declared as mutable
+error[E0596]: cannot borrow value as mutable, as it is not declared as mutable
  --> tests/ui/borrow-as-mut.rs:9:5
   |
 9 |     a.clear(); //~ ERROR E0596
