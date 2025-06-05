@@ -10,7 +10,7 @@ use syn::{
 
 use crate::{utils::SliceExt as _, visitor::Scope};
 
-#[derive(Copy, Clone)]
+#[derive(Clone, Copy)]
 pub(crate) enum Context {
     Stream,
     TryStream,

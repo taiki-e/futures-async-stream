@@ -332,7 +332,7 @@ mod future {
     ///
     /// It also simplifies the lowering of `.await`.
     #[doc(hidden)]
-    #[derive(Debug, Copy, Clone)]
+    #[derive(Debug, Clone, Copy)]
     pub struct ResumeTy(pub(crate) NonNull<Context<'static>>);
 
     // SAFETY: the caller of the `get_context` function that dereferences a
