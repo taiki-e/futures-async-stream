@@ -10,7 +10,9 @@ use syn::{
 
 pub(crate) fn unelide_lifetimes(generics: &mut Generics, args: &mut [FnArg]) {
     let mut visitor = UnelideLifetimes::new(generics);
-    args.iter_mut().for_each(|arg| visitor.visit_fn_arg_mut(arg));
+    for arg in args.iter_mut() {
+        visitor.visit_fn_arg_mut(arg);
+    }
 }
 
 struct UnelideLifetimes<'a> {
