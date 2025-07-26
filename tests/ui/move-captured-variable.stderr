@@ -2,15 +2,14 @@ error[E0507]: cannot move out of `a`, a captured variable in an `FnMut` closure
   --> tests/ui/move-captured-variable.rs:12:9
    |
 10 |       let a = String::new();
-   |           - captured outer variable
+   |           -   ------------- move occurs because `a` has type `String`, which does not implement the `Copy` trait
+   |           |
+   |           captured outer variable
 11 |       foo(|| {
    |           -- captured by this `FnMut` closure
 12 | /         stream_block! { //~ ERROR cannot move out of `a`, a captured variable in an `FnMut` closure
 13 | |             yield a
-   | |                   -
-   | |                   |
-   | |                   variable moved due to use in coroutine
-   | |                   move occurs because `a` has type `String`, which does not implement the `Copy` trait
+   | |                   - variable moved due to use in coroutine
 14 | |         };
    | |_________^ `a` is moved here
    |
