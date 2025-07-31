@@ -1,7 +1,7 @@
 error[E0308]: mismatched types
   --> tests/ui/bad-item-type.rs:15:11
    |
-7  | #[stream(item = Option<i32>)]
+ 7 | #[stream(item = Option<i32>)]
    | ----------------------------- arguments to this enum variant are incorrect
 ...
 15 |     yield val; //~ ERROR mismatched types
@@ -12,7 +12,7 @@ error[E0308]: mismatched types
 help: the type constructed contains `{integer}` due to the type of the argument passed
   --> tests/ui/bad-item-type.rs:7:1
    |
-7  | #[stream(item = Option<i32>)]
+ 7 | #[stream(item = Option<i32>)]
    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ...
 15 |     yield val; //~ ERROR mismatched types
