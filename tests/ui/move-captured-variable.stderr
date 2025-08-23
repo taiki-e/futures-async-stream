@@ -13,4 +13,9 @@ error[E0507]: cannot move out of `a`, a captured variable in an `FnMut` closure
 14 | |         };
    | |_________^ `a` is moved here
    |
+help: `Fn` and `FnMut` closures require captured values to be able to be consumed multiple times, but `FnOnce` closures may consume them only once
+  --> tests/ui/move-captured-variable.rs:7:11
+   |
+ 7 | fn foo<F: FnMut()>(_f: F) {}
+   |           ^^^^^^^
    = note: this error originates in the macro `stream_block` (in Nightly builds, run with -Z macro-backtrace for more info)
