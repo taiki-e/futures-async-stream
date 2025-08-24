@@ -33,7 +33,7 @@ pin-project = "1.0.11"
 futures = { package = "futures-util", version = "0.3", default-features = false }
 rustversion = "1"
 static_assertions = "1"
-test-helper = { features = ["git"], git = "https://github.com/taiki-e/test-helper.git", rev = "d2272e8" }
+test-helper = { features = ["git"], git = "https://github.com/taiki-e/test-helper.git", rev = "c5eac31" }
 trybuild = { git = "https://github.com/taiki-e/trybuild.git", branch = "dev" } # adjust overwrite behavior
 
 [lints]

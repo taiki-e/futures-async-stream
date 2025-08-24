@@ -11,13 +11,18 @@ fn write_size<T>(out: &mut String) {
         out, "{}: {}", std::any::type_name::<T> (), std::mem::size_of::<T> ()
     );
 }
-/// Test the size of public types. This is not intended to keep a specific size and
-/// is intended to be used only as a help in optimization.
+/// Test the size of public types. This is not intended to keep a specific size and is intended to
+/// be used only as a help in optimization.
 ///
-/// Ignore non-64-bit targets due to usize/ptr size, and ignore Miri/cargo-careful
-/// as we set -Z randomize-layout for them.
+/// Ignore non-64-bit targets due to usize/ptr size, ignore Miri/cargo-careful as we set
+/// -Z randomize-layout for them, and ignore old rustc as any::type_name output and size
+/// optimization may differ between compiler versions.
+#[rustversion::attr(
+    nightly,
+    cfg_attr(any(not(target_pointer_width = "64"), miri, careful), ignore)
+)]
+#[rustversion::attr(not(nightly), ignore)]
 #[test]
-#[cfg_attr(any(not(target_pointer_width = "64"), miri, careful), ignore)]
 fn track_size() {
     let mut out = String::new();
     write_size::<crate::future::ResumeTy>(&mut out);
