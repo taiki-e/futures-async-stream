@@ -16,9 +16,10 @@ use crate::{
 /// The scope in which `#[for_await]`, `.await`, or `yield` was called.
 ///
 /// The type of coroutine depends on which scope is called.
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Clone, Copy, Default, PartialEq)]
 pub(crate) enum Scope {
     /// `async fn`, `async {}`, or `async ||`
+    #[default]
     Future,
 
     /// `#[stream]` (this)
@@ -39,12 +40,6 @@ pub(crate) enum Scope {
 impl Scope {
     fn is_stream(self) -> bool {
         matches!(self, Self::Stream | Self::TryStream)
-    }
-}
-
-impl Default for Scope {
-    fn default() -> Self {
-        Self::Future
     }
 }
 
