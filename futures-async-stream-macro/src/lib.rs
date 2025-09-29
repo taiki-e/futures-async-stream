@@ -27,7 +27,7 @@ use proc_macro::{Delimiter, Group, TokenStream, TokenTree};
 use quote::ToTokens as _;
 use syn::{Error, Expr, ExprForLoop, parse_quote};
 
-use crate::utils::{expr_async, parse_as_empty};
+use self::utils::{expr_async, parse_as_empty};
 
 /// Processes streams using a for loop.
 ///
