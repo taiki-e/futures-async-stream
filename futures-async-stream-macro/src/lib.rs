@@ -11,6 +11,7 @@
 ))]
 #![forbid(unsafe_code)]
 #![feature(proc_macro_def_site)]
+#![allow(clippy::expl_impl_clone_on_copy)] // https://github.com/rust-lang/rust-clippy/issues/15842
 
 #[macro_use]
 mod error;
