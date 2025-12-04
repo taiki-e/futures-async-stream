@@ -1,4 +1,4 @@
-error[E0412]: cannot find type `L` in this scope
+error[E0425]: cannot find type `L` in this scope
  --> tests/ui/unresolved-type.rs:7:17
   |
 7 | #[stream(item = L)] //~ ERROR cannot find type `L` in this scope
