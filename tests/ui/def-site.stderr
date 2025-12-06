@@ -9,27 +9,62 @@ error[E0425]: cannot find value `__arg0` in this scope
    |
 14 |     __arg0; //~ ERROR E0425
    |     ^^^^^^ not found in this scope
+   |
+help: an identifier with the same name is defined here, but is not accessible due to macro hygiene
+  --> tests/ui/def-site.rs:12:1
+   |
+12 | #[stream(item = ())]
+   | ^^^^^^^^^^^^^^^^^^^^
+   = note: this error originates in the attribute macro `stream` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error[E0425]: cannot find value `__task_context` in this scope
   --> tests/ui/def-site.rs:19:5
    |
 19 |     __task_context; //~ ERROR E0425
    |     ^^^^^^^^^^^^^^ not found in this scope
+   |
+help: an identifier with the same name is defined here, but is not accessible due to macro hygiene
+  --> tests/ui/def-site.rs:17:1
+   |
+17 | #[stream(item = ())]
+   | ^^^^^^^^^^^^^^^^^^^^
+   = note: this error originates in the attribute macro `stream` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error[E0425]: cannot find value `__task_context` in this scope
   --> tests/ui/def-site.rs:25:5
    |
 25 |     __task_context; //~ ERROR E0425
    |     ^^^^^^^^^^^^^^ not found in this scope
+   |
+help: an identifier with the same name is defined here, but is not accessible due to macro hygiene
+  --> tests/ui/def-site.rs:22:1
+   |
+22 | #[stream(item = ())]
+   | ^^^^^^^^^^^^^^^^^^^^
+   = note: this error originates in the attribute macro `stream` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error[E0425]: cannot find value `__pinned` in this scope
   --> tests/ui/def-site.rs:35:10
    |
 35 |         &__pinned; //~ ERROR E0425
    |          ^^^^^^^^ not found in this scope
+   |
+help: an identifier with the same name is defined here, but is not accessible due to macro hygiene
+  --> tests/ui/def-site.rs:31:1
+   |
+31 | #[stream(item = ())]
+   | ^^^^^^^^^^^^^^^^^^^^
+   = note: this error originates in the attribute macro `stream` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error[E0425]: cannot find value `__pinned` in this scope
   --> tests/ui/def-site.rs:42:10
    |
 42 |         &__pinned; //~ ERROR E0425
    |          ^^^^^^^^ not found in this scope
+   |
+help: an identifier with the same name is defined here, but is not accessible due to macro hygiene
+  --> tests/ui/def-site.rs:40:5
+   |
+40 |     #[for_await]
+   |     ^^^^^^^^^^^^
+   = note: this error originates in the attribute macro `for_await` (in Nightly builds, run with -Z macro-backtrace for more info)
