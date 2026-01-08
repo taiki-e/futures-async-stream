@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
 use proc_macro2::TokenStream;
-use quote::{ToTokens, quote};
+use quote::{ToTokens, quote, quote_spanned};
 use syn::{
     Block, ExprAsync, FnArg, Pat, PatIdent, PatType, Result, Signature, Stmt, Token, Type,
     parse::{Parse, ParseStream},
     parse_quote,
     punctuated::Punctuated,
+    spanned::Spanned as _,
     token,
     visit_mut::VisitMut as _,
 };
@@ -373,7 +374,7 @@ fn make_gen_body(
     };
 
     let task_context = def_site_ident!("__task_context");
-    let body = quote! {
+    let body = quote_spanned! { block.span() =>
         #gen_function(
             #[coroutine]
             static #capture |
