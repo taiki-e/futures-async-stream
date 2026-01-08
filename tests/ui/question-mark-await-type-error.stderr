@@ -29,11 +29,14 @@ error[E0277]: the `?` operator can only be applied to values that implement `Try
 error[E0277]: the `?` operator can only be used in a coroutine that returns `Result` or `Option` (or another type that implements `FromResidual`)
   --> tests/ui/question-mark-await-type-error.rs:23:23
    |
-20 | #[stream(item = i32)]
-   | --------------------- this function should return `Result` or `Option` to accept `?`
-...
-23 |         async {}.await?; //~ ERROR the `?` operator can only be applied to values that implement `std::ops::Try`
-   |                       ^ cannot use the `?` operator in a coroutine that returns `()`
+21 |   async fn async_stream_fn() {
+   |  ____________________________-
+22 | |     for _i in 1..2 {
+23 | |         async {}.await?; //~ ERROR the `?` operator can only be applied to values that implement `std::ops::Try`
+   | |                       ^ cannot use the `?` operator in a coroutine that returns `()`
+24 | |     }
+25 | | }
+   | |_- this function should return `Result` or `Option` to accept `?`
 
 error[E0277]: the `?` operator can only be applied to values that implement `Try`
   --> tests/ui/question-mark-await-type-error.rs:30:9
@@ -67,8 +70,12 @@ error[E0277]: the `?` operator can only be applied to values that implement `Try
 error[E0277]: the `?` operator can only be used in a coroutine that returns `Result` or `Option` (or another type that implements `FromResidual`)
   --> tests/ui/question-mark-await-type-error.rs:38:23
    |
-34 | #[stream(item = i32)]
-   | --------------------- this function should return `Result` or `Option` to accept `?`
-...
-38 |         async {}.await?; //~ ERROR the `?` operator can only be applied to values that implement `std::ops::Try`
-   |                       ^ cannot use the `?` operator in a coroutine that returns `()`
+35 |   async fn async_stream_fn_and_for_await() {
+   |  __________________________________________-
+36 | |     #[for_await]
+37 | |     for _i in stream(2) {
+38 | |         async {}.await?; //~ ERROR the `?` operator can only be applied to values that implement `std::ops::Try`
+   | |                       ^ cannot use the `?` operator in a coroutine that returns `()`
+39 | |     }
+40 | | }
+   | |_- this function should return `Result` or `Option` to accept `?`
