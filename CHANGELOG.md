@@ -12,6 +12,10 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
+- Improve code coverage support and diagnostics. ([#99](https://github.com/taiki-e/futures-async-stream/pull/99), thanks @BugenZhao)
+
+- Enable [release immutability](https://docs.github.com/en/code-security/supply-chain-security/understanding-your-software-supply-chain/immutable-releases).
+
 ## [0.2.12] - 2024-08-23
 
 - Disable `derive` and `clone-impls` features of `syn` dependency.
