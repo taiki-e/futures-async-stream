@@ -12,6 +12,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 ## [Unreleased]
 
+## [0.2.13] - 2026-01-08
+
 - Improve code coverage support and diagnostics. ([#99](https://github.com/taiki-e/futures-async-stream/pull/99), thanks @BugenZhao)
 
 - Enable [release immutability](https://docs.github.com/en/code-security/supply-chain-security/understanding-your-software-supply-chain/immutable-releases).
@@ -185,7 +187,8 @@ Note: In this file, do not use the hard wrap in the middle of a sentence for com
 
 Initial release
 
-[Unreleased]: https://github.com/taiki-e/futures-async-stream/compare/v0.2.12...HEAD
+[Unreleased]: https://github.com/taiki-e/futures-async-stream/compare/v0.2.13...HEAD
+[0.2.13]: https://github.com/taiki-e/futures-async-stream/compare/v0.2.12...v0.2.13
 [0.2.12]: https://github.com/taiki-e/futures-async-stream/compare/v0.2.11...v0.2.12
 [0.2.11]: https://github.com/taiki-e/futures-async-stream/compare/v0.2.10...v0.2.11
 [0.2.10]: https://github.com/taiki-e/futures-async-stream/compare/v0.2.9...v0.2.10
