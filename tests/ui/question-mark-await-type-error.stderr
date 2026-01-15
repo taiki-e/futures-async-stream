@@ -4,7 +4,7 @@ error[E0277]: the `?` operator can only be applied to values that implement `Try
 16 |         async {}.await?; //~ ERROR the `?` operator can only be applied to values that implement `std::ops::Try`
    |         ^^^^^^^^^^^^^^^ the `?` operator cannot be applied to type `()`
    |
-   = help: the trait `Try` is not implemented for `()`
+   = help: the nightly-only, unstable trait `Try` is not implemented for `()`
 
 error[E0277]: the `?` operator can only be used in an async function that returns `Result` or `Option` (or another type that implements `FromResidual`)
   --> tests/ui/question-mark-await-type-error.rs:16:23
@@ -24,7 +24,7 @@ error[E0277]: the `?` operator can only be applied to values that implement `Try
 23 |         async {}.await?; //~ ERROR the `?` operator can only be applied to values that implement `std::ops::Try`
    |                  ^^^^^^ the `?` operator cannot be applied to type `()`
    |
-   = help: the trait `Try` is not implemented for `()`
+   = help: the nightly-only, unstable trait `Try` is not implemented for `()`
 
 error[E0277]: the `?` operator can only be used in a coroutine that returns `Result` or `Option` (or another type that implements `FromResidual`)
   --> tests/ui/question-mark-await-type-error.rs:23:23
@@ -44,7 +44,7 @@ error[E0277]: the `?` operator can only be applied to values that implement `Try
 30 |         async {}.await?; //~ ERROR the `?` operator can only be applied to values that implement `std::ops::Try`
    |         ^^^^^^^^^^^^^^^ the `?` operator cannot be applied to type `()`
    |
-   = help: the trait `Try` is not implemented for `()`
+   = help: the nightly-only, unstable trait `Try` is not implemented for `()`
 
 error[E0277]: the `?` operator can only be used in an async function that returns `Result` or `Option` (or another type that implements `FromResidual`)
   --> tests/ui/question-mark-await-type-error.rs:30:23
@@ -65,7 +65,7 @@ error[E0277]: the `?` operator can only be applied to values that implement `Try
 38 |         async {}.await?; //~ ERROR the `?` operator can only be applied to values that implement `std::ops::Try`
    |                  ^^^^^^ the `?` operator cannot be applied to type `()`
    |
-   = help: the trait `Try` is not implemented for `()`
+   = help: the nightly-only, unstable trait `Try` is not implemented for `()`
 
 error[E0277]: the `?` operator can only be used in a coroutine that returns `Result` or `Option` (or another type that implements `FromResidual`)
   --> tests/ui/question-mark-await-type-error.rs:38:23
