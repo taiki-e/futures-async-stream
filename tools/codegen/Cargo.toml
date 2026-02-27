@@ -3,12 +3,7 @@ name = "futures-async-stream-internal-codegen"
 edition = "2021"
 
 [dependencies]
-fs-err = "3"
-globset = { version = "0.4", default-features = false }
-prettyplease = "0.2"
-proc-macro2 = { version = "1", default-features = false }
-syn = { version = "2", default-features = false, features = ["parsing", "printing", "full"] }
-test-helper = { features = ["codegen"], git = "https://github.com/taiki-e/test-helper.git", rev = "c5eac31" }
+test-helper = { features = ["codegen"], git = "https://github.com/taiki-e/test-helper.git", rev = "c78a65c" }
 
 [lints]
 workspace = true

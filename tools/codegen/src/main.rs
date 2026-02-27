@@ -2,10 +2,13 @@
 
 #![allow(clippy::needless_pass_by_value, clippy::wildcard_imports)]
 
-#[macro_use]
-mod file;
+use std::path::Path;
 
-use crate::file::*;
+use test_helper::{bin_name, codegen::file, function_name};
+
+fn workspace_root() -> &'static Path {
+    Path::new(env!("CARGO_MANIFEST_DIR").strip_suffix("tools/codegen").unwrap())
+}
 
 fn main() {
     gen_assert_impl();
@@ -13,8 +16,9 @@ fn main() {
 }
 
 fn gen_assert_impl() {
+    let workspace_root = workspace_root();
     let (path, out) = test_helper::codegen::gen_assert_impl(
-        &workspace_root(),
+        workspace_root,
         test_helper::codegen::AssertImplConfig {
             exclude: &[],
             not_send: &[],
@@ -24,13 +28,14 @@ fn gen_assert_impl() {
             not_ref_unwind_safe: &[],
         },
     );
-    write(function_name!(), path, out).unwrap();
+    file::write(function_name!(), bin_name!(), workspace_root, path, out);
 }
 
 fn gen_track_size() {
+    let workspace_root = workspace_root();
     let (path, out) = test_helper::codegen::gen_track_size(
-        &workspace_root(),
+        workspace_root,
         test_helper::codegen::TrackSizeConfig { exclude: &[] },
     );
-    write(function_name!(), path, out).unwrap();
+    file::write(function_name!(), bin_name!(), workspace_root, path, out);
 }
