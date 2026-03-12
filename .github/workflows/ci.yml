@@ -42,9 +42,8 @@ jobs:
   tidy:
     uses: taiki-e/github-actions/.github/workflows/tidy.yml@main
     permissions:
-      contents: read
-      pull-requests: write # for gh pr edit --add-assignee
-      repository-projects: read # for gh pr edit --add-assignee
+      contents: write # for creating branch for pr
+      pull-requests: write # unused (used in `codegen-automerge: true` case)
       security-events: write # for github/codeql-action/*
     secrets: inherit
 
@@ -67,10 +66,10 @@ jobs:
           toolchain: ${{ matrix.rust }}
           component: rust-src
           target: thumbv6m-none-eabi
-      - uses: taiki-e/install-action@cargo-hack
-      - uses: taiki-e/install-action@cargo-minimal-versions
-      - uses: taiki-e/install-action@cargo-careful
-        if: matrix.rust == 'nightly'
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-hack,cargo-minimal-versions${{ matrix.rust == 'nightly' && ',cargo-careful' || '' }}
+          fallback: none
       - run: cargo test --workspace --all-features ${EXCLUDE} --no-run
       - run: cargo test --workspace --all-features ${EXCLUDE}
         if: matrix.rust == 'nightly'
