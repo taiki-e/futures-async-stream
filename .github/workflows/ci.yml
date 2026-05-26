@@ -1,7 +1,6 @@
 name: CI
 
-permissions:
-  contents: read
+permissions: {}
 
 on:
   pull_request:
@@ -34,21 +33,19 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  tidy:
+    uses: taiki-e/github-actions/.github/workflows/tidy.yml@1bb80ca038216cd1fb7b6ca6d76240b3772963ab # main
+    permissions:
+      security-events: write # for github/codeql-action/*
   miri:
-    uses: taiki-e/github-actions/.github/workflows/miri.yml@dec917193d835117a7238865adf83273d9fcd27a # main
+    needs: tidy
+    uses: taiki-e/github-actions/.github/workflows/rust-miri.yml@1bb80ca038216cd1fb7b6ca6d76240b3772963ab # main
     with:
       # NB: sync with env.EXCLUDE
       args: --exclude futures-async-stream-internal-codegen
-  tidy:
-    uses: taiki-e/github-actions/.github/workflows/tidy.yml@dec917193d835117a7238865adf83273d9fcd27a # main
-    permissions:
-      contents: write # for creating branch for pr
-      pull-requests: write # unused (used in `codegen-automerge: true` case)
-      security-events: write # for github/codeql-action/*
-    secrets:
-      PR_TOKEN_APP_PRIVATE_KEY: ${{ secrets.PR_TOKEN_APP_PRIVATE_KEY }}
 
   test:
+    needs: tidy
     strategy:
       fail-fast: false
       matrix:
@@ -58,18 +55,17 @@ jobs:
           # Rust version in README.md and .clippy.toml.
           - nightly-2024-04-25
           - nightly
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - uses: taiki-e/checkout-action@7d1e50e93dc4fb3bba58f85018fadf77898aee8b # v1.4.2
-      - uses: taiki-e/github-actions/install-rust@dec917193d835117a7238865adf83273d9fcd27a # main # zizmor: ignore[stale-action-refs]
+      - uses: taiki-e/install-action@c070f87102a1c75b3183910f391c1cb887fe13c8 # v2.77.6
         with:
-          toolchain: ${{ matrix.rust }}
-          component: rust-src
-          target: thumbv6m-none-eabi
-      - uses: taiki-e/install-action@b8be7f5e140177087325943c4a8e169d01c59b3d # v2.75.3
-        with:
-          tool: cargo-hack,cargo-minimal-versions${{ matrix.rust == 'nightly' && ',cargo-careful' || '' }}
+          tool: |
+            rust@${{ matrix.rust }} + rust-src + thumbv6m-none-eabi
+            cargo-hack
+            cargo-minimal-versions
+            ${{ matrix.rust == 'nightly' && 'cargo-careful' || '' }}
           fallback: none
       - run: cargo test --workspace --all-features ${EXCLUDE} --no-run
       - run: cargo test --workspace --all-features ${EXCLUDE}
