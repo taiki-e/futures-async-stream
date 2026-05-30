@@ -3,7 +3,7 @@ name = "futures-async-stream-internal-codegen"
 edition = "2021"
 
 [dependencies]
-test-helper = { features = ["codegen"], git = "https://github.com/taiki-e/test-helper.git", rev = "c78a65c" }
+test-helper = { features = ["codegen"], git = "https://github.com/taiki-e/test-helper.git", rev = "82e3b012a49fb16587e165986674290ef682a5b0" }
 
 [lints]
 workspace = true

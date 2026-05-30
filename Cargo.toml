@@ -33,7 +33,7 @@ pin-project = "1.0.11"
 futures = { package = "futures-util", version = "0.3", default-features = false }
 rustversion = "1"
 static_assertions = "1"
-test-helper = { features = ["git"], git = "https://github.com/taiki-e/test-helper.git", rev = "c78a65c" }
+test-helper = { features = ["git"], git = "https://github.com/taiki-e/test-helper.git", rev = "82e3b012a49fb16587e165986674290ef682a5b0" }
 trybuild = { git = "https://github.com/taiki-e/trybuild.git", branch = "dev-old-msrv-syn" } # adjust overwrite behavior + lower MSRV
 
 [lints]
