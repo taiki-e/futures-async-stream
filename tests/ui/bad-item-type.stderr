@@ -62,6 +62,7 @@ error[E0271]: type mismatch resolving `<impl Stream<Item = {integer}> as Stream>
    |
    = note: expected tuple `(i32, i32)`
                found type `{integer}`
+   = note: this error originates in the attribute macro `stream` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error[E0308]: mismatched types
   --> tests/ui/bad-item-type.rs:26:11
@@ -127,5 +128,13 @@ error[E0271]: type mismatch resolving `<impl Stream<Item = {integer}> as Stream>
    |
    = note: expected tuple `(i32, i32)`
                found type `{integer}`
+note: required because it appears within the type `impl futures_async_stream::__private::stream::Stream<Item = {integer}>`
+  --> src/lib.rs
+   |
+   |     pub fn from_coroutine<G, T>(g: G) -> impl Stream<Item = T>
+   |                                          ^^^^^^^^^^^^^^^^^^^^^
+   = note: required for `Box<impl futures_async_stream::__private::stream::Stream<Item = {integer}>>` to implement `CoerceUnsized<Box<dyn futures_async_stream::__private::stream::Stream<Item = (i32, i32)> + Send>>`
+   = note: 1 redundant requirement hidden
+   = note: required for `Pin<Box<impl futures_async_stream::__private::stream::Stream<Item = {integer}>>>` to implement `CoerceUnsized<Pin<Box<dyn futures_async_stream::__private::stream::Stream<Item = (i32, i32)> + Send>>>`
    = note: required for the cast from `Pin<Box<impl futures_async_stream::__private::stream::Stream<Item = {integer}>>>` to `Pin<Box<(dyn futures_async_stream::__private::stream::Stream<Item = (i32, i32)> + Send + 'static)>>`
    = note: this error originates in the attribute macro `stream` (in Nightly builds, run with -Z macro-backtrace for more info)
