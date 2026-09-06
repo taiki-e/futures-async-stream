@@ -7,6 +7,18 @@ error[E0277]: the `?` operator can only be applied to values that implement `Try
    = help: the nightly-only, unstable trait `Try` is not implemented for `()`
 
 error[E0277]: the `?` operator can only be used in an async function that returns `Result` or `Option` (or another type that implements `FromResidual`)
+  --> tests/ui/question-mark-await-type-error.rs:16:9
+   |
+14 |   async fn async_fn() {
+   |  _____________________-
+15 | |     for _i in 1..2 {
+16 | |         async {}.await?; //~ ERROR the `?` operator can only be applied to values that implement `std::ops::Try`
+   | |         ^^^^^^^^^^^^^^^ cannot use the `?` operator in an async function that returns `()`
+17 | |     }
+18 | | }
+   | |_- this function should return `Result` or `Option` to accept `?`
+
+error[E0277]: the `?` operator can only be used in an async function that returns `Result` or `Option` (or another type that implements `FromResidual`)
   --> tests/ui/question-mark-await-type-error.rs:16:23
    |
 14 |   async fn async_fn() {
@@ -25,6 +37,18 @@ error[E0277]: the `?` operator can only be applied to values that implement `Try
    |                  ^^^^^^ the `?` operator cannot be applied to type `()`
    |
    = help: the nightly-only, unstable trait `Try` is not implemented for `()`
+
+error[E0277]: the `?` operator can only be used in a coroutine that returns `Result` or `Option` (or another type that implements `FromResidual`)
+  --> tests/ui/question-mark-await-type-error.rs:23:18
+   |
+21 |   async fn async_stream_fn() {
+   |  ____________________________-
+22 | |     for _i in 1..2 {
+23 | |         async {}.await?; //~ ERROR the `?` operator can only be applied to values that implement `std::ops::Try`
+   | |                  ^^^^^^ cannot use the `?` operator in a coroutine that returns `()`
+24 | |     }
+25 | | }
+   | |_- this function should return `Result` or `Option` to accept `?`
 
 error[E0277]: the `?` operator can only be used in a coroutine that returns `Result` or `Option` (or another type that implements `FromResidual`)
   --> tests/ui/question-mark-await-type-error.rs:23:23
@@ -47,6 +71,19 @@ error[E0277]: the `?` operator can only be applied to values that implement `Try
    = help: the nightly-only, unstable trait `Try` is not implemented for `()`
 
 error[E0277]: the `?` operator can only be used in an async function that returns `Result` or `Option` (or another type that implements `FromResidual`)
+  --> tests/ui/question-mark-await-type-error.rs:30:9
+   |
+27 |   async fn async_fn_and_for_await() {
+   |  ___________________________________-
+28 | |     #[for_await]
+29 | |     for _i in stream(2) {
+30 | |         async {}.await?; //~ ERROR the `?` operator can only be applied to values that implement `std::ops::Try`
+   | |         ^^^^^^^^^^^^^^^ cannot use the `?` operator in an async function that returns `()`
+31 | |     }
+32 | | }
+   | |_- this function should return `Result` or `Option` to accept `?`
+
+error[E0277]: the `?` operator can only be used in an async function that returns `Result` or `Option` (or another type that implements `FromResidual`)
   --> tests/ui/question-mark-await-type-error.rs:30:23
    |
 27 |   async fn async_fn_and_for_await() {
@@ -66,6 +103,19 @@ error[E0277]: the `?` operator can only be applied to values that implement `Try
    |                  ^^^^^^ the `?` operator cannot be applied to type `()`
    |
    = help: the nightly-only, unstable trait `Try` is not implemented for `()`
+
+error[E0277]: the `?` operator can only be used in a coroutine that returns `Result` or `Option` (or another type that implements `FromResidual`)
+  --> tests/ui/question-mark-await-type-error.rs:38:18
+   |
+35 |   async fn async_stream_fn_and_for_await() {
+   |  __________________________________________-
+36 | |     #[for_await]
+37 | |     for _i in stream(2) {
+38 | |         async {}.await?; //~ ERROR the `?` operator can only be applied to values that implement `std::ops::Try`
+   | |                  ^^^^^^ cannot use the `?` operator in a coroutine that returns `()`
+39 | |     }
+40 | | }
+   | |_- this function should return `Result` or `Option` to accept `?`
 
 error[E0277]: the `?` operator can only be used in a coroutine that returns `Result` or `Option` (or another type that implements `FromResidual`)
   --> tests/ui/question-mark-await-type-error.rs:38:23
