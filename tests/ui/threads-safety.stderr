@@ -7,7 +7,7 @@ error[E0277]: `dyn futures_async_stream::__private::stream::Stream<Item = i32>` 
    |     required by a bound introduced by this call
    |
    = help: the trait `Send` is not implemented for `dyn futures_async_stream::__private::stream::Stream<Item = i32>`
-   = note: required for `std::ptr::Unique<dyn futures_async_stream::__private::stream::Stream<Item = i32>>` to implement `Send`
+   = note: required for `boxed::BoxRaw<dyn futures_async_stream::__private::stream::Stream<Item = i32>>` to implement `Send`
 note: required because it appears within the type `Box<dyn futures_async_stream::__private::stream::Stream<Item = i32>>`
   --> $RUST/alloc/src/boxed.rs
    |
